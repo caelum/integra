@@ -25,42 +25,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.logic;
+package br.com.caelum.integracao.client.ioc;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import br.com.caelum.integracao.server.Client;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
+import br.com.caelum.vraptor.ioc.pico.PicoProvider;
 
 @ApplicationScoped
-public class Clients {
-	
-	private final Set<Client> lockedClients = new HashSet<Client>();
-	
-	private final Set<Client> clients = new HashSet<Client>();
-
-	public void register(Client client) {
-		this.clients.add(client);
-	}
-
-	public Set<Client> clients() {
-		return this.clients;
-	}
-
-	public synchronized Client getFreeClient() {
-		if(clients.isEmpty()) {
-			throw new IllegalStateException("There are not enough clients");
-		}
-		Client client = clients.iterator().next();
-		clients.remove(client);
-		lockedClients.add(client);
-		return client;
-	}
-
-	public synchronized void release(Client client) {
-		lockedClients.remove(client);
-		clients.add(client);
-	}
+public class CustomProvider extends PicoProvider {
 
 }

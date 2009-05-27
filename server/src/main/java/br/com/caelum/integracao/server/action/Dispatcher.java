@@ -27,64 +27,67 @@
  */
 package br.com.caelum.integracao.server.action;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.Socket;
 import java.net.UnknownHostException;
 
-import br.com.caelum.integracao.CommandToExecute;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
+
+import br.com.caelum.integracao.server.Project;
 
 public class Dispatcher {
 
-	static final String ZIP_FILE = "ZIP_FILE";
-	static final String EXECUTE = "EXECUTE";
-	private final Socket socket;
-	private DataOutputStream output;
 	private final int id;
 	
 	static int uniqueCount = 0;
+	private final String host;
+	private final int port;
 
-	public Dispatcher(String host, int port) throws UnknownHostException, IOException {
-		this.socket = new Socket(host, port);
-		this.output = new DataOutputStream(socket.getOutputStream());
+	private final String context;
+
+	public Dispatcher(String host, String context, int port) throws UnknownHostException, IOException {
+		this.host = host;
+		this.context = context;
+		this.port = port;
 		this.id = ++uniqueCount;
 	}
-
-	public Dispatcher send(File dir) throws IOException {
-		int result = new CommandToExecute("zip", "-r", "zipped.zip", dir.getName()).at(dir.getParentFile()).runAs("zip");
-		if(result!=0) {
-			throw new IOException("Unable to zip " + dir.getAbsolutePath() + " : "  + result);
-		}
-		File zip = new File(dir.getParentFile(), "zipped.zip");
-		FileInputStream fis = new FileInputStream(zip);
-		output.writeUTF(ZIP_FILE);
-		output.writeUTF("count-" + id);
-		output.writeLong(zip.length());
-		while(true) {
-			int b = fis.read();
-			if(b==-1) {
-				break;
+	
+	public Dispatcher register(Project project) {
+		HttpClient client = new HttpClient();
+		PostMethod post = new PostMethod("http://" + host + ":" + port +context +  "/project/register");
+		post.addParameter("project.name", project.getName());
+		post.addParameter("project.uri", project.getUri());
+		try {
+			int result = client.executeMethod(post);
+			if(result!=200) {
+				throw new RuntimeException("Unable to continue with result " + result);
 			}
-			output.write(b);
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to continue with result ",e);
 		}
-		fis.close();
 		return this;
 	}
-	
-	public Dispatcher execute(String ...command) throws IOException {
-		output.writeUTF(EXECUTE);
-		output.writeUTF("count-" + id);
-		output.writeLong(command.length);
-		for(String part : command) {
-			output.writeUTF(part);
+
+	public Dispatcher execute(String revision, String ...commands) throws IOException {
+		HttpClient client = new HttpClient();
+		PostMethod post = new PostMethod("http://" + host + ":" + port +context +  "/job/execute");
+		post.addParameter("revision", revision);
+		for(String cmd : commands) {
+			post.addParameter("command", cmd);
+		}
+		try {
+			int result = client.executeMethod(post);
+			if(result!=200) {
+				throw new RuntimeException("Unable to continue with result " + result);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to continue with result ",e);
 		}
 		return this;
 	}
 	
 	public void close() throws IOException {
-		socket.close();
+		
 	}
 
 }

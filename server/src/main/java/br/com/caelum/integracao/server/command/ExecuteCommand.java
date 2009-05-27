@@ -25,9 +25,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.client;
+package br.com.caelum.integracao.server.command;
+
+import java.io.IOException;
+
+import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.scm.ScmControl;
+
+public interface ExecuteCommand {
+
+	void executeAt(Client client, Project project, ScmControl control) throws IOException;
 
 
-public class Client {
-	
 }

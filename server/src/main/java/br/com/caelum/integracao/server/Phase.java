@@ -25,15 +25,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.logic;
+package br.com.caelum.integracao.server;
 
-import br.com.caelum.integracao.server.Client;
+import java.io.IOException;
+
+import br.com.caelum.integracao.server.command.ExecuteCommand;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
-public class Checkout implements ExecuteCommand {
+public class Phase {
 
-	public void executeAt(Client client, ScmControl control) {
-		control.checkout();
+	private final ExecuteCommand[] cmds;
+
+	public Phase(ExecuteCommand... cmds) {
+		this.cmds = cmds;
+	}
+
+	public void execute(ScmControl control, Project project, Clients clients) throws IOException {
+		for(ExecuteCommand cmd : cmds) {
+			Client client = clients.getFreeClient();
+			cmd.executeAt(client, project, control);
+			clients.release(client);
+		}
 	}
 
 }

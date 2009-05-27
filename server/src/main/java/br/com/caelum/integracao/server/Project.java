@@ -25,7 +25,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.logic;
+package br.com.caelum.integracao.server;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +33,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.caelum.integracao.server.command.local.Checkout;
+import br.com.caelum.integracao.server.command.local.CreateBuildDir;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 public class Project {
@@ -73,7 +75,7 @@ public class Project {
 			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
 		ScmControl control = getControl();
 		for (Phase p : phases) {
-			p.execute(control, clients);
+			p.execute(control, this, clients);
 		}
 	}
 
@@ -99,6 +101,10 @@ public class Project {
 	
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getUri() {
+		return uri;
 	}
 
 }

@@ -35,27 +35,37 @@ import br.com.caelum.integracao.server.action.Dispatcher;
 public class Client {
 
 	private int port;
-
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	public void setHost(String host) {
-		this.host = host;
-	}
+	
+	private String context;
 
 	private String host;
 
-	public int getPort() {
-		return port;
+	public Dispatcher getConnection() throws UnknownHostException, IOException {
+		return new Dispatcher(host, getContext(), port);
+	}
+
+	public String getContext() {
+		return context;
 	}
 
 	public String getHost() {
 		return host;
 	}
 
-	public Dispatcher getConnection() throws UnknownHostException, IOException {
-		return new Dispatcher(host, port);
+	public int getPort() {
+		return port;
+	}
+
+	public void setContext(String context) {
+		this.context = context;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
 	}
 
 }

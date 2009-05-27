@@ -27,27 +27,33 @@
  */
 package br.com.caelum.integracao.client;
 
+import java.io.File;
 import java.io.IOException;
 
-public class Main {
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import br.com.caelum.vraptor.ioc.ApplicationScoped;
+import br.com.caelum.vraptor.ioc.Component;
+
+@Component
+@ApplicationScoped
+public class EntryPoint {
 	
-	public static void main(String[] args) throws InterruptedException, IOException {
-		
-		//HttpClient client = new HttpClient();
-		//PostMethod post = new PostMethod();
-		
-		String serverHost = "localhost";
-		int serverPort = 12000;
-		
-		Client client = new Client(63265);
-
-		//ServerConnection server = new ServerConnection(serverHost, serverPort, "localhost", client.getPort());
-		//server.connect();
-		
-		System.out.println("Running Integracao Main and waiting forever... at port " + client.getPort());
-		while(true) {
-			client.waitForNewServer();
-		}
+	private final Logger logger = LoggerFactory.getLogger(EntryPoint.class);
+	
+	@PostConstruct
+	public void startup() throws IOException {
+		logger.info("Client started");
 	}
-
+	
+	public File getBaseDir() {
+		File tmpDir = new File(".tmp-client");
+		return tmpDir;
+	}
+		
 }
+
+

@@ -1,4 +1,4 @@
-package br.com.caelum.integracao.server.logic;
+package br.com.caelum.integracao.server;
 
 import java.io.File;
 

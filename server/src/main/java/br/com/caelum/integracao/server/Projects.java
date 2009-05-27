@@ -25,9 +25,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.client;
+package br.com.caelum.integracao.server;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Client {
+import javax.annotation.PostConstruct;
+
+import br.com.caelum.integracao.server.command.remote.ExecuteCommandLine;
+import br.com.caelum.integracao.server.scm.svn.SvnControl;
+import br.com.caelum.vraptor.ioc.ApplicationScoped;
+
+@ApplicationScoped
+public class Projects {
+
+	private final Map<String,Project> projects = new HashMap<String, Project>();
+
+	@PostConstruct
+	public void startup() {
+		final Project p = new Project(SvnControl.class, "svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas",
+				new File("/Users/guilherme/int"), "apostilas");
+		p.add(new Phase(new ExecuteCommandLine("ant", "compile")));
+		projects.put(p.getName(), p);
+	}
 	
+	public Project get(String name) {
+		return projects.get(name);
+	}
+	
+	public Collection<Project> all() {
+		return projects.values();
+	}
+
 }

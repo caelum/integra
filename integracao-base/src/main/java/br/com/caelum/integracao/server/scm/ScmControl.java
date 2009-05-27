@@ -25,9 +25,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.client;
+package br.com.caelum.integracao.server.scm;
 
+import java.io.File;
 
-public class Client {
+public interface ScmControl {
+
+	public File getDir();
+
+	public int checkout();
+
+	public File getBuildFileForCurrentRevision(String name);
 	
+	String getRevision();
+
 }

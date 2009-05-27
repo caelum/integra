@@ -30,6 +30,7 @@ package br.com.caelum.integracao.server.logic;
 import java.util.Set;
 
 import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.view.Results;

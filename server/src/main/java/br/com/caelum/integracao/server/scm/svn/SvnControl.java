@@ -57,7 +57,7 @@ public class SvnControl implements ScmControl {
 		return new File(revisionDirectory, name);
 	}
 
-	private String getRevision() {
+	public String getRevision() {
 		StringWriter writer = new StringWriter();
 		prepare("svn", "info").logTo(writer).at(getDir()).runAs("svn-info");
 		String content = writer.getBuffer().toString();

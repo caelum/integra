@@ -25,27 +25,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.logic;
+package br.com.caelum.integracao.server.command.remote;
 
 import java.io.IOException;
+import java.util.Arrays;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.command.ExecuteCommand;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
-public class Phase {
+public class ExecuteCommandLine implements ExecuteCommand {
+	
+	private final Logger logger = LoggerFactory.getLogger(ExecuteCommandLine.class);
 
-	private final ExecuteCommand[] cmds;
+	private final String[] cmd;
 
-	public Phase(ExecuteCommand... cmds) {
-		this.cmds = cmds;
+	public ExecuteCommandLine(String ... cmd) {
+		this.cmd = cmd;
 	}
 
-	public void execute(ScmControl control, Clients clients) throws IOException {
-		for(ExecuteCommand cmd : cmds) {
-			Client client = clients.getFreeClient();
-			cmd.executeAt(client, control);
-			clients.release(client);
-		}
+	public void executeAt(Client client, Project project, ScmControl control) throws IOException {
+		logger.debug("Trying to execute " + Arrays.toString(cmd) + " @ " + client.getHost() + ":" + client.getPort());
+		// File logFile = control.getBuildFileForCurrentRevision(name());
+		client.getConnection().register(project).execute(control.getRevision(), cmd).close();
 	}
 
 }

@@ -27,9 +27,9 @@
  */
 package br.com.caelum.integracao.server.ioc;
 
-import br.com.caelum.integracao.server.logic.Clients;
+import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.logic.Database;
-import br.com.caelum.integracao.server.logic.Projects;
 import br.com.caelum.vraptor.ComponentRegistry;
 import br.com.caelum.vraptor.ioc.pico.PicoProvider;
 

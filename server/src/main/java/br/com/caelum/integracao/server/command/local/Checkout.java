@@ -25,16 +25,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.scm;
+package br.com.caelum.integracao.server.command.local;
 
-import java.io.File;
+import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.command.ExecuteCommand;
+import br.com.caelum.integracao.server.scm.ScmControl;
 
-public interface ScmControl {
+public class Checkout implements ExecuteCommand {
 
-	public File getDir();
-
-	public int checkout();
-
-	public File getBuildFileForCurrentRevision(String name);
+	public void executeAt(Client client, Project project, ScmControl control) {
+		control.checkout();
+	}
 
 }

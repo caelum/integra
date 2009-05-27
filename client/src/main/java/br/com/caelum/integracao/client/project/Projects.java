@@ -25,32 +25,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.logic;
+package br.com.caelum.integracao.client.project;
 
-import java.io.IOException;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import br.com.caelum.vraptor.ioc.ApplicationScoped;
+import br.com.caelum.vraptor.ioc.Component;
 
-import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.scm.ScmControl;
-
-public class ExecuteCommandLine implements ExecuteCommand {
+@ApplicationScoped
+@Component
+public class Projects {
 	
-	private final Logger logger = LoggerFactory.getLogger(ExecuteCommandLine.class);
+	private Map<String, Project> projects = new HashMap<String,Project>();
 
-	private final String[] cmd;
-
-	public ExecuteCommandLine(String ... cmd) {
-		this.cmd = cmd;
+	public Project get(String name) {
+		return projects.get(name);
 	}
 
-	public void executeAt(Client client, ScmControl control) throws IOException {
-		logger.debug("Trying to execute " + Arrays.toString(cmd) + " @ " + client.getHost() + ":" + client.getPort());
-		// File logFile = control.getBuildFileForCurrentRevision(name());
-		client.getConnection().send(control.getDir()).execute(cmd).close();
-		// new CommandToExecute(cmd).at(control.getDir()).logTo(logFile).runAs("executing");
+	public void register(Project project) {
+		this.projects.put(project.getName(), project);
 	}
 
 }
