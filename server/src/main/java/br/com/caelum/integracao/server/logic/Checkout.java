@@ -25,40 +25,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.scm.svn;
+package br.com.caelum.integracao.server.logic;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.scm.ScmControl;
 
-import org.junit.Assert;
-import org.junit.Test;
+public class Checkout implements ExecuteCommand {
 
-public class SvnControlTest extends AtDirectoryTest {
-
-	@Test
-	public void shouldCommitAndReceiveUpdate() throws IOException {
-		SvnControl control1 = new SvnControl("svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1", baseDir);
-		control1.checkout();
-		
-		SvnControl control2 = new SvnControl("svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-2", baseDir);
-		control2.checkout();
-		
-		File file = new File(control1.getDir(), "test-file");
-		givenA(file, "misc content");
-		
-		control1.add(file);
-		control1.commit("commiting test file");
-		control2.update();
-		File found = new File(control2.getDir(), "test-file");
-		Assert.assertTrue(found.exists());
-		String content = new BufferedReader(new FileReader(found)).readLine();
-		Assert.assertEquals("misc content", content);
-		control2.remove(found);
-		control2.commit("removed test file");
-		control1.update();
-		Assert.assertFalse(file.exists());
+	public void executeAt(Client client, ScmControl control) {
+		control.checkout();
 	}
 
 }

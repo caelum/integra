@@ -25,66 +25,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.action;
+package br.com.caelum.integracao.server.logic;
 
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-import br.com.caelum.integracao.server.scm.svn.CommandToExecute;
+import javax.annotation.PostConstruct;
 
-public class Dispatcher {
+import br.com.caelum.integracao.server.scm.svn.SvnControl;
+import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
-	static final String ZIP_FILE = "ZIP_FILE";
-	static final String EXECUTE = "EXECUTE";
-	private final Socket socket;
-	private DataOutputStream output;
-	private final int id;
-	
-	static int uniqueCount = 0;
+@ApplicationScoped
+public class Projects {
 
-	public Dispatcher(String host, int port) throws UnknownHostException, IOException {
-		this.socket = new Socket(host, port);
-		this.output = new DataOutputStream(socket.getOutputStream());
-		this.id = ++uniqueCount;
-	}
+	private final Map<String,Project> projects = new HashMap<String, Project>();
 
-	public Dispatcher send(File dir) throws IOException {
-		int result = new CommandToExecute("zip", "-r", "zipped.zip", dir.getName()).at(dir.getParentFile()).runAs("zip");
-		if(result!=0) {
-			throw new IOException("Unable to zip " + dir.getAbsolutePath() + " : "  + result);
-		}
-		File zip = new File(dir.getParentFile(), "zipped.zip");
-		FileInputStream fis = new FileInputStream(zip);
-		output.writeUTF(ZIP_FILE);
-		output.writeUTF("count-" + id);
-		output.writeLong(zip.length());
-		while(true) {
-			int b = fis.read();
-			if(b==-1) {
-				break;
-			}
-			output.write(b);
-		}
-		fis.close();
-		return this;
+	@PostConstruct
+	public void startup() {
+		final Project p = new Project(SvnControl.class, "svn+ssh://caelum.no-ip.org/svn/caelum/caelumweb2/trunk",
+				new File("/Users/guilherme/int"), "caelumweb2");
+		p.add(new Phase(new ExecuteCommandLine("ant", "compile")));
+		projects.put(p.getName(), p);
 	}
 	
-	public Dispatcher execute(String ...command) throws IOException {
-		output.writeUTF(EXECUTE);
-		output.writeUTF("count-" + id);
-		output.writeLong(command.length);
-		for(String part : command) {
-			output.writeUTF(part);
-		}
-		return this;
+	public Project get(String name) {
+		return projects.get(name);
 	}
 	
-	public void close() throws IOException {
-		socket.close();
+	public Collection<Project> all() {
+		return projects.values();
 	}
 
 }

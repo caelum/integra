@@ -25,66 +25,61 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.action;
+package br.com.caelum.integracao.client;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
-import br.com.caelum.integracao.server.scm.svn.CommandToExecute;
+import br.com.caelum.integracao.client.command.Command;
+import br.com.caelum.integracao.client.command.Commands;
+import br.com.caelum.integracao.client.command.Execute;
+import br.com.caelum.integracao.client.command.ReceiveZip;
 
-public class Dispatcher {
-
-	static final String ZIP_FILE = "ZIP_FILE";
-	static final String EXECUTE = "EXECUTE";
-	private final Socket socket;
-	private DataOutputStream output;
-	private final int id;
+public class Client {
 	
-	static int uniqueCount = 0;
+	private ServerSocket clientSocket;
 
-	public Dispatcher(String host, int port) throws UnknownHostException, IOException {
-		this.socket = new Socket(host, port);
-		this.output = new DataOutputStream(socket.getOutputStream());
-		this.id = ++uniqueCount;
+	public Client() throws IOException {
+		this.clientSocket = new ServerSocket();
+		this.clientSocket.bind(null);
 	}
 
-	public Dispatcher send(File dir) throws IOException {
-		int result = new CommandToExecute("zip", "-r", "zipped.zip", dir.getName()).at(dir.getParentFile()).runAs("zip");
-		if(result!=0) {
-			throw new IOException("Unable to zip " + dir.getAbsolutePath() + " : "  + result);
-		}
-		File zip = new File(dir.getParentFile(), "zipped.zip");
-		FileInputStream fis = new FileInputStream(zip);
-		output.writeUTF(ZIP_FILE);
-		output.writeUTF("count-" + id);
-		output.writeLong(zip.length());
-		while(true) {
-			int b = fis.read();
-			if(b==-1) {
-				break;
+	public Client(int port) throws IOException {
+		this.clientSocket = new ServerSocket(port);
+	}
+
+	public int getPort() {
+		return this.clientSocket.getLocalPort();
+	}
+
+	public void waitForNewServer() throws IOException {
+		final Socket server = this.clientSocket.accept();
+		new Thread(new Runnable() {
+			public void run() {
+				Commands cmd = new Commands();
+				cmd.register(ReceiveZip.class);
+				cmd.register(Execute.class);
+				try {
+					DataInputStream input = new DataInputStream(server.getInputStream());
+					while(true) {
+						String commandReceived = input.readUTF();
+						if(cmd.equals("DISCONNECT")) {
+							System.out.println("Disconnecting from server");
+							server.close();
+							break;
+						}
+						Command result = cmd.commandFor(commandReceived);
+						if(result==null) {
+							throw new IllegalArgumentException("Unable to parse " + commandReceived);
+						}
+						result.execute(input);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
-			output.write(b);
-		}
-		fis.close();
-		return this;
+		}).start();
 	}
-	
-	public Dispatcher execute(String ...command) throws IOException {
-		output.writeUTF(EXECUTE);
-		output.writeUTF("count-" + id);
-		output.writeLong(command.length);
-		for(String part : command) {
-			output.writeUTF(part);
-		}
-		return this;
-	}
-	
-	public void close() throws IOException {
-		socket.close();
-	}
-
 }

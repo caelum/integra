@@ -27,6 +27,9 @@
  */
 package br.com.caelum.integracao.client.command;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -40,7 +43,8 @@ public class CommandsTest {
 	
 	@CommandString("MyRocks")
 	public static class MyType implements Command {
-		
+		public void execute(DataInputStream input) throws IOException {
+		}
 	}
 
 	@Test

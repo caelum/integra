@@ -1,17 +1,21 @@
 package br.com.caelum.integracao.server.scm.svn;
 
-import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Arrays;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CommandToExecute {
 
 	private final String[] cmd;
 	private File baseDir;
+	private PrintWriter outputWriter = new PrintWriter(System.out, true);
+	private boolean closeWriter = false;
 
 	public CommandToExecute(String... cmd) {
 		this.cmd = cmd;
@@ -30,9 +34,17 @@ public class CommandToExecute {
 		try {
 			Process process = builder.start();
 			AtomicBoolean stopFlag = new AtomicBoolean(false);
-			Thread t = print(process, stopFlag, id);
 			int result = process.waitFor();
-			t.stop();
+			InputStream is = process.getInputStream();
+			Scanner sc = new Scanner(is).useDelimiter("\\n");
+			while(sc.hasNext()) {
+				outputWriter.println(id + ">> " + sc.next());
+			}
+			sc.close();
+			stopFlag.set(true);
+			if(closeWriter) {
+				this.outputWriter.close();
+			}
 			return result;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -41,30 +53,13 @@ public class CommandToExecute {
 		}
 	}
 
+	public CommandToExecute logTo(File build) throws IOException {
+		return logTo(new FileWriter(build));
+	}
 
-	private Thread print(Process p, final AtomicBoolean stopFlag, final String prefix) {
-		final InputStream inputStream = p.getInputStream();
-		final InputStreamReader isr = new InputStreamReader(inputStream);
-		final BufferedReader reader = new BufferedReader(isr);
-		Thread t = new Thread(new Runnable() {
-			public void run() {
-				while(!stopFlag.get()) {
-					try {
-						while (reader.ready()) {
-							System.out.println(prefix + ">> " + reader.readLine());
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		t.start();
-		return t;
+	public CommandToExecute logTo(Writer writer) {
+		this.outputWriter = new PrintWriter(writer, true);
+		this.closeWriter = true;
+		return this;
 	}
 }

@@ -25,66 +25,31 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.action;
+package br.com.caelum.integracao.client.command;
 
-import java.io.DataOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
 
 import br.com.caelum.integracao.server.scm.svn.CommandToExecute;
 
-public class Dispatcher {
+@CommandString("ZIP_FILE")
+public class ReceiveZip implements Command {
 
-	static final String ZIP_FILE = "ZIP_FILE";
-	static final String EXECUTE = "EXECUTE";
-	private final Socket socket;
-	private DataOutputStream output;
-	private final int id;
-	
-	static int uniqueCount = 0;
-
-	public Dispatcher(String host, int port) throws UnknownHostException, IOException {
-		this.socket = new Socket(host, port);
-		this.output = new DataOutputStream(socket.getOutputStream());
-		this.id = ++uniqueCount;
-	}
-
-	public Dispatcher send(File dir) throws IOException {
-		int result = new CommandToExecute("zip", "-r", "zipped.zip", dir.getName()).at(dir.getParentFile()).runAs("zip");
-		if(result!=0) {
-			throw new IOException("Unable to zip " + dir.getAbsolutePath() + " : "  + result);
+	public void execute(DataInputStream stream) throws IOException {
+		String id = stream.readUTF();
+		long length = stream.readLong();
+		File dir = new File(id);
+		dir.mkdirs();
+		File f = new File(dir, "my.zip");
+		FileOutputStream w = new FileOutputStream(f);
+		while(length--!=0) {
+			w.write(stream.read());
 		}
-		File zip = new File(dir.getParentFile(), "zipped.zip");
-		FileInputStream fis = new FileInputStream(zip);
-		output.writeUTF(ZIP_FILE);
-		output.writeUTF("count-" + id);
-		output.writeLong(zip.length());
-		while(true) {
-			int b = fis.read();
-			if(b==-1) {
-				break;
-			}
-			output.write(b);
-		}
-		fis.close();
-		return this;
-	}
-	
-	public Dispatcher execute(String ...command) throws IOException {
-		output.writeUTF(EXECUTE);
-		output.writeUTF("count-" + id);
-		output.writeLong(command.length);
-		for(String part : command) {
-			output.writeUTF(part);
-		}
-		return this;
-	}
-	
-	public void close() throws IOException {
-		socket.close();
+		w.flush();
+		w.close();
+		new CommandToExecute("unzip", f.getAbsolutePath()).at(dir).runAs("unzip-" + id);
 	}
 
 }

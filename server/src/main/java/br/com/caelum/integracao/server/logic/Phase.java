@@ -25,66 +25,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.action;
+package br.com.caelum.integracao.server.logic;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
 
-import br.com.caelum.integracao.server.scm.svn.CommandToExecute;
+import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.scm.ScmControl;
 
-public class Dispatcher {
+public class Phase {
 
-	static final String ZIP_FILE = "ZIP_FILE";
-	static final String EXECUTE = "EXECUTE";
-	private final Socket socket;
-	private DataOutputStream output;
-	private final int id;
-	
-	static int uniqueCount = 0;
+	private final ExecuteCommand[] cmds;
 
-	public Dispatcher(String host, int port) throws UnknownHostException, IOException {
-		this.socket = new Socket(host, port);
-		this.output = new DataOutputStream(socket.getOutputStream());
-		this.id = ++uniqueCount;
+	public Phase(ExecuteCommand... cmds) {
+		this.cmds = cmds;
 	}
 
-	public Dispatcher send(File dir) throws IOException {
-		int result = new CommandToExecute("zip", "-r", "zipped.zip", dir.getName()).at(dir.getParentFile()).runAs("zip");
-		if(result!=0) {
-			throw new IOException("Unable to zip " + dir.getAbsolutePath() + " : "  + result);
+	public void execute(ScmControl control, Clients clients) throws IOException {
+		for(ExecuteCommand cmd : cmds) {
+			Client client = clients.getFreeClient();
+			cmd.executeAt(client, control);
+			clients.release(client);
 		}
-		File zip = new File(dir.getParentFile(), "zipped.zip");
-		FileInputStream fis = new FileInputStream(zip);
-		output.writeUTF(ZIP_FILE);
-		output.writeUTF("count-" + id);
-		output.writeLong(zip.length());
-		while(true) {
-			int b = fis.read();
-			if(b==-1) {
-				break;
-			}
-			output.write(b);
-		}
-		fis.close();
-		return this;
-	}
-	
-	public Dispatcher execute(String ...command) throws IOException {
-		output.writeUTF(EXECUTE);
-		output.writeUTF("count-" + id);
-		output.writeLong(command.length);
-		for(String part : command) {
-			output.writeUTF(part);
-		}
-		return this;
-	}
-	
-	public void close() throws IOException {
-		socket.close();
 	}
 
 }

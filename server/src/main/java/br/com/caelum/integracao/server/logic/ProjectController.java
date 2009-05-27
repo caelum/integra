@@ -25,40 +25,48 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.scm.svn;
+package br.com.caelum.integracao.server.logic;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class SvnControlTest extends AtDirectoryTest {
+import br.com.caelum.vraptor.Resource;
 
-	@Test
-	public void shouldCommitAndReceiveUpdate() throws IOException {
-		SvnControl control1 = new SvnControl("svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1", baseDir);
-		control1.checkout();
-		
-		SvnControl control2 = new SvnControl("svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-2", baseDir);
-		control2.checkout();
-		
-		File file = new File(control1.getDir(), "test-file");
-		givenA(file, "misc content");
-		
-		control1.add(file);
-		control1.commit("commiting test file");
-		control2.update();
-		File found = new File(control2.getDir(), "test-file");
-		Assert.assertTrue(found.exists());
-		String content = new BufferedReader(new FileReader(found)).readLine();
-		Assert.assertEquals("misc content", content);
-		control2.remove(found);
-		control2.commit("removed test file");
-		control1.update();
-		Assert.assertFalse(file.exists());
+@Resource
+public class ProjectController {
+	
+	private final Logger logger = LoggerFactory.getLogger(ProjectController.class);
+
+	private final Clients clients;
+	private final Projects projects;
+
+	public ProjectController(Clients clients, Projects projects) {
+		this.clients = clients;
+		this.projects = projects;
+	}
+	
+	public Collection<Project> list() {
+		return this.projects.all();
+	}
+
+	public void run(Project project) throws IllegalArgumentException, SecurityException, InstantiationException,
+			IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		final Project found = projects.get(project.getName());
+		//p.add(new Phase(new ExecuteCommandLine("ant", "test"), new ExecuteCommandLine("ant", "test")));
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					logger.debug("Starting building project " + found.getName());
+					found.execute(clients);
+				} catch (Exception e) {
+					// TODO save pu
+					e.printStackTrace();
+				}
+			}
+		}).start();
 	}
 
 }

@@ -1,0 +1,13 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+
+<html>
+
+<div id="actions">
+<a href="${pageContext.request.contextPath }/client/form">new client</a>
+<a href="${pageContext.request.contextPath }/client/list">list clients</a>
+<a href="${pageContext.request.contextPath }/project/run?project.name=caelumweb2">run projects</a>
+<a href="${pageContext.request.contextPath }/project/list">list projects</a>
+</div>
+

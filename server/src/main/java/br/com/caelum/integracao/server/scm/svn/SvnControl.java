@@ -1,18 +1,23 @@
 package br.com.caelum.integracao.server.scm.svn;
 
 import java.io.File;
+import java.io.StringWriter;
 
-public class SvnControl {
+import br.com.caelum.integracao.server.scm.ScmControl;
+
+public class SvnControl implements ScmControl {
 
 	private final String uri;
 	private final File baseDir;
 	private String baseName;
 	private File baseDirectory;
+	private final File buildDirectory;
 
-	public SvnControl(String uri, File baseDir, String baseName) {
+	public SvnControl(String uri, File baseDir, String baseName, File buildDir) {
 		this.uri = uri;
 		this.baseDir = baseDir;
 		this.baseName = baseName;
+		this.buildDirectory = buildDir;
 		this.baseDirectory = new File(baseDir, baseName);
 	}
 
@@ -42,6 +47,21 @@ public class SvnControl {
 
 	public int remove(File file) {
 		return prepare("svn", "remove", file.getAbsolutePath()).at(file.getParentFile()).runAs("svn-add");
+	}
+
+	public File getBuildFileForCurrentRevision(String name) {
+		String revision = getRevision();
+		File revisionDirectory = new File(this.buildDirectory, "build-" + revision);
+		revisionDirectory.mkdirs();
+		return new File(revisionDirectory, name);
+	}
+
+	private String getRevision() {
+		StringWriter writer = new StringWriter();
+		prepare("svn", "info").logTo(writer).at(getDir()).runAs("svn-info");
+		String content = writer.getBuffer().toString();
+		int pos = content.indexOf("Last Changed Rev: ");
+		return content.substring(pos+ "Last Changed Rev: ".length(), content.indexOf("\n", pos));
 	}
 
 }
