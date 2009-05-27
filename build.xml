@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ====================================================================== 
+	Integracao full build
+	====================================================================== -->
+<project name="Integracao" default="all">
+
+	<description>Integracao Root Buildfile</description>
+
+	<target name="base" description="base module build">
+		<ant dir="integracao-base" />
+	</target>
+
+	<target name="deploy" description="copy to dependencies" depends="base">
+		<property file="integracao-base/build.properties" />
+		<delete file="client/src/main/webapp/WEB-INF/lib/integracao-*.jar" />
+		<delete file="server/src/main/webapp/WEB-INF/lib/integracao-*.jar" />
+		<copy file="integracao-base/${jar.file}" todir="client/src/main/webapp/WEB-INF/lib" />
+		<copy file="integracao-base/${jar.file}" todir="server/src/main/webapp/WEB-INF/lib" />
+	</target>
+
+	<target name="all" depends="deploy" />
+
+</project>
