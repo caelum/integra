@@ -54,4 +54,8 @@ public class Build {
 		return baseDirectory.listFiles();
 	}
 
+	public File getFile(String filename) {
+		return new File(baseDirectory, filename);
+	}
+
 }
