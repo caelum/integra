@@ -30,20 +30,27 @@ package br.com.caelum.integracao.client.project;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
-import br.com.caelum.vraptor.ioc.Component;
 
 @ApplicationScoped
-@Component
 public class Projects {
 	
-	private Map<String, Project> projects = new HashMap<String,Project>();
+	private final Logger logger = LoggerFactory.getLogger(Projects.class);
+	private final Map<String, Project> projects = new HashMap<String,Project>();
+	
+	public Projects() {
+		logger.info("Creating Projects instance");
+	}
 
 	public Project get(String name) {
 		return projects.get(name);
 	}
 
 	public void register(Project project) {
+		logger.debug("Registering project " + project.getName());
 		this.projects.put(project.getName(), project);
 	}
 

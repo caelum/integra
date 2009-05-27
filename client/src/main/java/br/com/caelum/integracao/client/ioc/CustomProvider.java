@@ -27,10 +27,16 @@
  */
 package br.com.caelum.integracao.client.ioc;
 
-import br.com.caelum.vraptor.ioc.ApplicationScoped;
+import br.com.caelum.integracao.client.project.Projects;
+import br.com.caelum.vraptor.ComponentRegistry;
 import br.com.caelum.vraptor.ioc.pico.PicoProvider;
 
-@ApplicationScoped
 public class CustomProvider extends PicoProvider {
+	
+	@Override
+	protected void registerComponents(ComponentRegistry container) {
+		super.registerComponents(container);
+		container.register(Projects.class, Projects.class);
+	}
 
 }

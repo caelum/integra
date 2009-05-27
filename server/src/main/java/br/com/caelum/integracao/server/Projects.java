@@ -45,9 +45,9 @@ public class Projects {
 
 	@PostConstruct
 	public void startup() {
-		final Project p = new Project(SvnControl.class, "svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas",
-				new File("/Users/guilherme/int"), "apostilas");
-		p.add(new Phase(new ExecuteCommandLine("ant", "compile")));
+		final Project p = new Project(SvnControl.class, "svn+ssh://caelum.no-ip.org/svn/caelum/caelumweb2/trunk",
+				new File("/Users/guilherme/int"), "caelumweb2");
+		p.add(new Phase("compile", new ExecuteCommandLine("ant", "compile")));
 		projects.put(p.getName(), p);
 	}
 	

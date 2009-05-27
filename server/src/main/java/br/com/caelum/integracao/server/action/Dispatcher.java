@@ -63,17 +63,18 @@ public class Dispatcher {
 				throw new RuntimeException("Unable to continue with result " + result);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException("Unable to continue with result ",e);
+			throw new RuntimeException("Unable to continue. ",e);
 		}
 		return this;
 	}
 
-	public Dispatcher execute(String revision, String ...commands) throws IOException {
+	public Dispatcher execute(String revision, Project project, String ...commands) throws IOException {
 		HttpClient client = new HttpClient();
 		PostMethod post = new PostMethod("http://" + host + ":" + port +context +  "/job/execute");
 		post.addParameter("revision", revision);
-		for(String cmd : commands) {
-			post.addParameter("command", cmd);
+		post.addParameter("project.name", project.getName());
+		for(int i=0;i<commands.length;i++) {
+			post.addParameter("command[" + i + "]", commands[i]);
 		}
 		try {
 			int result = client.executeMethod(post);
@@ -81,7 +82,7 @@ public class Dispatcher {
 				throw new RuntimeException("Unable to continue with result " + result);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException("Unable to continue with result ",e);
+			throw new RuntimeException("Unable to continue. ",e);
 		}
 		return this;
 	}

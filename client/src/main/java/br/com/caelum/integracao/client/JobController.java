@@ -41,12 +41,12 @@ import br.com.caelum.vraptor.Resource;
 
 @Resource
 public class JobController {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(JobController.class);
-	
+
 	private final EntryPoint point;
 	private final Projects projects;
-	
+
 	private Project currentJob;
 
 	public JobController(EntryPoint point, Projects projects) {
@@ -55,19 +55,23 @@ public class JobController {
 		this.currentJob = null;
 	}
 
-	public void execute(Project p, String revision, List<String> command, String phase, String commandPosition) {
-		if(this.currentJob!=null) {
+	public void execute(Project project, String revision, List<String> command, String phase, String commandPosition) {
+		if (this.currentJob != null) {
 			throw new RuntimeException("Cannot take another job as im currently processing " + currentJob.getName());
 		}
-		this.currentJob = projects.get(p.getName());
+		this.currentJob = projects.get(project.getName());
+		if(this.currentJob==null) {
+			throw new RuntimeException("Unable to find project " + project.getName());
+		}
 		try {
 			File dir = new File(point.getBaseDir(), currentJob.getName());
+			dir.mkdirs();
 			StringWriter writer = new StringWriter();
-			new CommandToExecute("svn", "update", "-r" , revision).at(dir).runAs("svn-update");
+			new CommandToExecute("svn", "update", "-r", revision).at(dir).runAs("svn-update");
 			String[] commands = command.toArray(new String[command.size()]);
 			new CommandToExecute(commands).at(dir).logTo(writer).runAs("execute");
 		} finally {
-			logger.debug("Job " + this.currentJob.getName() + " has finished");
+			logger.debug("Job " + (this.currentJob==null? "" : this.currentJob.getName())+ " has finished");
 			this.currentJob = null;
 		}
 	}

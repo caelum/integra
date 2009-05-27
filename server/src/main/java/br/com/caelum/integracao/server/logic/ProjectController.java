@@ -37,6 +37,8 @@ import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.vraptor.Resource;
+import br.com.caelum.vraptor.Validator;
+import br.com.caelum.vraptor.validator.ValidationMessage;
 
 @Resource
 public class ProjectController {
@@ -46,9 +48,12 @@ public class ProjectController {
 	private final Clients clients;
 	private final Projects projects;
 
-	public ProjectController(Clients clients, Projects projects) {
+	private final Validator validator;
+
+	public ProjectController(Clients clients, Projects projects, Validator validator) {
 		this.clients = clients;
 		this.projects = projects;
+		this.validator = validator;
 	}
 	
 	public Collection<Project> list() {
@@ -58,6 +63,11 @@ public class ProjectController {
 	public void run(Project project) throws IllegalArgumentException, SecurityException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		final Project found = projects.get(project.getName());
+		validator.onError().goTo(ProjectController.class).list();
+		if(found==null) {
+			validator.add(new ValidationMessage("", "project_not_found"));
+		}
+		validator.validate();
 		//p.add(new Phase(new ExecuteCommandLine("ant", "test"), new ExecuteCommandLine("ant", "test")));
 		new Thread(new Runnable() {
 			public void run() {

@@ -29,18 +29,26 @@ package br.com.caelum.integracao.server;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import br.com.caelum.integracao.server.command.ExecuteCommand;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 public class Phase {
 
+	private final Logger logger = LoggerFactory.getLogger(Phase.class);
 	private final ExecuteCommand[] cmds;
+	
+	private final String id;
 
-	public Phase(ExecuteCommand... cmds) {
+	public Phase(String id, ExecuteCommand... cmds) {
+		this.id = id;
 		this.cmds = cmds;
 	}
 
 	public void execute(ScmControl control, Project project, Clients clients) throws IOException {
+		logger.debug("Starting phase " + id + " for project " + project.getName());
 		for(ExecuteCommand cmd : cmds) {
 			Client client = clients.getFreeClient();
 			cmd.executeAt(client, project, control);

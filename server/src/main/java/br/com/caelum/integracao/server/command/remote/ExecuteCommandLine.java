@@ -51,7 +51,7 @@ public class ExecuteCommandLine implements ExecuteCommand {
 	public void executeAt(Client client, Project project, ScmControl control) throws IOException {
 		logger.debug("Trying to execute " + Arrays.toString(cmd) + " @ " + client.getHost() + ":" + client.getPort());
 		// File logFile = control.getBuildFileForCurrentRevision(name());
-		client.getConnection().register(project).execute(control.getRevision(), cmd).close();
+		client.getConnection().register(project).execute(control.getRevision(), project, cmd).close();
 	}
 
 }

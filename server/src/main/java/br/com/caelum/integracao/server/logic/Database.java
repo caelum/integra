@@ -27,15 +27,9 @@
  */
 package br.com.caelum.integracao.server.logic;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import br.com.caelum.integracao.server.Project;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 @ApplicationScoped
 public class Database {
-	
-	private final List<Project> projects = new ArrayList<Project>();
 
 }

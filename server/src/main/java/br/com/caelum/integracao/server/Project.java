@@ -33,12 +33,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import br.com.caelum.integracao.server.command.local.Checkout;
 import br.com.caelum.integracao.server.command.local.CreateBuildDir;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 public class Project {
 
+	private final Logger logger = LoggerFactory.getLogger(Project.class);
 	private final Class<?> controlType;
 	private final String uri;
 	private String name;
@@ -46,12 +50,12 @@ public class Project {
 	private final File baseDir;
 	private File buildsDir;
 	private File workDir;
-	
+
 	protected Project() {
 		this.controlType = null;
-		this.uri=null;
+		this.uri = null;
 		this.name = null;
-		this.baseDir= null;
+		this.baseDir = null;
 	}
 
 	public Project(Class<?> controlType, String uri, File baseDir, String name) {
@@ -63,8 +67,8 @@ public class Project {
 		this.workDir = new File(baseDir, "work");
 		this.workDir.mkdirs();
 		this.name = name;
-		this.phases.add(new Phase(new Checkout()));
-		this.phases.add(new Phase(new CreateBuildDir()));
+		this.phases.add(new Phase("checkout", new Checkout()));
+		this.phases.add(new Phase("create-build-dir", new CreateBuildDir()));
 	}
 
 	public void add(Phase p) {
@@ -73,9 +77,11 @@ public class Project {
 
 	public void execute(Clients clients) throws IllegalArgumentException, SecurityException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
+		logger.debug("Starting executing process for " + name);
 		ScmControl control = getControl();
-		for (Phase p : phases) {
-			p.execute(control, this, clients);
+		for (int i = 0; i < phases.size(); i++) {
+			Phase phase = phases.get(i);
+			phase.execute(control, this, clients);
 		}
 	}
 
@@ -91,18 +97,18 @@ public class Project {
 
 	public List<Build> getBuilds() {
 		List<Build> builds = new ArrayList<Build>();
-		for(File child: this.buildsDir.listFiles()) {
-			if(child.isDirectory()) {
+		for (File child : this.buildsDir.listFiles()) {
+			if (child.isDirectory()) {
 				builds.add(new Build(child));
 			}
 		}
 		return builds;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public String getUri() {
 		return uri;
 	}
