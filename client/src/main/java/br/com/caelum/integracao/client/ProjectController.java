@@ -29,7 +29,6 @@ package br.com.caelum.integracao.client;
 
 import br.com.caelum.integracao.client.project.Project;
 import br.com.caelum.integracao.client.project.Projects;
-import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Resource;
 
@@ -42,7 +41,6 @@ public class ProjectController {
 		this.projects = projects;
 	}
 	
-	@Get
 	@Post
 	public void register(Project project) {
 		projects.register(project);

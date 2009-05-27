@@ -60,7 +60,7 @@ public class Project {
 		return uri;
 	}
 
-	public void run(File baseDir, String revision, List<String> command) {
+	public String run(File baseDir, String revision, List<String> command) {
 		File dir = new File(baseDir, name);
 		StringWriter writer = new StringWriter();
 		logger.debug("Checking out project @ " + revision + " to " + baseDir + "/" + name);
@@ -68,6 +68,7 @@ public class Project {
 		String[] commands = command.toArray(new String[command.size()]);
 		logger.debug("Ready to execute " + Arrays.toString(commands));
 		new CommandToExecute(commands).at(dir).logTo(writer).runAs("execute");
+		return writer.getBuffer().toString();
 	}
 
 }

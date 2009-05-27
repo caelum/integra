@@ -27,12 +27,14 @@
  */
 package br.com.caelum.integracao.server.logic;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
@@ -102,6 +104,16 @@ public class ProjectController {
 		project = projects.get(project.getName());
 		result.include("project", project);
 		result.include("build", project.getBuild(revision));
+	}
+
+	
+	@Get
+	@Path("/download/project/{project.name}/{revision}/{filename}")
+	public File showFile(Project project, String revision, String filename) {
+		logger.debug("Displaying file for " + project.getName() + "@"+ revision + ", file="+filename);
+		project = projects.get(project.getName());
+		Build build = project.getBuild(revision);
+		return build.getFile(filename);
 	}
 
 }

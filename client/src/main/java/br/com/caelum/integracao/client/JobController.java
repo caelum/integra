@@ -61,7 +61,8 @@ public class JobController {
 			throw new RuntimeException("Unable to find project " + project.getName());
 		}
 		try {
-			currentJob.run(point.getBaseDir(), revision, command);
+			String result = currentJob.run(point.getBaseDir(), revision, command);
+			// inovke the server back
 		} finally {
 			logger.debug("Job " + (this.currentJob == null ? "" : this.currentJob.getName()) + " has finished");
 			this.currentJob = null;
