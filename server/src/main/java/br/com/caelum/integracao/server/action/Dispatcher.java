@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import br.com.caelum.integracao.server.scm.svn.CommandToExecute;
+import br.com.caelum.integracao.CommandToExecute;
 
 public class Dispatcher {
 

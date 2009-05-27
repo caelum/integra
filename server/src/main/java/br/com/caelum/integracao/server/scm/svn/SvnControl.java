@@ -3,6 +3,7 @@ package br.com.caelum.integracao.server.scm.svn;
 import java.io.File;
 import java.io.StringWriter;
 
+import br.com.caelum.integracao.CommandToExecute;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 public class SvnControl implements ScmControl {
