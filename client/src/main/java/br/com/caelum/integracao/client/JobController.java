@@ -27,14 +27,11 @@
  */
 package br.com.caelum.integracao.client;
 
-import java.io.File;
-import java.io.StringWriter;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.CommandToExecute;
 import br.com.caelum.integracao.client.project.Project;
 import br.com.caelum.integracao.client.project.Projects;
 import br.com.caelum.vraptor.Resource;
@@ -60,18 +57,13 @@ public class JobController {
 			throw new RuntimeException("Cannot take another job as im currently processing " + currentJob.getName());
 		}
 		this.currentJob = projects.get(project.getName());
-		if(this.currentJob==null) {
+		if (this.currentJob == null) {
 			throw new RuntimeException("Unable to find project " + project.getName());
 		}
 		try {
-			File dir = new File(point.getBaseDir(), currentJob.getName());
-			dir.mkdirs();
-			StringWriter writer = new StringWriter();
-			new CommandToExecute("svn", "update", "-r", revision).at(dir).runAs("svn-update");
-			String[] commands = command.toArray(new String[command.size()]);
-			new CommandToExecute(commands).at(dir).logTo(writer).runAs("execute");
+			currentJob.run(point.getBaseDir(), revision, command);
 		} finally {
-			logger.debug("Job " + (this.currentJob==null? "" : this.currentJob.getName())+ " has finished");
+			logger.debug("Job " + (this.currentJob == null ? "" : this.currentJob.getName()) + " has finished");
 			this.currentJob = null;
 		}
 	}

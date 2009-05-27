@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server.command.remote;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -35,23 +36,28 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.action.Dispatcher;
 import br.com.caelum.integracao.server.command.ExecuteCommand;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 public class ExecuteCommandLine implements ExecuteCommand {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(ExecuteCommandLine.class);
 
 	private final String[] cmd;
 
-	public ExecuteCommandLine(String ... cmd) {
+	public ExecuteCommandLine(String... cmd) {
 		this.cmd = cmd;
 	}
 
-	public void executeAt(Client client, Project project, ScmControl control) throws IOException {
+	public void executeAt(Client client, Project project, ScmControl control, File logFile) throws IOException {
 		logger.debug("Trying to execute " + Arrays.toString(cmd) + " @ " + client.getHost() + ":" + client.getPort());
-		// File logFile = control.getBuildFileForCurrentRevision(name());
-		client.getConnection().register(project).execute(control.getRevision(), project, cmd).close();
+		Dispatcher connection = client.getConnection(logFile);
+		try {
+			connection.register(project).execute(control.getRevision(), project, cmd).close();
+		} finally {
+			connection.close();
+		}
 	}
 
 }

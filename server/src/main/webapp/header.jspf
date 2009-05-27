@@ -9,5 +9,6 @@
 <a href="${pageContext.request.contextPath }/client/list">list clients</a>
 <a href="${pageContext.request.contextPath }/project/run?project.name=caelumweb2">run projects</a>
 <a href="${pageContext.request.contextPath }/project/list">list projects</a>
+<a href="${pageContext.request.contextPath }/job/list">list jobs</a>
 </div>
 

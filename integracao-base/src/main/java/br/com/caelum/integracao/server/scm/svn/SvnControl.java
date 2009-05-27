@@ -1,6 +1,7 @@
 package br.com.caelum.integracao.server.scm.svn;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 
 import br.com.caelum.integracao.CommandToExecute;
@@ -22,8 +23,8 @@ public class SvnControl implements ScmControl {
 		this.baseDirectory = new File(baseDir, baseName);
 	}
 
-	public int checkout() {
-		return prepare("svn", "co", uri, baseName).at(baseDir).runAs("svn-checkout");
+	public int checkout(File log) throws IOException {
+		return prepare("svn", "co", uri, baseName).at(baseDir).logTo(log).runAs("svn-checkout");
 	}
 
 	public File getDir() {

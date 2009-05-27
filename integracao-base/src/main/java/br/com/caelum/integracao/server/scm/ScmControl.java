@@ -28,12 +28,13 @@
 package br.com.caelum.integracao.server.scm;
 
 import java.io.File;
+import java.io.IOException;
 
 public interface ScmControl {
 
 	public File getDir();
 
-	public int checkout();
+	public int checkout(File log) throws IOException;
 
 	public File getBuildFileForCurrentRevision(String name);
 	

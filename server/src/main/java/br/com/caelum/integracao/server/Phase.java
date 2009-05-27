@@ -35,23 +35,33 @@ import org.slf4j.LoggerFactory;
 import br.com.caelum.integracao.server.command.ExecuteCommand;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
+/**
+ * A build consists of many different phases. At each phase some targets are
+ * executed. ExecuteCommands within phases might be parallellized.
+ * 
+ * @author guilherme silveira
+ */
 public class Phase {
 
 	private final Logger logger = LoggerFactory.getLogger(Phase.class);
-	private final ExecuteCommand[] cmds;
-	
+	private final ExecuteCommand[] commands;
+
 	private final String id;
 
 	public Phase(String id, ExecuteCommand... cmds) {
 		this.id = id;
-		this.cmds = cmds;
+		this.commands = cmds;
 	}
 
 	public void execute(ScmControl control, Project project, Clients clients) throws IOException {
-		logger.debug("Starting phase " + id + " for project " + project.getName());
-		for(ExecuteCommand cmd : cmds) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Starting phase " + id + " for project " + project.getName() + " containing "
+					+ commands.length + " parallel commands.");
+		}
+		int count = 0;
+		for (ExecuteCommand command : commands) {
 			Client client = clients.getFreeClient();
-			cmd.executeAt(client, project, control);
+			command.executeAt(client, project, control, control.getBuildFileForCurrentRevision(id + "-" + (count++)));
 			clients.release(client);
 		}
 	}

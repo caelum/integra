@@ -25,17 +25,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.command.local;
+package br.com.caelum.integracao.server.jobs;
 
-import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Project;
-import br.com.caelum.integracao.server.command.ExecuteCommand;
-import br.com.caelum.integracao.server.scm.ScmControl;
+public class Job {
 
-public class Checkout implements ExecuteCommand {
+	private final String name;
+	private Thread thread;
 
-	public void executeAt(Client client, Project project, ScmControl control) {
-		control.checkout();
+	public Job(String name) {
+		this.name = name;
+	}
+
+	public void attach(Thread thread) {
+		this.thread = thread;
+	}
+
+	public String getStatus() {
+		return this.thread.isAlive() ? "ALIVE" : "DEAD";
 	}
 
 }

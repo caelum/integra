@@ -27,7 +27,10 @@
  */
 package br.com.caelum.integracao.server.action;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.UnknownHostException;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -45,11 +48,14 @@ public class Dispatcher {
 
 	private final String context;
 
-	public Dispatcher(String host, String context, int port) throws UnknownHostException, IOException {
+	private final PrintWriter log;
+
+	public Dispatcher(String host, String context, int port, File logFile) throws UnknownHostException, IOException {
 		this.host = host;
 		this.context = context;
 		this.port = port;
 		this.id = ++uniqueCount;
+		this.log = new PrintWriter(new FileWriter(logFile), true);
 	}
 	
 	public Dispatcher register(Project project) {
@@ -88,7 +94,7 @@ public class Dispatcher {
 	}
 	
 	public void close() throws IOException {
-		
+		this.log.close();
 	}
 
 }

@@ -50,7 +50,8 @@ public class EntryPoint {
 	}
 	
 	public File getBaseDir() {
-		File tmpDir = new File(".tmp-client");
+		File tmpDir = new File(".tmps-client");
+		tmpDir.mkdir();
 		return tmpDir;
 	}
 		

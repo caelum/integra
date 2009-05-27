@@ -36,7 +36,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.command.local.Checkout;
 import br.com.caelum.integracao.server.command.local.CreateBuildDir;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
@@ -64,10 +63,9 @@ public class Project {
 		this.baseDir = baseDir;
 		this.buildsDir = new File(baseDir, "builds");
 		this.buildsDir.mkdirs();
-		this.workDir = new File(baseDir, "work");
+		this.workDir = new File(baseDir, name);
 		this.workDir.mkdirs();
 		this.name = name;
-		this.phases.add(new Phase("checkout", new Checkout()));
 		this.phases.add(new Phase("create-build-dir", new CreateBuildDir()));
 	}
 
@@ -79,6 +77,9 @@ public class Project {
 			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
 		logger.debug("Starting executing process for " + name);
 		ScmControl control = getControl();
+		File tmpFile = File.createTempFile("loading-checkout", ".log");
+		control.checkout(tmpFile);
+		tmpFile.renameTo(control.getBuildFileForCurrentRevision("checkout"));
 		for (int i = 0; i < phases.size(); i++) {
 			Phase phase = phases.get(i);
 			phase.execute(control, this, clients);
@@ -88,7 +89,7 @@ public class Project {
 	private ScmControl getControl() throws InstantiationException, IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException {
 		return (ScmControl) controlType.getDeclaredConstructor(String.class, File.class, String.class, File.class)
-				.newInstance(uri, workDir, name, buildsDir);
+				.newInstance(uri, baseDir, name, buildsDir);
 	}
 
 	public String getName() {
@@ -111,6 +112,15 @@ public class Project {
 
 	public String getUri() {
 		return uri;
+	}
+
+	public Build getBuild(String revision) {
+		for(Build b : getBuilds()) {
+			if(b.getRevision().equals(revision)) {
+				return b;
+			}
+		}
+		return null;
 	}
 
 }

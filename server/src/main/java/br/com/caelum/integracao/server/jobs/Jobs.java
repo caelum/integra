@@ -25,20 +25,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.command.local;
+package br.com.caelum.integracao.server.jobs;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Project;
-import br.com.caelum.integracao.server.command.ExecuteCommand;
-import br.com.caelum.integracao.server.scm.ScmControl;
+import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
-public class CreateBuildDir implements ExecuteCommand {
+@ApplicationScoped
+public class Jobs {
+	
+	private final List<Job> jobs;
 
-	public void executeAt(Client client,Project project, ScmControl control, File logFile) throws IOException {
-		control.getBuildFileForCurrentRevision("status");
+	public Jobs() {
+		this.jobs = new ArrayList<Job>();
+	}
+
+	public void add(Job job) {
+		this.jobs.add(job);
+	}
+	
+	public List<Job> all() {
+		return jobs;
+	}
+
+	public void remove(Job job) {
+		this.jobs.remove(job);
 	}
 
 }

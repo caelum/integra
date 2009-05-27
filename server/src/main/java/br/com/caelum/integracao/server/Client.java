@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -40,8 +41,8 @@ public class Client {
 
 	private String host;
 
-	public Dispatcher getConnection() throws UnknownHostException, IOException {
-		return new Dispatcher(host, getContext(), port);
+	public Dispatcher getConnection(File logFile) throws UnknownHostException, IOException {
+		return new Dispatcher(host, getContext(), port, logFile);
 	}
 
 	public String getContext() {
