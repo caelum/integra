@@ -46,14 +46,16 @@ import br.com.caelum.integracao.server.scm.ScmControl;
 public class Phase {
 
 	private final Logger logger = LoggerFactory.getLogger(Phase.class);
-	private final ExecuteCommand[] commands;
-	private final String id;
-	private final int phasePosition;
+	private ExecuteCommand[] commands;
+	private String id;
+	private long position;
 
-	public Phase(int phasePosition, String id, ExecuteCommand... cmds) {
-		this.phasePosition = phasePosition;
+	public Phase(String id, ExecuteCommand... cmds) {
 		this.id = id;
 		this.commands = cmds;
+	}
+	
+	public Phase() {
 	}
 
 	public void execute(ScmControl control, Build build, Clients clients) throws IOException {
@@ -61,7 +63,7 @@ public class Phase {
 			logger.debug("Starting phase " + id + " for project " + build.getProject().getName() + " containing "
 					+ commands.length + " parallel commands.");
 		}
-		build.getFile(phasePosition + "/" + id).mkdirs();
+		build.getFile(position + "/" + id).mkdirs();
 		for (ExecuteCommand command : commands) {
 			Client client = clients.getFreeClient(getId() + "/"+command.getName());
 			command.executeAt(client, build, control, File.createTempFile("connection", "txt"));
@@ -72,8 +74,8 @@ public class Phase {
 		return commands.length;
 	}
 	
-	public int getPhasePosition() {
-		return phasePosition;
+	public long getPhasePosition() {
+		return position;
 	}
 	
 	public String getId() {
@@ -82,6 +84,14 @@ public class Phase {
 	
 	public ExecuteCommand[] getCommands() {
 		return commands;
+	}
+	
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	public void setPosition(long position) {
+		this.position = position;
 	}
 
 }

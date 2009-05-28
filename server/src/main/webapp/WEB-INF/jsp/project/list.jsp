@@ -2,7 +2,7 @@
 	<h2>${project.name}</h2>
 	Uri: ${project.uri }<br />
 	Basedir: ${project.buildsDirectory.absolutePath }<br />
-	Actions: <a href="run?project.name=${project.name }">run</a>
+	Actions: <a href="run?project.name=${project.name }">run</a><br/>
 	Last build: ${project.lastBuild.time }<br/>
 
 	<table>
@@ -11,6 +11,7 @@
 				<td>${phase.id }</td>
 				<td>--></td>
 			</c:forEach>
+			<td><a href="phase?_method=post&project.name=${project.name }&phase.id=unnamed">new phase</a></td>
 		</tr>
 		<tr>
 			<c:forEach var="phase" items="${project.phases }">
@@ -19,6 +20,7 @@
 					<c:forEach var="cmd" items="${phase.commands}">
 						<li>${cmd.name }</li>
 					</c:forEach>
+					<li><a href="command?_method=post&project.name=${project.name }&phase.position=${phase.phasePosition}">new command</a></li>
 				</ul>
 				</td>
 				<td></td>

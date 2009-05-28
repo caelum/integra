@@ -76,6 +76,7 @@ public class Project {
 	}
 
 	public void add(Phase p) {
+		p.setPosition(phases.size());
 		this.phases.add(p);
 	}
 
