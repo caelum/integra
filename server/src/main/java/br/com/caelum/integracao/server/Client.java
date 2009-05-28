@@ -51,6 +51,8 @@ public class Client {
 
 	private String host;
 
+	private String reason;
+
 	public Dispatcher getConnection(File logFile, String myUrl) throws UnknownHostException, IOException {
 		return new Dispatcher(this, logFile, myUrl);
 	}
@@ -81,6 +83,14 @@ public class Client {
 
 	public String getBaseUri() {
 		return "http://" + this.getHost() + ":" + this.getPort() + this.getContext();
+	}
+
+	public void setCurrentJob(String reason) {
+		this.reason = reason;
+	}
+	
+	public String getReason() {
+		return reason;
 	}
 
 }

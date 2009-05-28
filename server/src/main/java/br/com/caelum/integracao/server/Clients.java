@@ -57,15 +57,20 @@ public class Clients {
 		this.clients.add(client);
 	}
 
-	public Set<Client> clients() {
+	public Set<Client> freeClients() {
 		return this.clients;
 	}
 
-	public synchronized Client getFreeClient() {
+	public Set<Client> lockedClients() {
+		return this.lockedClients;
+	}
+
+	public synchronized Client getFreeClient(String reason) {
 		if (clients.isEmpty()) {
 			throw new IllegalStateException("There are not enough clients");
 		}
 		Client client = clients.iterator().next();
+		client.setCurrentJob(reason);
 		clients.remove(client);
 		lockedClients.add(client);
 		return client;

@@ -25,24 +25,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.command;
+package br.com.caelum.integracao.server;
 
-import java.io.File;
-import java.io.IOException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
-import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.project.Build;
-import br.com.caelum.integracao.server.scm.ScmControl;
+import org.junit.Before;
+import org.junit.Test;
 
-/**
- * A command to be executed
- * 
- * @author guilherme silveira
- */
-public interface ExecuteCommand {
+public class ClientsTest {
 
-	void executeAt(Client client, Build build, ScmControl control, File logFile) throws IOException;
+	private Clients clients;
+	private Client bebado;
 
-	String getName();
+	@Before
+	public void setup() {
+		this.clients = new Clients();
+		this.bebado = new Client();
+		clients.register(bebado);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void shouldComplainIfRequestAClientWhenAllLocked() {
+		clients.getFreeClient("");
+		clients.getFreeClient("");
+	}
+
+	@Test
+	public void shouldReturnAFreeClientWhenAvailable() {
+		assertThat(clients.getFreeClient(""), is(equalTo(bebado)));
+		assertThat(clients.lockedClients().contains(bebado), is(equalTo(true)));
+	}
+
+	@Test
+	public void allowsAClientToBeReturned() {
+		clients.getFreeClient("");
+		clients.release(bebado.getId());
+		assertThat(clients.getFreeClient(""), is(equalTo(bebado)));
+	}
 
 }

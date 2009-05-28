@@ -69,4 +69,8 @@ public class ExecuteCommandLine implements ExecuteCommand {
 		}
 	}
 
+	public String getName() {
+		return Arrays.toString(cmd);
+	}
+
 }

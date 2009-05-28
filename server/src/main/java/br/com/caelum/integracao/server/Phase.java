@@ -63,13 +63,25 @@ public class Phase {
 		}
 		build.getFile(phasePosition + "/" + id).mkdirs();
 		for (ExecuteCommand command : commands) {
-			Client client = clients.getFreeClient();
+			Client client = clients.getFreeClient(getId() + "/"+command.getName());
 			command.executeAt(client, build, control, File.createTempFile("connection", "txt"));
 		}
 	}
 
 	public int getCommandCount() {
 		return commands.length;
+	}
+	
+	public int getPhasePosition() {
+		return phasePosition;
+	}
+	
+	public String getId() {
+		return id;
+	}
+	
+	public ExecuteCommand[] getCommands() {
+		return commands;
 	}
 
 }

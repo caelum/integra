@@ -32,6 +32,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -62,6 +64,9 @@ public class Build {
 	private Set<Integer> executedCommandsFromThisPhase = new HashSet<Integer>();
 	private boolean sucessSoFar = true;
 	private boolean finished = false;
+
+	private Calendar startTime = new GregorianCalendar();
+	private Calendar finishTime;
 
 	protected Build() {
 	}
@@ -130,7 +135,8 @@ public class Build {
 		writer.close();
 		boolean executedAllCommands = executedCommandsFromThisPhase.size() == project.getPhases().get(phaseId)
 				.getCommandCount();
-		if(executedAllCommands && !sucessSoFar) {
+		if (executedAllCommands && !sucessSoFar) {
+			finishTime = new GregorianCalendar();
 			finished = true;
 		}
 		if (executedAllCommands && sucessSoFar) {
@@ -139,6 +145,7 @@ public class Build {
 			if (project.getPhases().size() != currentPhase) {
 				project.getPhases().get(phaseId + 1).execute(project.getControl(), this, clients);
 			} else {
+				finishTime = new GregorianCalendar();
 				finished = true;
 			}
 		}
@@ -154,5 +161,21 @@ public class Build {
 
 	public boolean isFinished() {
 		return finished;
+	}
+
+	public double getRuntime() {
+		Calendar f = Calendar.getInstance();
+		if (finishTime != null) {
+			f = finishTime;
+		}
+		return (f.getTimeInMillis() - startTime.getTimeInMillis()) / 1000.0;
+	}
+	
+	public Calendar getFinishTime() {
+		return finishTime;
+	}
+	
+	public Calendar getStartTime() {
+		return startTime;
 	}
 }

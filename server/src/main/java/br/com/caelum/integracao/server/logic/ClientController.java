@@ -27,8 +27,6 @@
  */
 package br.com.caelum.integracao.server.logic;
 
-import java.util.Set;
-
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.vraptor.Resource;
@@ -51,8 +49,9 @@ public class ClientController {
 		result.use(Results.logic()).redirectTo(ClientController.class).list();
 	}
 	
-	public Set<Client> list() {
-		return this.clients.clients();
+	public void list() {
+		result.include("free", clients.freeClients());
+		result.include("locked", clients.lockedClients());
 	}
 	
 	public void form() {

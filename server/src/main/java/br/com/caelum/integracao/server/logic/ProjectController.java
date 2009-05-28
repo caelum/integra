@@ -52,6 +52,7 @@ import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.Validator;
 import br.com.caelum.vraptor.validator.ValidationMessage;
+import br.com.caelum.vraptor.view.Results;
 
 @Resource
 public class ProjectController {
@@ -71,21 +72,26 @@ public class ProjectController {
 		this.jobs = jobs;
 		this.result = result;
 	}
-	
+
 	public void addCaelumweb(String myUrl) {
-		final Project p = new Project(SvnControl.class, "svn+ssh://192.168.0.2/svn/caelum/caelumweb2/trunk",
-				new File("/home/integra/build/caelumweb2"), "caelumweb2");
-		p.add(new Phase(0, "compile", new ExecuteCommandLine(myUrl,0,0,  "ant", "test")));
-		p.add(new Phase(1, "compile", new ExecuteCommandLine(myUrl,1,0,  "ant", "integration-test-1"), new ExecuteCommandLine(myUrl,1,1,  "ant", "integration-test-2")));
+		final Project p = new Project(SvnControl.class, "svn+ssh://192.168.0.2/svn/caelum/caelumweb2/trunk", new File(
+				"/home/integra/build/caelumweb2"), "caelumweb2");
+		p.add(new Phase(0, "test", new ExecuteCommandLine(myUrl, 0, 0, "ant", "test")));
+		p.add(new Phase(1, "integration-test", new ExecuteCommandLine(myUrl, 1, 0, "ant", "integration-test-1"),
+				new ExecuteCommandLine(myUrl, 1, 1, "ant", "integration-test-2")));
 		projects.register(p);
+		result.use(Results.logic()).redirectTo(ProjectController.class).list();
 	}
-	
+
 	public void addMyProject(String myUrl) {
-		final Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject",
-				new File("/Users/guilherme/int"), "my-anted");
-		p.add(new Phase(0, "compile", new ExecuteCommandLine(myUrl,0,0,  "ant", "compile")));
-		p.add(new Phase(1, "compile", new ExecuteCommandLine(myUrl,1,0,  "ant", "test")));
+		final Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject", new File(
+				"/Users/guilherme/int"), "my-anted");
+		p.add(new Phase(0, "compile", new ExecuteCommandLine(myUrl, 0, 0, "ant", "compile")));
+		p.add(new Phase(1, "test", new ExecuteCommandLine(myUrl, 1, 0, "ant", "test")));
+		p.add(new Phase(2, "deploy", new ExecuteCommandLine(myUrl, 2, 0, "ant", "deploy"), new ExecuteCommandLine(
+				myUrl, 2, 1, "ant", "while-deploy")));
 		projects.register(p);
+		result.use(Results.logic()).redirectTo(ProjectController.class).list();
 	}
 
 	public Collection<Project> list() {
@@ -126,11 +132,11 @@ public class ProjectController {
 		result.include("project", project);
 		Build build = project.getBuild(buildId);
 		result.include("build", build);
-		if(filename.equals("")) {
+		if (filename.equals("")) {
 			result.include("currentPath", "");
 			result.include("content", build.getContent());
 		} else {
-			filename = filename.replace('$','/');
+			filename = filename.replace('$', '/');
 			File base = build.getFile(filename);
 			result.include("currentPath", base.getName() + "$");
 			result.include("content", base.listFiles());
@@ -145,12 +151,14 @@ public class ProjectController {
 		Build build = project.getBuild(buildId);
 		return build.getFile(filename.replace('$', '/'));
 	}
-	
+
 	@Post
 	@Path("/finish/project/{project.name}/{buildId}/{phaseId}/{commandId}")
-	public void finish(Project project, Long buildId, int phaseId, int commandId, String result, boolean success, Client client) throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public void finish(Project project, Long buildId, int phaseId, int commandId, String result, boolean success,
+			Client client) throws IOException, InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException {
 		clients.release(client.getId());
-		logger.debug("Finishing " + project.getName() + " phase "+phaseId + " command " + commandId);
+		logger.debug("Finishing " + project.getName() + " phase " + phaseId + " command " + commandId);
 		project = projects.get(project.getName());
 		Build build = project.getBuild(buildId);
 		build.finish(phaseId, commandId, result, success, clients);

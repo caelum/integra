@@ -30,6 +30,8 @@ package br.com.caelum.integracao.server;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -50,6 +52,8 @@ public class Project {
 	private File workDir;
 	private Long buildCount = 0L;
 	private final List<Build> builds = new ArrayList<Build>();
+	
+	private Calendar lastBuild = new GregorianCalendar();
 
 	protected Project() {
 		this.controlType = null;
@@ -127,9 +131,9 @@ public class Project {
 	public List<Phase> getPhases() {
 		return this.phases;
 	}
-
-	public Phase getPhase(int phaseId) {
-		return this.phases.get(phaseId);
+	
+	public Calendar getLastBuild() {
+		return lastBuild;
 	}
 
 }

@@ -4,6 +4,8 @@ Current phase: ${build.currentPhase }<br/>
 Base directory: ${build.baseDirectory.absolutePath }<br/>
 Sucess so far: ${build.successSoFar }<br/>
 Finished: ${build.finished }<br/>
+Started at: ${build.startTime.time }<br/>
+Finished at: ${build.finishTime.time }<br/>
 Commands finished so far:
 <c:forEach var="cmd" items="${build.executedCommandsFromThisPhase}">
 ${cmd },
