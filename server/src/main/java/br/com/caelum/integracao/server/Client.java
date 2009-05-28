@@ -51,8 +51,8 @@ public class Client {
 
 	private String host;
 
-	public Dispatcher getConnection(File logFile) throws UnknownHostException, IOException {
-		return new Dispatcher(this, logFile);
+	public Dispatcher getConnection(File logFile, String myUrl) throws UnknownHostException, IOException {
+		return new Dispatcher(this, logFile, myUrl);
 	}
 
 	public String getContext() {

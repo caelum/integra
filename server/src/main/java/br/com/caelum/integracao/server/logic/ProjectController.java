@@ -72,19 +72,19 @@ public class ProjectController {
 		this.result = result;
 	}
 	
-	public void addCaelumweb() {
+	public void addCaelumweb(String myUrl) {
 		final Project p = new Project(SvnControl.class, "svn+ssh://192.168.0.2/svn/caelum/caelumweb2/trunk",
 				new File("/home/integra/build/caelumweb2"), "caelumweb2");
-		p.add(new Phase(0, "compile", new ExecuteCommandLine(0,0,  "ant", "test")));
-		p.add(new Phase(1, "compile", new ExecuteCommandLine(1,0,  "ant", "integration-test-1"), new ExecuteCommandLine(1,1,  "ant", "integration-test-2")));
+		p.add(new Phase(0, "compile", new ExecuteCommandLine(myUrl,0,0,  "ant", "test")));
+		p.add(new Phase(1, "compile", new ExecuteCommandLine(myUrl,1,0,  "ant", "integration-test-1"), new ExecuteCommandLine(myUrl,1,1,  "ant", "integration-test-2")));
 		projects.register(p);
 	}
 	
-	public void addMyProject() {
+	public void addMyProject(String myUrl) {
 		final Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject",
 				new File("/Users/guilherme/int"), "my-anted");
-		p.add(new Phase(0, "compile", new ExecuteCommandLine(0,0,  "ant", "compile")));
-		p.add(new Phase(1, "compile", new ExecuteCommandLine(1,0,  "ant", "test")));
+		p.add(new Phase(0, "compile", new ExecuteCommandLine(myUrl,0,0,  "ant", "compile")));
+		p.add(new Phase(1, "compile", new ExecuteCommandLine(myUrl,1,0,  "ant", "test")));
 		projects.register(p);
 	}
 

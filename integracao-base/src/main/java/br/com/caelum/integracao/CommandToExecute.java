@@ -55,6 +55,7 @@ public class CommandToExecute {
 
 	public int runAs(String id) {
 		ProcessBuilder builder = new ProcessBuilder();
+		baseDir.mkdirs();
 		builder.directory(baseDir);
 		builder.command(Arrays.asList(cmd));
 		builder.redirectErrorStream(true);

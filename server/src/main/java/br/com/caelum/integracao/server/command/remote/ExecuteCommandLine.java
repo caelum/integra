@@ -50,7 +50,10 @@ public class ExecuteCommandLine implements ExecuteCommand {
 
 	private final int commandCount;
 
-	public ExecuteCommandLine(int phaseCount, int commandCount, String... cmd) {
+	private final String myUrl;
+
+	public ExecuteCommandLine(String myUrl, int phaseCount, int commandCount, String... cmd) {
+		this.myUrl = myUrl;
 		this.phaseCount = phaseCount;
 		this.commandCount = commandCount;
 		this.cmd = cmd;
@@ -58,7 +61,7 @@ public class ExecuteCommandLine implements ExecuteCommand {
 
 	public void executeAt(Client client, Build build, ScmControl control, File logFile) throws IOException {
 		logger.debug("Trying to execute " + Arrays.toString(cmd) + " @ " + client.getHost() + ":" + client.getPort());
-		Dispatcher connection = client.getConnection(logFile);
+		Dispatcher connection = client.getConnection(logFile, myUrl);
 		try {
 			connection.register(build.getProject()).execute(build,phaseCount,commandCount, cmd).close();
 		} finally {

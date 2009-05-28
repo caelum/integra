@@ -45,11 +45,11 @@ public class Clients {
 
 	@PostConstruct
 	public void base() {
-		Client c = new Client();
+		/*Client c = new Client();
 		c.setContext("/integracao-client");
 		c.setHost("localhost");
 		c.setPort(8080);
-		register(c);
+		register(c);*/
 	}
 
 	public synchronized void register(Client client) {

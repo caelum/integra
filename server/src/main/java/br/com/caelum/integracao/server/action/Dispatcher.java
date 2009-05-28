@@ -46,8 +46,11 @@ public class Dispatcher {
 
 	private final Client client;
 
-	public Dispatcher(Client client, File logFile) throws UnknownHostException, IOException {
+	private final String myUrl;
+
+	public Dispatcher(Client client, File logFile, String myUrl) throws UnknownHostException, IOException {
 		this.client = client;
+		this.myUrl = myUrl;
 		logFile.getParentFile().mkdirs();
 		this.log = new PrintWriter(new FileWriter(logFile), true);
 	}
@@ -75,7 +78,7 @@ public class Dispatcher {
 		post.addParameter("revision", build.getRevision());
 		post.addParameter("project.name", build.getProject().getName());
 		post.addParameter("clientId", "" + this.client.getId());
-		post.addParameter("resultUri", "http://localhost:9091/integracao/finish/project/" + build.getProject().getName() + "/" + build.getBuildCount() + "/"
+		post.addParameter("resultUri", "http://" + myUrl + "/integracao/finish/project/" + build.getProject().getName() + "/" + build.getBuildCount() + "/"
 				+ phaseCount + "/" + commandCount);
 		for (int i = 0; i < commands.length; i++) {
 			post.addParameter("command[" + i + "]", commands[i]);
