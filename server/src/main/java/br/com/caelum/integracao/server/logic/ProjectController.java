@@ -28,20 +28,26 @@
 package br.com.caelum.integracao.server.logic;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.Build;
+import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
+import br.com.caelum.integracao.server.command.remote.ExecuteCommandLine;
 import br.com.caelum.integracao.server.jobs.Job;
 import br.com.caelum.integracao.server.jobs.Jobs;
+import br.com.caelum.integracao.server.project.Build;
+import br.com.caelum.integracao.server.scm.svn.SvnControl;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
+import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.Validator;
@@ -49,7 +55,7 @@ import br.com.caelum.vraptor.validator.ValidationMessage;
 
 @Resource
 public class ProjectController {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
 	private final Clients clients;
@@ -66,6 +72,22 @@ public class ProjectController {
 		this.result = result;
 	}
 	
+	public void addCaelumweb() {
+		final Project p = new Project(SvnControl.class, "svn+ssh://192.168.0.2/svn/caelum/caelumweb2/trunk",
+				new File("/home/integra/build/caelumweb2"), "caelumweb2");
+		p.add(new Phase(0, "compile", new ExecuteCommandLine(0,0,  "ant", "test")));
+		p.add(new Phase(1, "compile", new ExecuteCommandLine(1,0,  "ant", "integration-test-1"), new ExecuteCommandLine(1,1,  "ant", "integration-test-2")));
+		projects.register(p);
+	}
+	
+	public void addMyProject() {
+		final Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject",
+				new File("/Users/guilherme/int"), "my-anted");
+		p.add(new Phase(0, "compile", new ExecuteCommandLine(0,0,  "ant", "compile")));
+		p.add(new Phase(1, "compile", new ExecuteCommandLine(1,0,  "ant", "test")));
+		projects.register(p);
+	}
+
 	public Collection<Project> list() {
 		return this.projects.all();
 	}
@@ -74,7 +96,7 @@ public class ProjectController {
 			IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		final Project found = projects.get(project.getName());
 		validator.onError().goTo(ProjectController.class).list();
-		if(found==null) {
+		if (found == null) {
 			validator.add(new ValidationMessage("", "project_not_found"));
 		}
 		validator.validate();
@@ -84,10 +106,9 @@ public class ProjectController {
 			public void run() {
 				try {
 					logger.debug("Starting building project " + found.getName());
-					found.execute(clients);
+					found.build().start(clients);
 					jobs.remove(job);
 				} catch (Exception e) {
-					// TODO save pu
 					e.printStackTrace();
 				}
 			}
@@ -96,24 +117,43 @@ public class ProjectController {
 		job.attach(thread);
 		thread.start();
 	}
-	
+
 	@Get
-	@Path("/project/{project.name}/{revision}")
-	public void show(Project project, String revision) {
-		logger.debug("Displaying build result for " + project.getName() + "@"+ revision);
+	@Path("/project/{project.name}/{buildId}")
+	public void show(Project project, Long buildId, String filename) {
+		logger.debug("Displaying build result for " + project.getName() + "@build-" + buildId + "@" + filename);
 		project = projects.get(project.getName());
 		result.include("project", project);
-		result.include("build", project.getBuild(revision));
+		Build build = project.getBuild(buildId);
+		result.include("build", build);
+		if(filename.equals("")) {
+			result.include("currentPath", "");
+			result.include("content", build.getContent());
+		} else {
+			filename = filename.replace('$','/');
+			File base = build.getFile(filename);
+			result.include("currentPath", base.getName() + "$");
+			result.include("content", base.listFiles());
+		}
 	}
 
-	
 	@Get
-	@Path("/download/project/{project.name}/{revision}/{filename}")
-	public File showFile(Project project, String revision, String filename) {
-		logger.debug("Displaying file for " + project.getName() + "@"+ revision + ", file="+filename);
+	@Path("/download/project/{project.name}/{buildId}")
+	public File showFile(Project project, Long buildId, String filename) {
+		logger.debug("Displaying file for " + project.getName() + "@" + buildId + ", file=" + filename);
 		project = projects.get(project.getName());
-		Build build = project.getBuild(revision);
-		return build.getFile(filename);
+		Build build = project.getBuild(buildId);
+		return build.getFile(filename.replace('$', '/'));
+	}
+	
+	@Post
+	@Path("/finish/project/{project.name}/{buildId}/{phaseId}/{commandId}")
+	public void finish(Project project, Long buildId, int phaseId, int commandId, String result, boolean success, Client client) throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		clients.release(client.getId());
+		logger.debug("Finishing " + project.getName() + " phase "+phaseId + " command " + commandId);
+		project = projects.get(project.getName());
+		Build build = project.getBuild(buildId);
+		build.finish(phaseId, commandId, result, success, clients);
 	}
 
 }

@@ -35,14 +35,16 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import br.com.caelum.integracao.AtDirectoryTest;
+
 public class SvnControlTest extends AtDirectoryTest {
 
 	@Test
 	public void shouldCommitAndReceiveUpdate() throws IOException {
-		SvnControl control1 = new SvnControl("svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1", baseDir);
+		SvnControl control1 = new SvnControl("svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1");
 		control1.checkout(new File(this.baseDir, "control1-checkout"));
 		
-		SvnControl control2 = new SvnControl("svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-2", baseDir);
+		SvnControl control2 = new SvnControl("svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-2");
 		control2.checkout(new File(this.baseDir, "control2-checkout"));
 		
 		File file = new File(control1.getDir(), "test-file");

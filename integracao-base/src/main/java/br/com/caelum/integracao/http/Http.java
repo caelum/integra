@@ -25,36 +25,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.http;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import br.com.caelum.integracao.AtDirectoryTest;
-
-public class ProjectTest extends AtDirectoryTest{
+public class Http {
 	
-	@Test
-	public void listBuildsFromEachBuildDirectory() {
-		Assert.fail("not yet implemented");
+	private final HttpClient client = new HttpClient();
+	
+	public Method post(String uri) {
+		PostMethod post = new PostMethod(uri);
+		return new Method(client, post);
 	}
 	
-	@Test
-	public void retrievesAnSpecificBuild() {
-		Assert.fail("not yet implemented");
-	}
-	
-	@Test
-	public void newlyCreatedProjectsHaveBuildCountZero() {
-		Project p = new Project();
-		assertThat(p.getBuildCount(), is(equalTo(0L)));
-	}
-	
-	
-	
-
 }

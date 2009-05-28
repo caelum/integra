@@ -25,36 +25,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.project;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-
-import org.junit.Assert;
-import org.junit.Test;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.junit.After;
+import org.junit.Before;
 
 import br.com.caelum.integracao.AtDirectoryTest;
 
-public class ProjectTest extends AtDirectoryTest{
-	
-	@Test
-	public void listBuildsFromEachBuildDirectory() {
-		Assert.fail("not yet implemented");
-	}
-	
-	@Test
-	public void retrievesAnSpecificBuild() {
-		Assert.fail("not yet implemented");
-	}
-	
-	@Test
-	public void newlyCreatedProjectsHaveBuildCountZero() {
-		Project p = new Project();
-		assertThat(p.getBuildCount(), is(equalTo(0L)));
-	}
-	
-	
-	
+public class BaseTest extends AtDirectoryTest {
 
+	protected Mockery mockery;
+
+	@Before
+	public void configMockery() {
+		this.mockery = new Mockery();
+		mockery.setImposteriser(ClassImposteriser.INSTANCE);
+	}
+
+	@After
+	public void removeMockery() {
+		mockery = null;
+	}
 }

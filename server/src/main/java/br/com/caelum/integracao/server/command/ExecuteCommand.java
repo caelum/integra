@@ -31,12 +31,12 @@ import java.io.File;
 import java.io.IOException;
 
 import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.project.Build;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 public interface ExecuteCommand {
 
-	void executeAt(Client client, Project project, ScmControl control, File logFile) throws IOException;
+	void executeAt(Client client, Build build, ScmControl control, File logFile) throws IOException;
 
 
 }

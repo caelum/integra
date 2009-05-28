@@ -27,15 +27,10 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
-import br.com.caelum.integracao.server.command.remote.ExecuteCommandLine;
-import br.com.caelum.integracao.server.scm.svn.SvnControl;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 @ApplicationScoped
@@ -43,20 +38,16 @@ public class Projects {
 
 	private final Map<String,Project> projects = new HashMap<String, Project>();
 
-	@PostConstruct
-	public void startup() {
-		final Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject",
-				new File("/Users/guilherme/int"), "my-anted");
-		p.add(new Phase("compile", new ExecuteCommandLine("ant", "compile")));
-		projects.put(p.getName(), p);
-	}
-	
 	public Project get(String name) {
 		return projects.get(name);
 	}
 	
 	public Collection<Project> all() {
 		return projects.values();
+	}
+
+	public void register(Project p) {
+		projects.put(p.getName(), p);
 	}
 
 }

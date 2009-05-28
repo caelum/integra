@@ -30,16 +30,30 @@ package br.com.caelum.integracao.server;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 @ApplicationScoped
 public class Clients {
-	
+
 	private final Set<Client> lockedClients = new HashSet<Client>();
-	
+
 	private final Set<Client> clients = new HashSet<Client>();
 
-	public void register(Client client) {
+	private long uniqueCount = 0;
+
+	@PostConstruct
+	public void base() {
+		Client c = new Client();
+		c.setContext("/integracao-client");
+		c.setHost("localhost");
+		c.setPort(8080);
+		register(c);
+	}
+
+	public synchronized void register(Client client) {
+		client.setId(++uniqueCount);
 		this.clients.add(client);
 	}
 
@@ -48,7 +62,7 @@ public class Clients {
 	}
 
 	public synchronized Client getFreeClient() {
-		if(clients.isEmpty()) {
+		if (clients.isEmpty()) {
 			throw new IllegalStateException("There are not enough clients");
 		}
 		Client client = clients.iterator().next();
@@ -57,9 +71,14 @@ public class Clients {
 		return client;
 	}
 
-	public synchronized void release(Client client) {
-		lockedClients.remove(client);
-		clients.add(client);
+	public synchronized void release(Long id) {
+		for (Client c : lockedClients) {
+			if (c.getId().equals(id)) {
+				lockedClients.remove(c);
+				clients.add(c);
+				break;
+			}
+		}
 	}
 
 }

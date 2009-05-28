@@ -35,9 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.action.Dispatcher;
 import br.com.caelum.integracao.server.command.ExecuteCommand;
+import br.com.caelum.integracao.server.project.Build;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 public class ExecuteCommandLine implements ExecuteCommand {
@@ -46,15 +46,21 @@ public class ExecuteCommandLine implements ExecuteCommand {
 
 	private final String[] cmd;
 
-	public ExecuteCommandLine(String... cmd) {
+	private final int phaseCount;
+
+	private final int commandCount;
+
+	public ExecuteCommandLine(int phaseCount, int commandCount, String... cmd) {
+		this.phaseCount = phaseCount;
+		this.commandCount = commandCount;
 		this.cmd = cmd;
 	}
 
-	public void executeAt(Client client, Project project, ScmControl control, File logFile) throws IOException {
+	public void executeAt(Client client, Build build, ScmControl control, File logFile) throws IOException {
 		logger.debug("Trying to execute " + Arrays.toString(cmd) + " @ " + client.getHost() + ":" + client.getPort());
 		Dispatcher connection = client.getConnection(logFile);
 		try {
-			connection.register(project).execute(control.getRevision(), project, cmd).close();
+			connection.register(build.getProject()).execute(build,phaseCount,commandCount, cmd).close();
 		} finally {
 			connection.close();
 		}

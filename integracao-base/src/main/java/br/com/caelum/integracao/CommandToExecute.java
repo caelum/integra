@@ -65,7 +65,7 @@ public class CommandToExecute {
 			InputStream is = process.getInputStream();
 			Scanner sc = new Scanner(is).useDelimiter("\\n");
 			while(sc.hasNext()) {
-				outputWriter.println(id + ">> " + sc.next());
+				outputWriter.println(id + sc.next());
 			}
 			sc.close();
 			stopFlag.set(true);

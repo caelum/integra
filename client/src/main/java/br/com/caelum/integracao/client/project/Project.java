@@ -67,7 +67,7 @@ public class Project {
 		new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir).runAs("svn-checkout");
 		String[] commands = command.toArray(new String[command.size()]);
 		logger.debug("Ready to execute " + Arrays.toString(commands));
-		new CommandToExecute(commands).at(dir).logTo(writer).runAs("execute");
+		new CommandToExecute(commands).at(dir).logTo(writer).runAs("");
 		return writer.getBuffer().toString();
 	}
 

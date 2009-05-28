@@ -35,6 +35,16 @@ import br.com.caelum.integracao.server.action.Dispatcher;
 
 public class Client {
 
+	private Long id;
+	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	private int port;
 	
 	private String context;
@@ -42,7 +52,7 @@ public class Client {
 	private String host;
 
 	public Dispatcher getConnection(File logFile) throws UnknownHostException, IOException {
-		return new Dispatcher(host, getContext(), port, logFile);
+		return new Dispatcher(this, logFile);
 	}
 
 	public String getContext() {
@@ -67,6 +77,10 @@ public class Client {
 
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	public String getBaseUri() {
+		return "http://" + this.getHost() + ":" + this.getPort() + this.getContext();
 	}
 
 }

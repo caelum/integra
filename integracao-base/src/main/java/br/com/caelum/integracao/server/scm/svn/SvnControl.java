@@ -13,13 +13,11 @@ public class SvnControl implements ScmControl {
 	private final File baseDir;
 	private String baseName;
 	private File baseDirectory;
-	private final File buildDirectory;
 
-	public SvnControl(String uri, File baseDir, String baseName, File buildDir) {
+	public SvnControl(String uri, File baseDir, String baseName) {
 		this.uri = uri;
 		this.baseDir = baseDir;
 		this.baseName = baseName;
-		this.buildDirectory = buildDir;
 		this.baseDirectory = new File(baseDir, baseName);
 	}
 
@@ -49,13 +47,6 @@ public class SvnControl implements ScmControl {
 
 	public int remove(File file) {
 		return prepare("svn", "remove", file.getAbsolutePath()).at(file.getParentFile()).runAs("svn-add");
-	}
-
-	public File getBuildFileForCurrentRevision(String name) {
-		String revision = getRevision();
-		File revisionDirectory = new File(this.buildDirectory, "build-" + revision);
-		revisionDirectory.mkdirs();
-		return new File(revisionDirectory, name);
 	}
 
 	public String getRevision() {

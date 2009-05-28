@@ -28,7 +28,6 @@
 package br.com.caelum.integracao.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +35,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.command.local.CreateBuildDir;
+import br.com.caelum.integracao.server.project.Build;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 public class Project {
@@ -47,8 +46,10 @@ public class Project {
 	private String name;
 	private final List<Phase> phases = new ArrayList<Phase>();
 	private final File baseDir;
-	private File buildsDir;
+	private File buildsDirectory;
 	private File workDir;
+	private Long buildCount = 0L;
+	private final List<Build> builds = new ArrayList<Build>();
 
 	protected Project() {
 		this.controlType = null;
@@ -61,35 +62,23 @@ public class Project {
 		this.controlType = controlType;
 		this.uri = uri;
 		this.baseDir = baseDir;
-		this.buildsDir = new File(baseDir, "builds");
-		this.buildsDir.mkdirs();
+		this.buildsDirectory = new File(baseDir, "builds");
+		this.buildsDirectory.mkdirs();
 		this.workDir = new File(baseDir, name);
 		this.workDir.mkdirs();
 		this.name = name;
-		this.phases.add(new Phase("create-build-dir", new CreateBuildDir()));
+		// this.phases.add(new Phase(0, "create-build-dir", new
+		// CreateBuildDir()));
 	}
 
 	public void add(Phase p) {
 		this.phases.add(p);
 	}
 
-	public void execute(Clients clients) throws IllegalArgumentException, SecurityException, InstantiationException,
-			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
-		logger.debug("Starting executing process for " + name);
-		ScmControl control = getControl();
-		File tmpFile = File.createTempFile("loading-checkout", ".log");
-		control.checkout(tmpFile);
-		tmpFile.renameTo(control.getBuildFileForCurrentRevision("checkout"));
-		for (int i = 0; i < phases.size(); i++) {
-			Phase phase = phases.get(i);
-			phase.execute(control, this, clients);
-		}
-	}
-
-	private ScmControl getControl() throws InstantiationException, IllegalAccessException, InvocationTargetException,
+	public ScmControl getControl() throws InstantiationException, IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException {
-		return (ScmControl) controlType.getDeclaredConstructor(String.class, File.class, String.class, File.class)
-				.newInstance(uri, baseDir, name, buildsDir);
+		return (ScmControl) controlType.getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
+				baseDir, name);
 	}
 
 	public String getName() {
@@ -97,12 +86,6 @@ public class Project {
 	}
 
 	public List<Build> getBuilds() {
-		List<Build> builds = new ArrayList<Build>();
-		for (File child : this.buildsDir.listFiles()) {
-			if (child.isDirectory()) {
-				builds.add(new Build(child));
-			}
-		}
 		return builds;
 	}
 
@@ -114,13 +97,39 @@ public class Project {
 		return uri;
 	}
 
-	public Build getBuild(String revision) {
-		for(Build b : getBuilds()) {
-			if(b.getRevision().equals(revision)) {
+	public Build getBuild(Long id) {
+		for (Build b : getBuilds()) {
+			if (b.getBuildCount().equals(id)) {
 				return b;
 			}
 		}
 		return null;
+	}
+
+	public Build build() {
+		Build build = new Build(this);
+		this.builds.add(build);
+		return build;
+	}
+
+	public Long getBuildCount() {
+		return buildCount;
+	}
+
+	public Long nextBuild() {
+		return ++buildCount;
+	}
+
+	public File getBuildsDirectory() {
+		return this.buildsDirectory;
+	}
+
+	public List<Phase> getPhases() {
+		return this.phases;
+	}
+
+	public Phase getPhase(int phaseId) {
+		return this.phases.get(phaseId);
 	}
 
 }

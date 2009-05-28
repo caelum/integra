@@ -7,8 +7,14 @@
 	<description>Integracao base jar</description>
 
 	<property file="build.properties" />
+	<path id="libs.classpath" path=".">
+		<fileset dir="${libs.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
 
 	<path id="compile.classpath">
+		<path refid="libs.classpath" />
 	</path>
 
 	<target name="prepare" description="--> prepares directories">

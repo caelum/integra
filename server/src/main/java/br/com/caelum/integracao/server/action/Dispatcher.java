@@ -36,63 +36,61 @@ import java.net.UnknownHostException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.project.Build;
 
 public class Dispatcher {
 
-	private final int id;
-	
-	static int uniqueCount = 0;
-	private final String host;
-	private final int port;
-
-	private final String context;
-
 	private final PrintWriter log;
 
-	public Dispatcher(String host, String context, int port, File logFile) throws UnknownHostException, IOException {
-		this.host = host;
-		this.context = context;
-		this.port = port;
-		this.id = ++uniqueCount;
+	private final Client client;
+
+	public Dispatcher(Client client, File logFile) throws UnknownHostException, IOException {
+		this.client = client;
+		logFile.getParentFile().mkdirs();
 		this.log = new PrintWriter(new FileWriter(logFile), true);
 	}
-	
+
 	public Dispatcher register(Project project) {
 		HttpClient client = new HttpClient();
-		PostMethod post = new PostMethod("http://" + host + ":" + port +context +  "/project/register");
+		PostMethod post = new PostMethod(this.client.getBaseUri() + "/project/register");
 		post.addParameter("project.name", project.getName());
 		post.addParameter("project.uri", project.getUri());
 		try {
 			int result = client.executeMethod(post);
-			if(result!=200) {
+			if (result != 200) {
 				throw new RuntimeException("Unable to continue with result " + result);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException("Unable to continue. ",e);
+			throw new RuntimeException("Unable to continue. ", e);
 		}
 		return this;
 	}
 
-	public Dispatcher execute(String revision, Project project, String ...commands) throws IOException {
+	public Dispatcher execute(Build build, int phaseCount, int commandCount, String... commands)
+			throws IOException {
 		HttpClient client = new HttpClient();
-		PostMethod post = new PostMethod("http://" + host + ":" + port +context +  "/job/execute");
-		post.addParameter("revision", revision);
-		post.addParameter("project.name", project.getName());
-		for(int i=0;i<commands.length;i++) {
+		PostMethod post = new PostMethod(this.client.getBaseUri() + "/job/execute");
+		post.addParameter("revision", build.getRevision());
+		post.addParameter("project.name", build.getProject().getName());
+		post.addParameter("clientId", "" + this.client.getId());
+		post.addParameter("resultUri", "http://localhost:9091/integracao/finish/project/" + build.getProject().getName() + "/" + build.getBuildCount() + "/"
+				+ phaseCount + "/" + commandCount);
+		for (int i = 0; i < commands.length; i++) {
 			post.addParameter("command[" + i + "]", commands[i]);
 		}
 		try {
 			int result = client.executeMethod(post);
-			if(result!=200) {
+			if (result != 200) {
 				throw new RuntimeException("Unable to continue with result " + result);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException("Unable to continue. ",e);
+			throw new RuntimeException("Unable to continue. ", e);
 		}
 		return this;
 	}
-	
+
 	public void close() throws IOException {
 		this.log.close();
 	}

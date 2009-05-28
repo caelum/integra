@@ -34,10 +34,8 @@ public interface ScmControl {
 
 	public File getDir();
 
-	public int checkout(File log) throws IOException;
+	int checkout(File log) throws IOException;
 
-	public File getBuildFileForCurrentRevision(String name);
-	
 	String getRevision();
 
 }

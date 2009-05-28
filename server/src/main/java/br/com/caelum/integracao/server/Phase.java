@@ -27,12 +27,14 @@
  */
 package br.com.caelum.integracao.server;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.command.ExecuteCommand;
+import br.com.caelum.integracao.server.project.Build;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 /**
@@ -45,25 +47,29 @@ public class Phase {
 
 	private final Logger logger = LoggerFactory.getLogger(Phase.class);
 	private final ExecuteCommand[] commands;
-
 	private final String id;
+	private final int phasePosition;
 
-	public Phase(String id, ExecuteCommand... cmds) {
+	public Phase(int phasePosition, String id, ExecuteCommand... cmds) {
+		this.phasePosition = phasePosition;
 		this.id = id;
 		this.commands = cmds;
 	}
 
-	public void execute(ScmControl control, Project project, Clients clients) throws IOException {
+	public void execute(ScmControl control, Build build, Clients clients) throws IOException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Starting phase " + id + " for project " + project.getName() + " containing "
+			logger.debug("Starting phase " + id + " for project " + build.getProject().getName() + " containing "
 					+ commands.length + " parallel commands.");
 		}
-		int count = 0;
+		build.getFile(phasePosition + "/" + id).mkdirs();
 		for (ExecuteCommand command : commands) {
 			Client client = clients.getFreeClient();
-			command.executeAt(client, project, control, control.getBuildFileForCurrentRevision(id + "-" + (count++)));
-			clients.release(client);
+			command.executeAt(client, build, control, File.createTempFile("connection", "txt"));
 		}
+	}
+
+	public int getCommandCount() {
+		return commands.length;
 	}
 
 }

@@ -25,20 +25,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.command.local;
+package br.com.caelum.integracao.http;
 
-import java.io.File;
 import java.io.IOException;
 
-import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Project;
-import br.com.caelum.integracao.server.command.ExecuteCommand;
-import br.com.caelum.integracao.server.scm.ScmControl;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.PostMethod;
 
-public class CreateBuildDir implements ExecuteCommand {
+public class Method {
 
-	public void executeAt(Client client,Project project, ScmControl control, File logFile) throws IOException {
-		control.getBuildFileForCurrentRevision("status");
+	private final PostMethod post;
+	private final HttpClient client;
+	private int result;
+
+	public Method(HttpClient client, PostMethod post) {
+		this.client = client;
+		this.post = post;
+	}
+	
+	public Method with(String key, String value) {
+		post.addParameter(key, value);
+		return this;
+	}
+	
+	public void send() throws HttpException, IOException {
+		this.result = client.executeMethod(post);
+	}
+	
+	public int getResult() {
+		return result;
 	}
 
 }
