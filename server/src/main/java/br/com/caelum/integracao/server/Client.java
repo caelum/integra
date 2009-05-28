@@ -89,7 +89,7 @@ public class Client {
 		this.reason = reason;
 	}
 	
-	public String getReason() {
+	public String getCurrentJob() {
 		return reason;
 	}
 

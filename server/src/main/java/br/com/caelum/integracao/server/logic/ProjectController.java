@@ -74,11 +74,23 @@ public class ProjectController {
 	}
 
 	public void addCaelumweb(String myUrl) {
-		final Project p = new Project(SvnControl.class, "svn+ssh://192.168.0.2/svn/caelum/caelumweb2/trunk", new File(
+		final Project p = new Project(SvnControl.class, "svn+ssh://localhost/svn/caelum/caelumweb2/trunk", new File(
 				"/home/integra/build/caelumweb2"), "caelumweb2");
-		p.add(new Phase("test", new ExecuteCommandLine(myUrl, 0, 0, "ant", "test")));
-		p.add(new Phase("integration-test", new ExecuteCommandLine(myUrl, 1, 0, "ant", "integration-test-1"),
-				new ExecuteCommandLine(myUrl, 1, 1, "ant", "integration-test-2")));
+		p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "ant", "clear", "compile")));
+		p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "ant", "clear", "test")));
+		p.add(new Phase("integration-test", new ExecuteCommandLine(myUrl, 2, 0, "ant", "clear", "integration-test-1"),
+				new ExecuteCommandLine(myUrl, 2, 1, "ant", "integration-test-2")));
+		projects.register(p);
+		result.use(Results.logic()).redirectTo(ProjectController.class).list();
+	}
+
+	public void addVRaptor2(String myUrl) {
+		final Project p = new Project(SvnControl.class, "https://vraptor2.svn.sourceforge.net/svnroot/vraptor2/trunk", new File(
+				"/home/integra/build/caelumweb2"), "vraptor2");
+		p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "ant", "clear", "compile")));
+		p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "ant", "clear", "test")));
+		p.add(new Phase("double-test", new ExecuteCommandLine(myUrl, 2, 0, "ant", "clear", "test"),
+				new ExecuteCommandLine(myUrl, 2, 1, "ant", "test")));
 		projects.register(p);
 		result.use(Results.logic()).redirectTo(ProjectController.class).list();
 	}
@@ -88,12 +100,12 @@ public class ProjectController {
 				"/Users/guilherme/int"), "my-anted");
 		p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "ant", "compile")));
 		p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "ant", "test")));
-		p.add(new Phase("deploy", new ExecuteCommandLine(myUrl, 2, 0, "ant", "deploy"), new ExecuteCommandLine(
-				myUrl, 2, 1, "ant", "while-deploy")));
+		p.add(new Phase("deploy", new ExecuteCommandLine(myUrl, 2, 0, "ant", "deploy"), new ExecuteCommandLine(myUrl,
+				2, 1, "ant", "while-deploy")));
 		projects.register(p);
 		result.use(Results.logic()).redirectTo(ProjectController.class).list();
 	}
-	
+
 	@Post
 	@Path("/project/phase")
 	public void addPhase(Project project, Phase phase) {

@@ -19,6 +19,11 @@
 		<copy file="integracao-base/${jar.file}" todir="server/src/main/webapp/WEB-INF/lib" />
 	</target>
 
+	<target name="war" depends="deploy">
+		<ant dir="server" target="war" />
+		<ant dir="client" target="war" />
+	</target>
+
 	<target name="all" depends="deploy" />
 
 </project>

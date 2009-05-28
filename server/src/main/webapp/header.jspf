@@ -7,11 +7,11 @@
 <div id="actions">
 <a href="${pageContext.request.contextPath }/client/form">new client</a>
 <a href="${pageContext.request.contextPath }/client/list">list clients</a>
-<a href="${pageContext.request.contextPath }/project/run?project.name=caelumweb2">run projects</a>
 <a href="${pageContext.request.contextPath }/project/">list projects</a>
 <a href="${pageContext.request.contextPath }/job/list">list jobs</a>
 <br/>
-<a href="${pageContext.request.contextPath }/project/addCaelumweb?myUrl=192.168.0.159:9091">add cweb @ 159</a>
+<a href="${pageContext.request.contextPath }/project/addVRaptor2?myUrl=192.168.0.2:9100">add cweb @ 2:9100</a>
+<a href="${pageContext.request.contextPath }/project/addCaelumweb?myUrl=192.168.0.2:9100">add cweb @ 2:9100</a>
 <a href="${pageContext.request.contextPath }/project/addMyProject?myUrl=localhost:9091">add my @ local</a>
 </div>
 
