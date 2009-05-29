@@ -35,6 +35,7 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
@@ -44,8 +45,6 @@ import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
-import br.com.caelum.integracao.server.jobs.Job;
-import br.com.caelum.integracao.server.jobs.Jobs;
 import br.com.caelum.vraptor.Delete;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
@@ -64,24 +63,25 @@ public class ProjectController {
 	private final Clients clients;
 	private final Projects projects;
 	private final Validator validator;
-	private final Jobs jobs;
 	private final Result result;
 
 	private final DatabaseFactory factory;
 
-	public ProjectController(Clients clients, Projects projects, Validator validator, Jobs jobs, Result result,
-			DatabaseFactory factory) {
+	private final Application app;
+
+	public ProjectController(Clients clients, Projects projects, Validator validator, Result result,
+			DatabaseFactory factory, Application app) {
 		this.clients = clients;
 		this.projects = projects;
 		this.validator = validator;
-		this.jobs = jobs;
 		this.result = result;
 		this.factory = factory;
+		this.app = app;
 	}
 
-	public void addAll(String myUrl) {
-		new BasicProjects(projects).add(myUrl);
-		result.use(Results.logic()).redirectTo(ProjectController.class).list();
+	public void addAll() {
+		new BasicProjects(projects).add();
+		showList();
 	}
 
 	@Post
@@ -89,7 +89,7 @@ public class ProjectController {
 	public void addPhase(Project project, Phase phase) {
 		project = projects.get(project.getName());
 		project.add(phase);
-		result.use(Results.logic()).redirectTo(ProjectController.class).list();
+		showList();
 	}
 
 	@Get
@@ -106,19 +106,16 @@ public class ProjectController {
 			validator.add(new ValidationMessage("", "project_not_found"));
 		}
 		validator.validate();
-		final Job job = new Job("Building project " + found.getName());
-		jobs.add(job);
 		Runnable execution = new Runnable() {
 			public void run() {
-				runProject(found.getName(), job);
+				runProject(found.getName());
 			}
 		};
 		Thread thread = new Thread(execution);
-		job.attach(thread);
 		thread.start();
 	}
 
-	private void runProject(String name, final Job job) {
+	private void runProject(String name) {
 		logger.debug("Starting building project id=" + name);
 		Database db = new Database(factory);
 		db.beginTransaction();
@@ -126,9 +123,8 @@ public class ProjectController {
 			Project toBuild = new Projects(db).get(name);
 			Build build = toBuild.build();
 			new Projects(db).register(build);
-			build.start(new Clients(db));
+			build.start(new Clients(db), new Application(db));
 			db.commit();
-			jobs.remove(job);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -177,15 +173,27 @@ public class ProjectController {
 				+ commandId);
 		project = projects.get(project.getName());
 		Build build = project.getBuild(buildId);
-		build.finish(phasePosition, commandId, result, success, clients);
+		build.finish(phasePosition, commandId, result, success, clients, app);
 		this.result.use(Results.nothing());
 	}
 
 	@Delete
 	@Path("/project/command/{command.id}")
 	public void removeCommand(ExecuteCommandLine command) {
-		Phase phase = projects.load(command).getPhase();
+		command = projects.load(command);
+		Phase phase = command.getPhase();
 		phase.remove(projects, command);
+		showList();
+	}
+
+	private void showList() {
+		result.use(Results.logic()).redirectTo(ProjectController.class).list();
+	}
+
+	@Post
+	@Path("/project/command")
+	public void addCommand(Phase phase, String command) {
+		showList();
 	}
 
 }

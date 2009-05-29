@@ -30,22 +30,41 @@ package br.com.caelum.integracao.server.project;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 import br.com.caelum.integracao.AtDirectoryTest;
+import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.dao.DatabaseFactory;
 
 public class BaseTest extends AtDirectoryTest {
 
+	private static DatabaseFactory databaseFactory;
 	protected Mockery mockery;
+	protected Database database;
+	
+	@BeforeClass
+	public static void configDatabase() {
+		databaseFactory = new DatabaseFactory();
+		databaseFactory.startup();
+	}
+	
+	@AfterClass
+	public static void stopDatabase() {
+		databaseFactory.destroy();
+	}
 
 	@Before
 	public void configMockery() {
 		this.mockery = new Mockery();
 		mockery.setImposteriser(ClassImposteriser.INSTANCE);
+		this.database = new Database(databaseFactory);
 	}
 
 	@After
 	public void removeMockery() {
 		mockery = null;
+		this.database.close();
 	}
 }

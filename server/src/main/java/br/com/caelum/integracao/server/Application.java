@@ -32,53 +32,33 @@ import java.util.List;
 import org.hibernate.Session;
 
 import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
 @RequestScoped
-@SuppressWarnings("unchecked")
-public class Clients {
+@Component
+public class Application {
 
 	private final Session session;
 
-	public Clients(Database database) {
-		this.session = database.getSession();
+	public Application(Database db) {
+		this.session = db.getSession();
 	}
-
-	public void register(Client client) {
-		client.activate();
-		this.session.save(client);
-	}
-
-	public List<Client> freeClients() {
-		return this.session.createQuery("from Client as c where c.busy = false and c.active = true").list();
-	}
-
-	public List<Client> lockedClients() {
-		return this.session.createQuery("from Client as c where c.busy = true and c.active = true").list();
-	}
-
-	public List<Client> inactiveClients() {
-		return this.session.createQuery("from Client as c where c.active = false").list();
-	}
-
-	public Client getFreeClient(String reason) {
-		List<Client> clients = freeClients();
-		if (clients.isEmpty()) {
-			throw new IllegalStateException("There are not enough clients");
+	
+	public Config getConfig() {
+		List<Config> list = session.createQuery("from Config").list();
+		if(list.isEmpty()) {
+			Config cfg = new Config();
+			session.save(cfg);
+			return cfg;
 		}
-		Client client = clients.get(0);
-		client.work(reason);
-		clients.remove(client);
-		return client;
+		return list.get(0);
 	}
 
-	public void release(Long id) {
-		Client client = (Client) session.load(Client.class, id);
-		client.leaveJob();
-	}
-
-	public Client get(Client client) {
-		return (Client) session.load(Client.class, client.getId());
+	public void update(Config config) {
+		Config result=getConfig();
+		result.setHostname(config.getHostname());
+		result.setPort(config.getPort());
 	}
 
 }

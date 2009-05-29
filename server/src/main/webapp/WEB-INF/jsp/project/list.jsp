@@ -20,7 +20,12 @@
 					<c:forEach var="cmd" items="${phase.commands}">
 						<li>${cmd.name } (<a href="command/${cmd.id}?_method=DELETE">remove</a>)</li>
 					</c:forEach>
-					<li><a href="command?_method=post&project.name=${project.name }&phase.position=${phase.phasePosition}">new command</a></li>
+					<li>
+					<form action="command" method="post">
+						<input type="hidden" name="phase.id" value="${phase.id }" />
+						<input type="text" name="command" value="" length="10" />
+						<input type="submit" value="new command" />
+					</form>
 				</ul>
 				</td>
 				<td></td>

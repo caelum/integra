@@ -27,112 +27,39 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.UnknownHostException;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import br.com.caelum.integracao.server.action.Dispatcher;
-
-/**
- * Represents a client machine.
- * 
- * @author guilherme silveira
- */
 @Entity
-public class Client {
-
+public class Config {
+	
 	@Id
 	@GeneratedValue
-	private Long id;
-
-	private int port;
-
-	private String context;
-
-	private String host;
-
-	private String reason;
+	public Long id;
 	
-	private boolean busy;
+	private String hostname = "localhost";
+	
+	private Integer port = 9091;
 
-	private boolean active;
-
-	public String getBaseUri() {
-		return "http://" + this.getHost() + ":" + this.getPort() + this.getContext();
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
 	}
 
-	public Dispatcher getConnection(File logFile, String myUrl) throws UnknownHostException, IOException {
-		return new Dispatcher(this, logFile, myUrl);
+	public String getHostname() {
+		return hostname;
 	}
 
-	public String getContext() {
-		return context;
-	}
-
-	public String getCurrentJob() {
-		return reason;
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public void setContext(String context) {
-		this.context = context;
-	}
-
-	public void setCurrentJob(String reason) {
-		this.reason = reason;
-	}
-
-	public void setHost(String host) {
-		this.host = host;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setPort(int port) {
+	public void setPort(Integer port) {
 		this.port = port;
 	}
 
-	public void setBusy(boolean busy) {
-		this.busy = busy;
+	public Integer getPort() {
+		return port;
 	}
 
-	public boolean isBusy() {
-		return busy;
-	}
-
-	public void work(String job) {
-		this.busy = true;
-		this.reason = job;
-	}
-
-	public void leaveJob() {
-		this.busy = false;
-		this.reason = "";
-	}
-
-	public void deactivate() {
-		this.active = false;
-	}
-	
-	public void activate() {
-		this.active = true;
+	public String getUrl() {
+		return getHostname() + ":" + getPort();
 	}
 
 }

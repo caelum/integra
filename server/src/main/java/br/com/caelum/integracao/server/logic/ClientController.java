@@ -29,6 +29,7 @@ package br.com.caelum.integracao.server.logic;
 
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.view.Results;
@@ -46,12 +47,29 @@ public class ClientController {
 	
 	public void add(Client client) {
 		this.clients.register(client);
+		showList();
+	}
+
+	private void showList() {
 		result.use(Results.logic()).redirectTo(ClientController.class).list();
 	}
 	
 	public void list() {
 		result.include("free", clients.freeClients());
 		result.include("locked", clients.lockedClients());
+		result.include("inactive", clients.inactiveClients());
+	}
+
+	@Path("/client/{client.id}/deactivate")
+	public void deactivate(Client client) {
+		clients.get(client).deactivate();
+		showList();
+	}
+	
+	@Path("/client/{client.id}/activate")
+	public void activate(Client client) {
+		clients.get(client).activate();
+		showList();
 	}
 	
 	public void form() {

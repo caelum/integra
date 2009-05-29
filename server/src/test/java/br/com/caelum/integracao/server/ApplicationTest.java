@@ -27,58 +27,21 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.util.List;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
-import org.hibernate.Session;
+import org.junit.Test;
 
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.RequestScoped;
+import br.com.caelum.integracao.server.project.BaseTest;
 
-@RequestScoped
-@SuppressWarnings("unchecked")
-public class Clients {
+public class ApplicationTest extends BaseTest {
 
-	private final Session session;
-
-	public Clients(Database database) {
-		this.session = database.getSession();
-	}
-
-	public void register(Client client) {
-		client.activate();
-		this.session.save(client);
-	}
-
-	public List<Client> freeClients() {
-		return this.session.createQuery("from Client as c where c.busy = false and c.active = true").list();
-	}
-
-	public List<Client> lockedClients() {
-		return this.session.createQuery("from Client as c where c.busy = true and c.active = true").list();
-	}
-
-	public List<Client> inactiveClients() {
-		return this.session.createQuery("from Client as c where c.active = false").list();
-	}
-
-	public Client getFreeClient(String reason) {
-		List<Client> clients = freeClients();
-		if (clients.isEmpty()) {
-			throw new IllegalStateException("There are not enough clients");
-		}
-		Client client = clients.get(0);
-		client.work(reason);
-		clients.remove(client);
-		return client;
-	}
-
-	public void release(Long id) {
-		Client client = (Client) session.load(Client.class, id);
-		client.leaveJob();
-	}
-
-	public Client get(Client client) {
-		return (Client) session.load(Client.class, client.getId());
+	@Test
+	public void shouldReturnTheBasicConfigInstanceIfNoneFound() {
+		Config result = new Application(database).getConfig();
+		assertThat(result.getHostname(), is(equalTo("localhost")));
+		assertThat(result.getPort(), is(equalTo(9091)));
 	}
 
 }

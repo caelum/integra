@@ -41,6 +41,7 @@ import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Phase;
@@ -55,6 +56,7 @@ public class BuildTest extends BaseTest {
 	private ScmControl control;
 	private Phase first;
 	private Phase second;
+	private Application app;
 
 	@Before
 	public void configProject() throws InstantiationException, IllegalAccessException, InvocationTargetException,
@@ -73,6 +75,7 @@ public class BuildTest extends BaseTest {
 				will(returnValue(phases));
 			}
 		});
+		this.app = mockery.mock(Application.class);
 	}
 
 	@Test
@@ -110,7 +113,7 @@ public class BuildTest extends BaseTest {
 			}
 		});
 		Build build = new Build(project);
-		build.start(clients);
+		build.start(clients, app);
 		assertThat(build.getRevision(), is(equalTo("my-revision")));
 		File checkout = new File(baseDir, "build-3/checkout");
 		assertThat(checkout.exists(), is(equalTo(true)));
@@ -139,12 +142,12 @@ public class BuildTest extends BaseTest {
 		final Build build = new Build(project);
 		mockery.checking(new Expectations() {
 			{
-				one(first).execute(control, build, clients);
+				one(first).execute(control, build, clients, app);
 			}
 		});
-		build.start(clients);
+		build.start(clients, app);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", false, clients);
+		build.finish(0, 0, "no-result", false, clients, app);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -171,12 +174,12 @@ public class BuildTest extends BaseTest {
 		final Build build = new Build(project);
 		mockery.checking(new Expectations() {
 			{
-				one(first).execute(control, build, clients);
+				one(first).execute(control, build, clients, app);
 			}
 		});
-		build.start(clients);
+		build.start(clients, app);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", true, clients);
+		build.finish(0, 0, "no-result", true, clients, app);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -203,13 +206,13 @@ public class BuildTest extends BaseTest {
 		final Build build = new Build(project);
 		mockery.checking(new Expectations() {
 			{
-				one(first).execute(control, build, clients);
-				one(second).execute(control, build, clients);
+				one(first).execute(control, build, clients, app);
+				one(second).execute(control, build, clients, app);
 			}
 		});
-		build.start(clients);
+		build.start(clients, app);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", true, clients);
+		build.finish(0, 0, "no-result", true, clients, app);
 		assertThat(build.getCurrentPhase(), is(equalTo(1)));
 		mockery.assertIsSatisfied();
 	}

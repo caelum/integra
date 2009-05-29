@@ -82,12 +82,12 @@ public class Phase {
 	public Phase() {
 	}
 
-	public void execute(ScmControl control, Build build, Clients clients) throws IOException {
+	public void execute(ScmControl control, Build build, Clients clients, Application app) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Starting phase " + name + " for project " + build.getProject().getName() + " containing "
 					+ commands.size() + " parallel commands.");
 		}
-		build.getFile(position + "/" + name).mkdirs();
+		build.getFile(position + "").mkdirs();
 		for (ExecuteCommandLine command : commands) {
 			Client client;
 			try {
@@ -95,13 +95,13 @@ public class Phase {
 			} catch (IllegalStateException e) {
 				// there is no client available
 				try {
-					build.finish((int) position, command.getPosition(), "NOT ENOUGHT CLIENTS", false, clients);
+					build.finish((int) position, command.getPosition(), "NOT ENOUGHT CLIENTS", false, clients, app);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 				return;
 			}
-			command.executeAt(client, build, control, File.createTempFile("connection", "txt"));
+			command.executeAt(client, build, control, File.createTempFile("connection", "txt"), app.getConfig().getUrl());
 		}
 	}
 
@@ -159,6 +159,7 @@ public class Phase {
 				cmd.setPosition(cmd.getPosition()-1);
 			}
 		}
+		getCommands().remove(command);
 		projects.remove(command);
 	}
 

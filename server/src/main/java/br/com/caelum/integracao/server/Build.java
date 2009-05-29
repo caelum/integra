@@ -42,8 +42,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
 
+import org.hibernate.annotations.CollectionOfElements;
+import org.hibernate.validator.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,11 +68,16 @@ public class Build {
 	@GeneratedValue
 	private Long id;
 
+	@Min(0)
 	private Long buildCount;
 	private String revision;
+	
+	@Min(0)
 	private int currentPhase;
-	@Transient
+	
+	@CollectionOfElements
 	private Set<Integer> executedCommandsFromThisPhase = new HashSet<Integer>();
+	
 	private boolean sucessSoFar = true;
 	private boolean finished = false;
 
@@ -107,7 +113,7 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
-	public void start(Clients clients) throws IllegalArgumentException, SecurityException, InstantiationException,
+	public void start(Clients clients, Application app) throws IllegalArgumentException, SecurityException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
 		logger.debug("Starting executing process for " + project.getName());
 		ScmControl control = project.getControl();
@@ -121,7 +127,7 @@ public class Build {
 		if (!phases.isEmpty()) {
 			this.currentPhase = 0;
 			Phase phase = phases.get(0);
-			phase.execute(control, this, clients);
+			phase.execute(control, this, clients, app);
 		}
 	}
 
@@ -133,7 +139,7 @@ public class Build {
 		return currentPhase;
 	}
 
-	public synchronized void finish(int phasePosition, int commandId, String result, boolean success, Clients clients)
+	public synchronized void finish(int phasePosition, int commandId, String result, boolean success, Clients clients, Application app)
 			throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException {
 		sucessSoFar &= success;
@@ -153,7 +159,7 @@ public class Build {
 			currentPhase++;
 			executedCommandsFromThisPhase.clear();
 			if (project.getPhases().size() != currentPhase) {
-				project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients);
+				project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients, app);
 			} else {
 				finishTime = new GregorianCalendar();
 				finished = true;

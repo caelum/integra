@@ -41,6 +41,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,15 +60,13 @@ public class ExecuteCommandLine {
 
 	@OneToMany
 	@OrderBy("id")
-	@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+	@Cascade(value= {CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE})
 	private List<Command> commands;
 
 	private int phaseCount;
 
 	@Column(name = "pos")
 	private int position;
-
-	private String myUrl;
 
 	@NotNull
 	@ManyToOne
@@ -76,8 +75,7 @@ public class ExecuteCommandLine {
 	protected ExecuteCommandLine() {
 	}
 
-	public ExecuteCommandLine(String myUrl, int phaseCount, int commandCount, String... cmds) {
-		this.myUrl = myUrl;
+	public ExecuteCommandLine(int phaseCount, int commandCount, String... cmds) {
 		this.phaseCount = phaseCount;
 		this.position = commandCount;
 		this.commands = new ArrayList<Command>();
@@ -86,7 +84,7 @@ public class ExecuteCommandLine {
 		}
 	}
 
-	public void executeAt(Client client, Build build, ScmControl control, File logFile) throws IOException {
+	public void executeAt(Client client, Build build, ScmControl control, File logFile, String myUrl) throws IOException {
 		logger.debug("Trying to execute " + getName() + " @ " + client.getHost() + ":" + client.getPort());
 		Dispatcher connection = client.getConnection(logFile, myUrl);
 		try {
@@ -124,14 +122,6 @@ public class ExecuteCommandLine {
 		this.phaseCount = phaseCount;
 	}
 
-	public String getMyUrl() {
-		return myUrl;
-	}
-
-	public void setMyUrl(String myUrl) {
-		this.myUrl = myUrl;
-	}
-
 	public void setPosition(int position) {
 		this.position = position;
 	}
@@ -143,5 +133,5 @@ public class ExecuteCommandLine {
 	public Phase getPhase() {
 		return phase;
 	}
-
+	
 }

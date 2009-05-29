@@ -45,15 +45,14 @@ public class BasicProjects {
 		this.projects = projects;
 	}
 
-	public void add(String myUrl) {
+	public void add() {
 		{
 			Project p = new Project(SvnControl.class, "svn+ssh://localhost/svn/caelum/caelumweb2/trunk",
 					new File("/home/integra/build/caelumweb2"), "caelumweb2");
 			projects.register(p);
-			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "ant", "clear", "compile")));
-			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "ant", "clear", "test")));
-			p.add(new Phase("integration-test", new ExecuteCommandLine(myUrl, 2, 0, "ant", "clear",
-					"integration-test-1"), new ExecuteCommandLine(myUrl, 2, 1, "ant", "integration-test-2")));
+			p.add(new Phase("compile", new ExecuteCommandLine(0, 0, "ant", "clear", "compile")));
+			p.add(new Phase("test", new ExecuteCommandLine(1, 0, "ant", "clear", "test")));
+			p.add(new Phase("integration-test", new ExecuteCommandLine(2, 0, "ant", "clear", "integration-test-1"), new ExecuteCommandLine(2, 1, "ant", "integration-test-2")));
 			saveInternals(p);
 		}
 		{
@@ -61,10 +60,10 @@ public class BasicProjects {
 					"https://vraptor2.svn.sourceforge.net/svnroot/vraptor2/trunk/core", new File(
 							"/home/integra/build/vraptor2"), "vraptor2");
 			projects.register(p);
-			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "mvn", "clean", "compile")));
-			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "mvn", "clean", "test")));
-			p.add(new Phase("double-test", new ExecuteCommandLine(myUrl, 2, 0, "mvn", "clean", "test"),
-					new ExecuteCommandLine(myUrl, 2, 1, "mvn", "test")));
+			p.add(new Phase("compile", new ExecuteCommandLine(0, 0, "mvn", "clean", "compile")));
+			p.add(new Phase("test", new ExecuteCommandLine(1, 0, "mvn", "clean", "test")));
+			p.add(new Phase("double-test", new ExecuteCommandLine(2, 0, "mvn", "clean", "test"),
+					new ExecuteCommandLine(2, 1, "mvn", "test")));
 			saveInternals(p);
 		}
 		{
@@ -72,10 +71,10 @@ public class BasicProjects {
 					"http://svn.vidageek.net/mirror/trunk", new File(
 							"/home/integra/build/mirror"), "mirror");
 			projects.register(p);
-			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "mvn", "clean", "compile")));
-			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "mvn", "clean", "test")));
-			p.add(new Phase("double-test", new ExecuteCommandLine(myUrl, 2, 0, "mvn", "clean", "test"),
-					new ExecuteCommandLine(myUrl, 2, 1, "mvn", "clean", "test")));
+			p.add(new Phase("compile", new ExecuteCommandLine(0, 0, "mvn", "clean", "compile")));
+			p.add(new Phase("test", new ExecuteCommandLine(1, 0, "mvn", "clean", "test")));
+			p.add(new Phase("double-test", new ExecuteCommandLine(2, 0, "mvn", "clean", "test"),
+					new ExecuteCommandLine(2, 1, "mvn", "clean", "test")));
 			saveInternals(p);
 		}
 		{
@@ -83,10 +82,10 @@ public class BasicProjects {
 					"svn://svn.paranamer.codehaus.org/paranamer/trunk", new File(
 							"/home/integra/build/paranamer"), "paranamer");
 			projects.register(p);
-			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "mvn", "clean", "compile")));
-			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "mvn", "clean", "test")));
-			p.add(new Phase("double-test", new ExecuteCommandLine(myUrl, 2, 0, "mvn", "clean", "test"),
-					new ExecuteCommandLine(myUrl, 2, 1, "mvn", "clean", "test")));
+			p.add(new Phase("compile", new ExecuteCommandLine(0, 0, "mvn", "clean", "compile")));
+			p.add(new Phase("test", new ExecuteCommandLine(1, 0, "mvn", "clean", "test")));
+			p.add(new Phase("double-test", new ExecuteCommandLine(2, 0, "mvn", "clean", "test"),
+					new ExecuteCommandLine(2, 1, "mvn", "clean", "test")));
 			saveInternals(p);
 		}
 		{
@@ -94,20 +93,27 @@ public class BasicProjects {
 					"http://seleniumdsl.svn.sourceforge.net/svnroot/seleniumdsl/trunk", new File(
 							"/home/integra/build/selenium-dsl"), "selenium-dsl");
 			projects.register(p);
-			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "mvn", "clean", "compile")));
-			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "mvn", "clean", "test")));
-			p.add(new Phase("double-test", new ExecuteCommandLine(myUrl, 2, 0, "mvn", "clean", "test"),
-					new ExecuteCommandLine(myUrl, 2, 1, "mvn", "clean", "test")));
+			p.add(new Phase("compile", new ExecuteCommandLine(0, 0, "mvn", "clean", "compile")));
+			p.add(new Phase("test", new ExecuteCommandLine(1, 0, "mvn", "clean", "test")));
+			p.add(new Phase("double-test", new ExecuteCommandLine(2, 0, "mvn", "clean", "test"),
+					new ExecuteCommandLine(2, 1, "mvn", "clean", "test")));
 			saveInternals(p);
 		}
 		{
 			Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject",
-					new File("/Users/guilherme/int"), "my-anted");
+					new File("/Users/guilherme/int/anted"), "my-anted");
 			projects.register(p);
-			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "ant", "compile")));
-			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "ant", "test")));
-			p.add(new Phase("deploy", new ExecuteCommandLine(myUrl, 2, 0, "ant", "deploy"), new ExecuteCommandLine(
-					myUrl, 2, 1, "ant", "while-deploy")));
+			p.add(new Phase("compile", new ExecuteCommandLine(0, 0, "ant", "compile")));
+			p.add(new Phase("test", new ExecuteCommandLine(1, 0, "ant", "test")));
+			p.add(new Phase("deploy", new ExecuteCommandLine(2, 0, "ant", "deploy"), new ExecuteCommandLine(
+					2, 1, "ant", "while-deploy")));
+			saveInternals(p);
+		}
+		{
+			Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject",
+					new File("/Users/guilherme/int/wicked"), "wicked");
+			projects.register(p);
+			p.add(new Phase("compile", new ExecuteCommandLine(0, 0, "wicked", "whatever")));
 			saveInternals(p);
 		}
 	}
