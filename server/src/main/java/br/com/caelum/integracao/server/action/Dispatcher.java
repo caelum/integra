@@ -40,6 +40,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Command;
+import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 
 public class Dispatcher {
@@ -73,7 +74,7 @@ public class Dispatcher {
 		return this;
 	}
 
-	public Dispatcher execute(Build build, int phaseCount, int commandCount, List<Command> commands)
+	public Dispatcher execute(Build build, Phase phase, int commandCount, List<Command> commands)
 			throws IOException {
 		HttpClient client = new HttpClient();
 		PostMethod post = new PostMethod(this.client.getBaseUri() + "/job/execute");
@@ -81,7 +82,7 @@ public class Dispatcher {
 		post.addParameter("project.name", build.getProject().getName());
 		post.addParameter("clientId", "" + this.client.getId());
 		post.addParameter("resultUri", "http://" + myUrl + "/integracao/finish/project/" + build.getProject().getName() + "/" + build.getBuildCount() + "/"
-				+ phaseCount + "/" + commandCount);
+				+ phase.getPosition() + "/" + commandCount);
 		for (int i = 0; i < commands.size(); i++) {
 			post.addParameter("command[" + i + "]", commands.get(i).getValue());
 		}

@@ -60,10 +60,8 @@ public class ExecuteCommandLine {
 
 	@OneToMany
 	@OrderBy("id")
-	@Cascade(value= {CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE})
+	@Cascade(value = { CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE })
 	private List<Command> commands;
-
-	private int phaseCount;
 
 	@Column(name = "pos")
 	private int position;
@@ -71,24 +69,26 @@ public class ExecuteCommandLine {
 	@NotNull
 	@ManyToOne
 	private Phase phase;
-	
+
 	protected ExecuteCommandLine() {
 	}
 
-	public ExecuteCommandLine(int phaseCount, int commandCount, String... cmds) {
-		this.phaseCount = phaseCount;
-		this.position = commandCount;
+	public ExecuteCommandLine(Phase phase, String... cmds) {
+		this.phase = phase;
+		this.position = phase.getCommandCount();
 		this.commands = new ArrayList<Command>();
 		for (String command : cmds) {
 			this.commands.add(new Command(command));
 		}
+		phase.getCommands().add(this);
 	}
 
-	public void executeAt(Client client, Build build, ScmControl control, File logFile, String myUrl) throws IOException {
+	public void executeAt(Client client, Build build, ScmControl control, File logFile, String myUrl)
+			throws IOException {
 		logger.debug("Trying to execute " + getName() + " @ " + client.getHost() + ":" + client.getPort());
 		Dispatcher connection = client.getConnection(logFile, myUrl);
 		try {
-			connection.register(build.getProject()).execute(build, phaseCount, position, commands).close();
+			connection.register(build.getProject()).execute(build, phase, position, commands).close();
 		} finally {
 			connection.close();
 		}
@@ -114,14 +114,6 @@ public class ExecuteCommandLine {
 		this.id = id;
 	}
 
-	public int getPhaseCount() {
-		return phaseCount;
-	}
-
-	public void setPhaseCount(int phaseCount) {
-		this.phaseCount = phaseCount;
-	}
-
 	public void setPosition(int position) {
 		this.position = position;
 	}
@@ -133,5 +125,5 @@ public class ExecuteCommandLine {
 	public Phase getPhase() {
 		return phase;
 	}
-	
+
 }

@@ -80,4 +80,8 @@ public class Projects {
 		session.save(build);
 	}
 
+	public void register(ExecuteCommandLine line) {
+		session.save(line);
+	}
+
 }

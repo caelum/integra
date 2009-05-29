@@ -193,6 +193,8 @@ public class ProjectController {
 	@Post
 	@Path("/project/command")
 	public void addCommand(Phase phase, String command) {
+		ExecuteCommandLine line = new ExecuteCommandLine(phase, command.split("\\s"));
+		projects.register(line);
 		showList();
 	}
 

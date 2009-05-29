@@ -106,7 +106,7 @@ public class Phase {
 	}
 
 	public int getCommandCount() {
-		return commands.size();
+		return getCommands().size();
 	}
 
 	public long getPhasePosition() {
@@ -118,6 +118,9 @@ public class Phase {
 	}
 
 	public List<ExecuteCommandLine> getCommands() {
+		if(commands==null) {
+			this.commands = new ArrayList<ExecuteCommandLine>();
+		}
 		return commands;
 	}
 
