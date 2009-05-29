@@ -37,10 +37,10 @@ import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Command;
 import br.com.caelum.integracao.server.Project;
-import br.com.caelum.integracao.server.project.Build;
 
 public class Dispatcher {
 

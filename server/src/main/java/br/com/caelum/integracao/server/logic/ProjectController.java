@@ -35,6 +35,7 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.ExecuteCommandLine;
@@ -45,7 +46,6 @@ import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
 import br.com.caelum.integracao.server.jobs.Job;
 import br.com.caelum.integracao.server.jobs.Jobs;
-import br.com.caelum.integracao.server.project.Build;
 import br.com.caelum.vraptor.Delete;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;

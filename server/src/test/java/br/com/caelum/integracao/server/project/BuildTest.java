@@ -41,6 +41,7 @@ import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;

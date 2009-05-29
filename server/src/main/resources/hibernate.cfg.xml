@@ -25,6 +25,7 @@
 		<mapping class="br.com.caelum.integracao.server.Phase"/>
 		<mapping class="br.com.caelum.integracao.server.Command"/>
 		<mapping class="br.com.caelum.integracao.server.ExecuteCommandLine"/>
+		<mapping class="br.com.caelum.integracao.server.Build"/>
 		
 	</session-factory>
 </hibernate-configuration>

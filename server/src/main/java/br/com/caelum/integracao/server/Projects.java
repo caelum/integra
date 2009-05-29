@@ -32,7 +32,6 @@ import java.util.Collection;
 import org.hibernate.Session;
 
 import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.project.Build;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
 /**

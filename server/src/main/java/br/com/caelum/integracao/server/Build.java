@@ -25,7 +25,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.project;
+package br.com.caelum.integracao.server;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -38,12 +38,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.Clients;
-import br.com.caelum.integracao.server.Phase;
-import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 /**
@@ -52,15 +55,22 @@ import br.com.caelum.integracao.server.scm.ScmControl;
  * @author guilherme silveira
  * 
  */
+@Entity
 public class Build {
 
-	private final Logger logger = LoggerFactory.getLogger(Build.class);
+	private static final Logger logger = LoggerFactory.getLogger(Build.class);
 
+	@ManyToOne
 	private Project project;
+	
+	@Id
+	@GeneratedValue
+	private Long id;
 
 	private Long buildCount;
 	private String revision;
 	private int currentPhase;
+	@Transient
 	private Set<Integer> executedCommandsFromThisPhase = new HashSet<Integer>();
 	private boolean sucessSoFar = true;
 	private boolean finished = false;
@@ -177,5 +187,13 @@ public class Build {
 	
 	public Calendar getStartTime() {
 		return startTime;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Long getId() {
+		return id;
 	}
 }
