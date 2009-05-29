@@ -54,6 +54,16 @@ public class ProjectTest extends AtDirectoryTest{
 		assertThat(p.getBuildCount(), is(equalTo(0L)));
 	}
 	
+	@Test
+	public void buildCreatesANewBuild() {
+		Project p = new Project();
+		p.setBuildCount(10L);
+		Build build = p.build();
+		assertThat(build.getBuildCount(), is(equalTo(11L)));
+		assertThat(p.getBuildCount(), is(equalTo(11L)));
+		assertThat(build.getProject(), is(equalTo(p)));
+	}
+	
 	
 	
 
