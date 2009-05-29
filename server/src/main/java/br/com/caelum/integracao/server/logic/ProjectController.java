@@ -89,6 +89,7 @@ public class ProjectController {
 	public void addPhase(Project project, Phase phase) {
 		project = projects.get(project.getName());
 		project.add(phase);
+		projects.register(phase);
 		showList();
 	}
 

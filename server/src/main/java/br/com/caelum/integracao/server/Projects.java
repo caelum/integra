@@ -84,4 +84,8 @@ public class Projects {
 		session.save(line);
 	}
 
+	public void register(Phase phase) {
+		session.save(phase);
+	}
+
 }

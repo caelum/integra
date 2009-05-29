@@ -97,6 +97,7 @@ public class Project {
 
 	public void add(Phase p) {
 		p.setPosition(phases.size());
+		p.setProject(this);
 		this.phases.add(p);
 	}
 

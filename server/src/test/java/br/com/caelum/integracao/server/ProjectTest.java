@@ -65,6 +65,24 @@ public class ProjectTest extends AtDirectoryTest{
 	}
 	
 	
+	@Test
+	public void setsAPhaseCountWhenAddingANewPhase() {
+		Project p  =new Project();
+		Phase first = new Phase();
+		p.add(first);
+		assertThat(first.getPosition(), is(equalTo(0L)));
+		Phase second = new Phase();
+		p.add(second);
+		assertThat(second.getPosition(), is(equalTo(1L)));
+	}
+
+	@Test
+	public void setsTheProjectWhenAddingANewPhase() {
+		Project p  =new Project();
+		Phase first = new Phase();
+		p.add(first);
+		assertThat(first.getProject(), is(equalTo(p)));
+	}
 	
 
 }
