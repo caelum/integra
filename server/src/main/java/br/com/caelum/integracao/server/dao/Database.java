@@ -28,6 +28,7 @@
 package br.com.caelum.integracao.server.dao;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
@@ -37,6 +38,7 @@ import br.com.caelum.vraptor.ioc.RequestScoped;
 public class Database {
 	
 	private final Session session;
+	private Transaction transaction;
 
 	public Database(DatabaseFactory factory) {
 		this.session = factory.getSession();
@@ -48,6 +50,24 @@ public class Database {
 
 	public Session getSession() {
 		return this.session;
+	}
+
+	public void beginTransaction() {
+		this.transaction = session.beginTransaction();
+	}
+
+	public void commit() {
+		this.transaction.commit();
+		transaction = null;
+	}
+
+	public boolean hasTransaction() {
+		return transaction!=null;
+	}
+
+	public void rollback() {
+		transaction.rollback();
+		transaction = null;
 	}
 
 }
