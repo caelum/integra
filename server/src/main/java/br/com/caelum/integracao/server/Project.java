@@ -35,6 +35,9 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -57,17 +60,23 @@ public class Project {
 
 	@Min(10)
 	private long checkInterval;
+	
+	@Id
+	@GeneratedValue
+	private Long id;
 
 	private static final Logger logger = LoggerFactory.getLogger(Project.class);
 	private Class<?> controlType;
 	private String uri;
 	private String name;
-	@Transient
-	private final List<Phase> phases = new ArrayList<Phase>();
+	@OneToMany
+	private List<Phase> phases = new ArrayList<Phase>();
 	private File baseDir;
 
-	private transient File buildsDirectory;
-	private transient File workDir;
+	public void setPhases(List<Phase> phases) {
+		this.phases = phases;
+	}
+
 	private Long buildCount = 0L;
 	@Transient
 	private final List<Build> builds = new ArrayList<Build>();
@@ -77,14 +86,39 @@ public class Project {
 	protected Project() {
 	}
 
+	public long getCheckInterval() {
+		return checkInterval;
+	}
+
+	public void setCheckInterval(long checkInterval) {
+		this.checkInterval = checkInterval;
+	}
+
+	public File getBaseDir() {
+		return baseDir;
+	}
+
+	public void setBaseDir(File baseDir) {
+		this.baseDir = baseDir;
+		new File(baseDir, name).mkdirs();
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+
+	public void setBuildCount(Long buildCount) {
+		this.buildCount = buildCount;
+	}
+
+	public void setLastBuild(Calendar lastBuild) {
+		this.lastBuild = lastBuild;
+	}
+
 	public Project(Class<?> controlType, String uri, File baseDir, String name) {
 		this.controlType = controlType;
 		this.uri = uri;
-		this.baseDir = baseDir;
-		this.buildsDirectory = new File(baseDir, "builds");
-		this.buildsDirectory.mkdirs();
-		this.workDir = new File(baseDir, name);
-		this.workDir.mkdirs();
+		setBaseDir(baseDir);
 		this.name = name;
 	}
 
@@ -95,6 +129,7 @@ public class Project {
 
 	public ScmControl getControl() throws InstantiationException, IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException {
+		logger.debug("Creating scm control " + controlType.getName() + " for project " + getName());
 		return (ScmControl) controlType.getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
 				baseDir, name);
 	}
@@ -139,7 +174,9 @@ public class Project {
 	}
 
 	public File getBuildsDirectory() {
-		return this.buildsDirectory;
+		File buildsDirectory = new File(baseDir, "builds");
+		buildsDirectory.mkdirs();
+		return buildsDirectory;
 	}
 
 	public List<Phase> getPhases() {

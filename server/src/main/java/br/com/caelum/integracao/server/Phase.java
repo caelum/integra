@@ -29,11 +29,16 @@ package br.com.caelum.integracao.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.command.ExecuteCommand;
 import br.com.caelum.integracao.server.project.Build;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
@@ -43,16 +48,25 @@ import br.com.caelum.integracao.server.scm.ScmControl;
  * 
  * @author guilherme silveira
  */
+@Entity
 public class Phase {
 
-	private final Logger logger = LoggerFactory.getLogger(Phase.class);
-	private ExecuteCommand[] commands;
-	private String id;
+	private static final Logger logger = LoggerFactory.getLogger(Phase.class);
+	
+	private List<ExecuteCommandLine> commands;
+	
+	@Id
+	@GeneratedValue
+	private Long id;
+	private String name;
 	private long position;
 
-	public Phase(String id, ExecuteCommand... cmds) {
-		this.id = id;
-		this.commands = cmds;
+	public Phase(String id, ExecuteCommandLine... cmds) {
+		this.name = id;
+		this.commands = new ArrayList<ExecuteCommandLine>();
+		for(ExecuteCommandLine cmd : cmds) {
+			commands.add(cmd);
+		}
 	}
 	
 	public Phase() {
@@ -60,14 +74,14 @@ public class Phase {
 
 	public void execute(ScmControl control, Build build, Clients clients) throws IOException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Starting phase " + id + " for project " + build.getProject().getName() + " containing "
-					+ commands.length + " parallel commands.");
+			logger.debug("Starting phase " + name + " for project " + build.getProject().getName() + " containing "
+					+ commands.size() + " parallel commands.");
 		}
-		build.getFile(position + "/" + id).mkdirs();
-		for (ExecuteCommand command : commands) {
+		build.getFile(position + "/" + name).mkdirs();
+		for (ExecuteCommandLine command : commands) {
 			Client client;
 			try {
-				client = clients.getFreeClient(getId() + "/"+command.getName());
+				client = clients.getFreeClient(getName() + "/"+command.getName());
 			} catch (IllegalStateException e) {
 				// there is no client available
 				try {
@@ -82,27 +96,43 @@ public class Phase {
 	}
 
 	public int getCommandCount() {
-		return commands.length;
+		return commands.size();
 	}
 	
 	public long getPhasePosition() {
 		return position;
 	}
 	
-	public String getId() {
-		return id;
+	public String getName() {
+		return name;
 	}
 	
-	public ExecuteCommand[] getCommands() {
+	public List<ExecuteCommandLine> getCommands() {
 		return commands;
 	}
 	
-	public void setId(String id) {
-		this.id = id;
+	public void setCommands(List<ExecuteCommandLine> commands) {
+		this.commands = commands;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	public void setPosition(long position) {
 		this.position = position;
 	}
 
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public long getPosition() {
+		return position;
+	}
+	
 }

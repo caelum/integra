@@ -25,56 +25,99 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.command.remote;
+package br.com.caelum.integracao.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.action.Dispatcher;
-import br.com.caelum.integracao.server.command.ExecuteCommand;
 import br.com.caelum.integracao.server.project.Build;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
-public class ExecuteCommandLine implements ExecuteCommand {
+@Entity
+public class ExecuteCommandLine  {
+	
+	@Id
+	@GeneratedValue
+	private Long id;
 
-	private final Logger logger = LoggerFactory.getLogger(ExecuteCommandLine.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExecuteCommandLine.class);
 
-	private final String[] cmd;
+	private List<Command> commands;
 
-	private final int phaseCount;
+	private int phaseCount;
 
-	private final int position;
+	private int position;
 
-	private final String myUrl;
-
-	public ExecuteCommandLine(String myUrl, int phaseCount, int commandCount, String... cmd) {
+	private String myUrl;
+	
+	public ExecuteCommandLine(String myUrl, int phaseCount, int commandCount, String... cmds) {
 		this.myUrl = myUrl;
 		this.phaseCount = phaseCount;
 		this.position = commandCount;
-		this.cmd = cmd;
+		this.commands = new ArrayList<Command>();
+		for(String command : cmds) {
+			this.commands.add(new Command(command));
+		}
 	}
 
 	public void executeAt(Client client, Build build, ScmControl control, File logFile) throws IOException {
-		logger.debug("Trying to execute " + Arrays.toString(cmd) + " @ " + client.getHost() + ":" + client.getPort());
+		logger.debug("Trying to execute " + getName() + " @ " + client.getHost() + ":" + client.getPort());
 		Dispatcher connection = client.getConnection(logFile, myUrl);
 		try {
-			connection.register(build.getProject()).execute(build,phaseCount,position, cmd).close();
+			connection.register(build.getProject()).execute(build,phaseCount,position, commands).close();
 		} finally {
 			connection.close();
 		}
 	}
 
 	public String getName() {
-		return Arrays.toString(cmd);
+		String name = "";
+		for(Command cmd : commands) {
+			name += cmd.getValue() + " ";
+		}
+		return name;
 	}
 	
 	public int getPosition() {
 		return position;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public int getPhaseCount() {
+		return phaseCount;
+	}
+
+	public void setPhaseCount(int phaseCount) {
+		this.phaseCount = phaseCount;
+	}
+
+	public String getMyUrl() {
+		return myUrl;
+	}
+
+	public void setMyUrl(String myUrl) {
+		this.myUrl = myUrl;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
 	}
 
 }

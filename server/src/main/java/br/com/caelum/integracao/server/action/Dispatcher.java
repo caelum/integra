@@ -32,11 +32,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 
 import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.Command;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.project.Build;
 
@@ -71,7 +73,7 @@ public class Dispatcher {
 		return this;
 	}
 
-	public Dispatcher execute(Build build, int phaseCount, int commandCount, String... commands)
+	public Dispatcher execute(Build build, int phaseCount, int commandCount, List<Command> commands)
 			throws IOException {
 		HttpClient client = new HttpClient();
 		PostMethod post = new PostMethod(this.client.getBaseUri() + "/job/execute");
@@ -80,8 +82,8 @@ public class Dispatcher {
 		post.addParameter("clientId", "" + this.client.getId());
 		post.addParameter("resultUri", "http://" + myUrl + "/integracao/finish/project/" + build.getProject().getName() + "/" + build.getBuildCount() + "/"
 				+ phaseCount + "/" + commandCount);
-		for (int i = 0; i < commands.length; i++) {
-			post.addParameter("command[" + i + "]", commands[i]);
+		for (int i = 0; i < commands.size(); i++) {
+			post.addParameter("command[" + i + "]", commands.get(i).getValue());
 		}
 		try {
 			int result = client.executeMethod(post);

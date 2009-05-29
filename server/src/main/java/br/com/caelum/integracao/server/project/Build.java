@@ -123,17 +123,17 @@ public class Build {
 		return currentPhase;
 	}
 
-	public synchronized void finish(int phaseId, int commandId, String result, boolean success, Clients clients)
+	public synchronized void finish(int phasePosition, int commandId, String result, boolean success, Clients clients)
 			throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException {
 		sucessSoFar &= success;
 		executedCommandsFromThisPhase.add(commandId);
-		File file = getFile(phaseId + "/" + commandId + ".txt");
+		File file = getFile(phasePosition + "/" + commandId + ".txt");
 		file.getParentFile().mkdirs();
 		PrintWriter writer = new PrintWriter(new FileWriter(file), true);
 		writer.print(result);
 		writer.close();
-		boolean executedAllCommands = executedCommandsFromThisPhase.size() == project.getPhases().get(phaseId)
+		boolean executedAllCommands = executedCommandsFromThisPhase.size() == project.getPhases().get(phasePosition)
 				.getCommandCount();
 		if (executedAllCommands && !sucessSoFar) {
 			finishTime = new GregorianCalendar();
@@ -143,7 +143,7 @@ public class Build {
 			currentPhase++;
 			executedCommandsFromThisPhase.clear();
 			if (project.getPhases().size() != currentPhase) {
-				project.getPhases().get(phaseId + 1).execute(project.getControl(), this, clients);
+				project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients);
 			} else {
 				finishTime = new GregorianCalendar();
 				finished = true;

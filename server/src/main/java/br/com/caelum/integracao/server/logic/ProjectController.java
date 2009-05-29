@@ -37,10 +37,10 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.ExecuteCommandLine;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
-import br.com.caelum.integracao.server.command.remote.ExecuteCommandLine;
 import br.com.caelum.integracao.server.jobs.Job;
 import br.com.caelum.integracao.server.jobs.Jobs;
 import br.com.caelum.integracao.server.project.Build;
@@ -174,15 +174,15 @@ public class ProjectController {
 	}
 
 	@Post
-	@Path("/finish/project/{project.name}/{buildId}/{phaseId}/{commandId}")
-	public void finish(Project project, Long buildId, int phaseId, int commandId, String result, boolean success,
+	@Path("/finish/project/{project.name}/{buildId}/{phasePosition}/{commandId}")
+	public void finish(Project project, Long buildId, int phasePosition, int commandId, String result, boolean success,
 			Client client) throws IOException, InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		clients.release(client.getId());
-		logger.debug("Finishing " + project.getName() + " phase " + phaseId + " command " + commandId);
+		logger.debug("Finishing " + project.getName() + " phase " + phasePosition + " command " + commandId);
 		project = projects.get(project.getName());
 		Build build = project.getBuild(buildId);
-		build.finish(phaseId, commandId, result, success, clients);
+		build.finish(phasePosition, commandId, result, success, clients);
 		this.result.use(Results.nothing());
 	}
 

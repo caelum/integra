@@ -1,6 +1,8 @@
 /***
  * 
- * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
+ * Copyright (c) 2009 Caelum - w
+import javax.persistence.Entity;
+ww.caelum.com.br/opensource All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,26 +27,39 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.command;
+package br.com.caelum.integracao.server;
 
-import java.io.File;
-import java.io.IOException;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
-import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.project.Build;
-import br.com.caelum.integracao.server.scm.ScmControl;
+@Entity
+public class Command {
 
-/**
- * A command to be executed
- * 
- * @author guilherme silveira
- */
-public interface ExecuteCommand {
+	@GeneratedValue
+	@Id
+	private Long id;
 
-	void executeAt(Client client, Build build, ScmControl control, File logFile) throws IOException;
+	private String value;
 
-	String getName();
+	public Long getId() {
+		return id;
+	}
 
-	int getPosition();
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
+	public Command(String value) {
+		this.value = value;
+	}
 
 }
