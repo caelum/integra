@@ -30,7 +30,6 @@ package br.com.caelum.integracao.server.ioc;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
-import br.com.caelum.integracao.server.jobs.Jobs;
 import br.com.caelum.vraptor.ComponentRegistry;
 import br.com.caelum.vraptor.ioc.pico.PicoProvider;
 
@@ -42,7 +41,6 @@ public class CustomProvider extends PicoProvider {
         container.register(DatabaseFactory.class, DatabaseFactory.class);
         container.register(Clients.class, Clients.class);
         container.register(Projects.class, Projects.class);
-        container.register(Jobs.class, Jobs.class);
     }
 
 }

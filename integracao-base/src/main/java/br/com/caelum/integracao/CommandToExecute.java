@@ -35,7 +35,6 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CommandToExecute {
 
@@ -53,27 +52,44 @@ public class CommandToExecute {
 		return this;
 	}
 
-	public int runAs(String id) {
+	public int runAs() {
 		ProcessBuilder builder = new ProcessBuilder();
 		baseDir.mkdirs();
 		builder.directory(baseDir);
 		builder.command(Arrays.asList(cmd));
 		builder.redirectErrorStream(true);
 		try {
-			Process process = builder.start();
-			AtomicBoolean stopFlag = new AtomicBoolean(false);
-			int result = process.waitFor();
-			InputStream is = process.getInputStream();
-			Scanner sc = new Scanner(is).useDelimiter("\\n");
-			while(sc.hasNext()) {
-				outputWriter.println(id + sc.next());
-			}
-			sc.close();
-			stopFlag.set(true);
+			final Process process = builder.start();
+			Runnable waitRun = new Runnable() {
+				public void run() {
+					try {
+						process.waitFor();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			Thread waitThread = new Thread(waitRun);
+			waitThread.start();
+			Runnable outputRun = new Runnable() {
+				public void run() {
+					InputStream is = process.getInputStream();
+					Scanner sc = new Scanner(is).useDelimiter("\\n");
+					while(sc.hasNext()) {
+						outputWriter.println(sc.next());
+						outputWriter.flush();
+					}
+					sc.close();
+				}
+			};
+			Thread outputThread = new Thread(outputRun);
+			outputThread.start();
+			waitThread.join();
+			outputThread.join();
 			if(closeWriter) {
 				this.outputWriter.close();
 			}
-			return result;
+			return process.exitValue();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (InterruptedException e) {

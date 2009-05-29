@@ -41,11 +41,11 @@ public class SvnControlTest extends AtDirectoryTest {
 
 	@Test
 	public void shouldCommitAndReceiveUpdate() throws IOException {
-		SvnControl control1 = new SvnControl("svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1");
-		control1.checkout(new File(this.baseDir, "control1-checkout"));
+		SvnControl control1 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1");
+		Assert.assertEquals(0,control1.checkout(new File(this.baseDir, "control1-checkout")));
 		
-		SvnControl control2 = new SvnControl("svn+ssh://caelum.no-ip.org/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-2");
-		control2.checkout(new File(this.baseDir, "control2-checkout"));
+		SvnControl control2 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-2");
+		Assert.assertEquals(0,control2.checkout(new File(this.baseDir, "control2-checkout")));
 		
 		File file = new File(control1.getDir(), "test-file");
 		givenA(file, "misc content");

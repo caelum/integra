@@ -63,7 +63,7 @@ public class Build {
 
 	@ManyToOne
 	private Project project;
-	
+
 	@Id
 	@GeneratedValue
 	private Long id;
@@ -71,13 +71,13 @@ public class Build {
 	@Min(0)
 	private Long buildCount;
 	private String revision;
-	
+
 	@Min(0)
-	private int currentPhase;
-	
+	private int currentPhase = 0;
+
 	@CollectionOfElements
 	private Set<Integer> executedCommandsFromThisPhase = new HashSet<Integer>();
-	
+
 	private boolean sucessSoFar = true;
 	private boolean finished = false;
 
@@ -113,22 +113,31 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
-	public void start(Clients clients, Application app) throws IllegalArgumentException, SecurityException, InstantiationException,
-			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
-		logger.debug("Starting executing process for " + project.getName());
+	public void start(Clients clients, Application app) throws IllegalArgumentException, SecurityException,
+			InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException,
+			IOException {
+		this.currentPhase = 0;
+		logger.debug("Starting executing process for " + project.getName() + " at "
+				+ project.getBaseDir().getAbsolutePath());
 		ScmControl control = project.getControl();
-		File tmpFile = File.createTempFile("loading-checkout", ".log");
-		control.checkout(tmpFile);
-		this.revision = control.getRevision();
-		tmpFile.renameTo(getFile("checkout"));
-
-		// executes the first phase
-		List<Phase> phases = project.getPhases();
-		if (!phases.isEmpty()) {
-			this.currentPhase = 0;
-			Phase phase = phases.get(0);
-			phase.execute(control, this, clients, app);
+		int result = checkout(control);
+		if (result == 0) {
+			List<Phase> phases = project.getPhases();
+			if (!phases.isEmpty()) {
+				Phase phase = phases.get(0);
+				phase.execute(control, this, clients, app);
+			}
 		}
+	}
+
+	private int checkout(ScmControl control) throws InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException, IOException {
+		File tmpFile = File.createTempFile("loading-checkout", ".log");
+		int result = control.checkout(tmpFile);
+		this.revision = control.getRevision();
+		tmpFile.renameTo(getFile("checkout.txt"));
+		logger.debug("Checking out " + project.getName() + ", build = " + buildCount + " resulted in " +result);
+		return result;
 	}
 
 	public Project getProject() {
@@ -139,9 +148,9 @@ public class Build {
 		return currentPhase;
 	}
 
-	public synchronized void finish(int phasePosition, int commandId, String result, boolean success, Clients clients, Application app)
-			throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException,
-			NoSuchMethodException {
+	public synchronized void finish(int phasePosition, int commandId, String result, boolean success, Clients clients,
+			Application app) throws IOException, InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException {
 		sucessSoFar &= success;
 		executedCommandsFromThisPhase.add(commandId);
 		File file = getFile(phasePosition + "/" + commandId + ".txt");
@@ -186,11 +195,11 @@ public class Build {
 		}
 		return (f.getTimeInMillis() - startTime.getTimeInMillis()) / 1000.0;
 	}
-	
+
 	public Calendar getFinishTime() {
 		return finishTime;
 	}
-	
+
 	public Calendar getStartTime() {
 		return startTime;
 	}

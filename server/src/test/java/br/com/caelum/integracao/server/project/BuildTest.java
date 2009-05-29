@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jmock.Expectations;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -215,6 +216,11 @@ public class BuildTest extends BaseTest {
 		build.finish(0, 0, "no-result", true, clients, app);
 		assertThat(build.getCurrentPhase(), is(equalTo(1)));
 		mockery.assertIsSatisfied();
+	}
+	
+	@Test
+	public void shouldNotStartPhaseIfResultIsZero() {
+		Assert.fail("not yet implemented");
 	}
 
 }

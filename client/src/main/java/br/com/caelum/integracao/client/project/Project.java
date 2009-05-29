@@ -64,10 +64,10 @@ public class Project {
 		File dir = new File(baseDir, name);
 		StringWriter writer = new StringWriter();
 		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDir + "/" + name);
-		new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir).runAs("svn-checkout");
+		new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir).runAs();
 		String[] commands = command.toArray(new String[command.size()]);
 		logger.debug("Ready to execute " + Arrays.toString(commands));
-		int result = new CommandToExecute(commands).at(dir).logTo(writer).runAs("");
+		int result = new CommandToExecute(commands).at(dir).logTo(writer).runAs();
 		return new ProjectRunResult(writer.getBuffer().toString(), result);
 	}
 

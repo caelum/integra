@@ -22,7 +22,7 @@ public class SvnControl implements ScmControl {
 	}
 
 	public int checkout(File log) throws IOException {
-		return prepare("svn", "co", uri, baseName).at(baseDir).logTo(log).runAs("svn-checkout");
+		return prepare("svn", "co", uri, baseName).at(baseDir).logTo(log).runAs();
 	}
 
 	public File getDir() {
@@ -30,7 +30,7 @@ public class SvnControl implements ScmControl {
 	}
 
 	public int add(File file) {
-		return prepare("svn", "add", file.getAbsolutePath()).at(file.getParentFile()).runAs("svn-add");
+		return prepare("svn", "add", file.getAbsolutePath()).at(file.getParentFile()).runAs();
 	}
 
 	private CommandToExecute prepare(String ... cmd) {
@@ -38,20 +38,20 @@ public class SvnControl implements ScmControl {
 	}
 
 	public int commit(String message) {
-		return prepare("svn", "commit", "-m", message).at(getDir()).runAs("svn-commit");
+		return prepare("svn", "commit", "-m", message).at(getDir()).runAs();
 	}
 
 	public int update() {
-		return prepare("svn", "update").at(getDir()).runAs("svn-update");
+		return prepare("svn", "update").at(getDir()).runAs();
 	}
 
 	public int remove(File file) {
-		return prepare("svn", "remove", file.getAbsolutePath()).at(file.getParentFile()).runAs("svn-add");
+		return prepare("svn", "remove", file.getAbsolutePath()).at(file.getParentFile()).runAs();
 	}
 
 	public String getRevision() {
 		StringWriter writer = new StringWriter();
-		prepare("svn", "info").logTo(writer).at(getDir()).runAs("svn-info");
+		prepare("svn", "info").logTo(writer).at(getDir()).runAs();
 		String content = writer.getBuffer().toString();
 		int pos = content.indexOf("Last Changed Rev: ");
 		return content.substring(pos+ "Last Changed Rev: ".length(), content.indexOf("\n", pos));
