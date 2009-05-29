@@ -25,39 +25,39 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
-
-import java.util.Collection;
-
-import org.hibernate.Session;
+package br.com.caelum.integracao.server.logic;
 
 import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.RequestScoped;
+import br.com.caelum.vraptor.InterceptionException;
+import br.com.caelum.vraptor.Intercepts;
+import br.com.caelum.vraptor.core.InterceptorStack;
+import br.com.caelum.vraptor.resource.ResourceMethod;
 
-/**
- * Represents all projects.
- * 
- * @author guilherme silveira
- */
-@RequestScoped
-public class Projects {
+@Intercepts
+public class DatabaseInterceptor  implements br.com.caelum.vraptor.Interceptor {
 
-	private final Session session;
+    private final Database controller;
 
-	public Projects(Database database) {
-		this.session = database.getSession();
-	}
+    public DatabaseInterceptor(Database controller) {
+        this.controller = controller;
+    }
+    
 
-	public Project get(String name) {
-		return (Project) session.createQuery("from Project as p where p.name=:name").setParameter("name",name).uniqueResult();
-	}
+    public void intercept(InterceptorStack stack, ResourceMethod method, Object instance) throws InterceptionException {
+        try {
+            controller.beginTransaction();
+            stack.next(method, instance);
+            controller.commit();
+        } finally {
+            if (controller.hasTransaction()) {
+                controller.rollback();
+            }
+            controller.close();
+        }
+    }
 
-	public Collection<Project> all() {
-		return session.createQuery("from Project").list();
-	}
-
-	public void register(Project p) {
-		session.save(p);
-	}
+    public boolean accepts(ResourceMethod method) {
+        return true;
+    }
 
 }

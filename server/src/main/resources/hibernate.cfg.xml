@@ -21,6 +21,7 @@
 		<property name="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property>
 
 		<mapping class="br.com.caelum.integracao.server.Client"/>
+		<mapping class="br.com.caelum.integracao.server.Project"/>
 		
 	</session-factory>
 </hibernate-configuration>

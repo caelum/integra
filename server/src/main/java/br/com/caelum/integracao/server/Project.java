@@ -34,32 +34,47 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+
+import org.hibernate.validator.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.project.Build;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
+/**
+ * Represents a project which should be built.
+ * 
+ * @author guilherme silveira
+ */
+@Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 public class Project {
 
-	private final Logger logger = LoggerFactory.getLogger(Project.class);
-	private final Class<?> controlType;
-	private final String uri;
+	@Min(10)
+	private long checkInterval;
+
+	private static final Logger logger = LoggerFactory.getLogger(Project.class);
+	private Class<?> controlType;
+	private String uri;
 	private String name;
+	@Transient
 	private final List<Phase> phases = new ArrayList<Phase>();
-	private final File baseDir;
-	private File buildsDirectory;
-	private File workDir;
+	private File baseDir;
+
+	private transient File buildsDirectory;
+	private transient File workDir;
 	private Long buildCount = 0L;
+	@Transient
 	private final List<Build> builds = new ArrayList<Build>();
-	
+
 	private Calendar lastBuild = new GregorianCalendar();
 
 	protected Project() {
-		this.controlType = null;
-		this.uri = null;
-		this.name = null;
-		this.baseDir = null;
 	}
 
 	public Project(Class<?> controlType, String uri, File baseDir, String name) {
@@ -71,8 +86,6 @@ public class Project {
 		this.workDir = new File(baseDir, name);
 		this.workDir.mkdirs();
 		this.name = name;
-		// this.phases.add(new Phase(0, "create-build-dir", new
-		// CreateBuildDir()));
 	}
 
 	public void add(Phase p) {
@@ -132,7 +145,7 @@ public class Project {
 	public List<Phase> getPhases() {
 		return this.phases;
 	}
-	
+
 	public Calendar getLastBuild() {
 		return lastBuild;
 	}
