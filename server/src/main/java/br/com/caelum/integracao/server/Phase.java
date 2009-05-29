@@ -35,6 +35,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,7 @@ public class Phase {
 
 	private static final Logger logger = LoggerFactory.getLogger(Phase.class);
 	
+	@OneToMany
 	private List<ExecuteCommandLine> commands;
 	
 	@Id

@@ -73,53 +73,20 @@ public class Project {
 	private List<Phase> phases = new ArrayList<Phase>();
 	private File baseDir;
 
-	public void setPhases(List<Phase> phases) {
-		this.phases = phases;
-	}
-
 	private Long buildCount = 0L;
+
 	@Transient
 	private final List<Build> builds = new ArrayList<Build>();
-
 	private Calendar lastBuild = new GregorianCalendar();
 
 	protected Project() {
 	}
 
-	public long getCheckInterval() {
-		return checkInterval;
-	}
-
-	public void setCheckInterval(long checkInterval) {
-		this.checkInterval = checkInterval;
-	}
-
-	public File getBaseDir() {
-		return baseDir;
-	}
-
-	public void setBaseDir(File baseDir) {
-		this.baseDir = baseDir;
-		new File(baseDir, name).mkdirs();
-	}
-
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
-
-	public void setBuildCount(Long buildCount) {
-		this.buildCount = buildCount;
-	}
-
-	public void setLastBuild(Calendar lastBuild) {
-		this.lastBuild = lastBuild;
-	}
-
-	public Project(Class<?> controlType, String uri, File baseDir, String name) {
+	public Project(Class<?> controlType, String uri, File dir, String name) {
 		this.controlType = controlType;
 		this.uri = uri;
-		setBaseDir(baseDir);
 		this.name = name;
+		this.setBaseDir(dir);
 	}
 
 	public void add(Phase p) {
@@ -127,27 +94,14 @@ public class Project {
 		this.phases.add(p);
 	}
 
-	public ScmControl getControl() throws InstantiationException, IllegalAccessException, InvocationTargetException,
-			NoSuchMethodException {
-		logger.debug("Creating scm control " + controlType.getName() + " for project " + getName());
-		return (ScmControl) controlType.getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
-				baseDir, name);
+	public Build build() {
+		Build build = new Build(this);
+		this.builds.add(build);
+		return build;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public List<Build> getBuilds() {
-		return builds;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getUri() {
-		return uri;
+	public File getBaseDir() {
+		return baseDir;
 	}
 
 	public Build getBuild(Long id) {
@@ -159,18 +113,12 @@ public class Project {
 		return null;
 	}
 
-	public Build build() {
-		Build build = new Build(this);
-		this.builds.add(build);
-		return build;
-	}
-
 	public Long getBuildCount() {
 		return buildCount;
 	}
 
-	public Long nextBuild() {
-		return ++buildCount;
+	public List<Build> getBuilds() {
+		return builds;
 	}
 
 	public File getBuildsDirectory() {
@@ -179,12 +127,64 @@ public class Project {
 		return buildsDirectory;
 	}
 
-	public List<Phase> getPhases() {
-		return this.phases;
+	public long getCheckInterval() {
+		return checkInterval;
+	}
+
+	public ScmControl getControl() throws InstantiationException, IllegalAccessException, InvocationTargetException,
+			NoSuchMethodException {
+		logger.debug("Creating scm control " + controlType.getName() + " for project " + getName());
+		return (ScmControl) controlType.getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
+				baseDir, name);
 	}
 
 	public Calendar getLastBuild() {
 		return lastBuild;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public List<Phase> getPhases() {
+		return this.phases;
+	}
+
+	public String getUri() {
+		return uri;
+	}
+
+	public Long nextBuild() {
+		return ++buildCount;
+	}
+
+	public void setBaseDir(File dir) {
+		this.baseDir = dir;
+		new File(baseDir, name).mkdirs();
+	}
+
+	public void setBuildCount(Long buildCount) {
+		this.buildCount = buildCount;
+	}
+
+	public void setCheckInterval(long checkInterval) {
+		this.checkInterval = checkInterval;
+	}
+
+	public void setLastBuild(Calendar lastBuild) {
+		this.lastBuild = lastBuild;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setPhases(List<Phase> phases) {
+		this.phases = phases;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
 	}
 
 }

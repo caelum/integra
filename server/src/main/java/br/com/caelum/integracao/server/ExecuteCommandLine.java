@@ -35,6 +35,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ public class ExecuteCommandLine  {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExecuteCommandLine.class);
 
+	@OneToMany
 	private List<Command> commands;
 
 	private int phaseCount;
