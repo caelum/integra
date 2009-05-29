@@ -40,7 +40,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.validator.Min;
@@ -80,8 +79,8 @@ public class Project {
 	private File baseDir;
 
 	private Long buildCount = 0L;
-
-	@Transient
+	
+	@OneToMany(mappedBy="project")
 	private final List<Build> builds = new ArrayList<Build>();
 	@NotNull
 	private Calendar lastBuild = new GregorianCalendar();
@@ -111,9 +110,9 @@ public class Project {
 		return baseDir;
 	}
 
-	public Build getBuild(Long id) {
+	public Build getBuild(Long buildCount) {
 		for (Build b : getBuilds()) {
-			if (b.getBuildCount().equals(id)) {
+			if (b.getBuildCount().equals(buildCount)) {
 				return b;
 			}
 		}

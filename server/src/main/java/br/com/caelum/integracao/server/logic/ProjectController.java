@@ -69,7 +69,8 @@ public class ProjectController {
 
 	private final DatabaseFactory factory;
 
-	public ProjectController(Clients clients, Projects projects, Validator validator, Jobs jobs, Result result, DatabaseFactory factory) {
+	public ProjectController(Clients clients, Projects projects, Validator validator, Jobs jobs, Result result,
+			DatabaseFactory factory) {
 		this.clients = clients;
 		this.projects = projects;
 		this.validator = validator;
@@ -109,23 +110,33 @@ public class ProjectController {
 		jobs.add(job);
 		Runnable execution = new Runnable() {
 			public void run() {
-				try {
-					logger.debug("Starting building project " + found.getName());
-					Database db = new Database(factory);
-					Project toBuild = new Projects(db).get(found.getName()); 
-					Build build = toBuild.build();
-					new Projects(db).register(build);
-					build.start(new Clients(db));
-					db.close();
-					jobs.remove(job);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				runProject(found.getName(), job);
 			}
 		};
 		Thread thread = new Thread(execution);
 		job.attach(thread);
 		thread.start();
+	}
+
+	private void runProject(String name, final Job job) {
+		logger.debug("Starting building project id=" + name);
+		Database db = new Database(factory);
+		db.beginTransaction();
+		try {
+			Project toBuild = new Projects(db).get(name);
+			Build build = toBuild.build();
+			new Projects(db).register(build);
+			build.start(new Clients(db));
+			db.commit();
+			jobs.remove(job);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (db.hasTransaction()) {
+				db.rollback();
+			}
+			db.close();
+		}
 	}
 
 	@Get
@@ -162,16 +173,17 @@ public class ProjectController {
 			Client client) throws IOException, InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		clients.release(client.getId());
-		logger.debug("Finishing " + project.getName() + " build " + buildId + " phase " + phasePosition + " command " + commandId);
+		logger.debug("Finishing " + project.getName() + " build " + buildId + " phase " + phasePosition + " command "
+				+ commandId);
 		project = projects.get(project.getName());
 		Build build = project.getBuild(buildId);
 		build.finish(phasePosition, commandId, result, success, clients);
 		this.result.use(Results.nothing());
 	}
-	
+
 	@Delete
-	@Path("/project/command/{command.id}") 
-	public void removeCommand(ExecuteCommandLine command){
+	@Path("/project/command/{command.id}")
+	public void removeCommand(ExecuteCommandLine command) {
 		Phase phase = projects.load(command).getPhase();
 		phase.remove(projects, command);
 	}
