@@ -98,6 +98,14 @@ public class ProjectController {
 	public Collection<Project> list() {
 		return this.projects.all();
 	}
+	
+	@Post
+	@Path("/project/")
+	public void create(Project project, String baseDir) {
+		project.setBaseDir(new File(baseDir));
+		projects.register(project);
+		showList();
+	}
 
 	public void run(Project project) throws IllegalArgumentException, SecurityException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, NoSuchMethodException {

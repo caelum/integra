@@ -14,11 +14,9 @@
 			</c:forEach>
 			<td>
 			<form action="phase" method="post"><input type="hidden"
-				name="project.name" value="${project.name }" />
-				<input type="hidden"
-				name="phase.name" value="${unnamed }" />
-				<input type="submit"
-				value="new phase" /></form>
+				name="project.name" value="${project.name }" /> <input
+				type="hidden" name="phase.name" value="${unnamed }" /> <input
+				type="submit" value="new phase" /></form>
 			</td>
 		</tr>
 		<tr>
@@ -48,6 +46,19 @@
 	</ul>
 </c:forEach>
 
-<form action="new">Uri: <input name="project.uri" /> Name: <input
-	name="project.name" /> Base directory: <input name="project.baseDir" />
+<form action="" method="post">
+<table>
+	<tr>
+		<td>Uri: <input name="project.uri" /></td>
+	</tr>
+	<tr>
+		<td>Name: <input name="project.name" /></td>
+	</tr>
+	<tr>
+		<td>Base directory: <input name="baseDir" /></td>
+	</tr>
+	<tr>
+		<td><input type="submit"></td>
+	</tr>
+</table>
 </form>

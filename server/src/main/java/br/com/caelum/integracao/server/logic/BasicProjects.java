@@ -43,7 +43,7 @@ public class BasicProjects {
 
 	public void add() {
 		{
-			Project p = new Project(SvnControl.class, "svn+ssh://localhost/svn/caelum/caelumweb2/trunk", new File(
+			Project p = new Project(SvnControl.class, "svn+ssh://192.168.0.2/svn/caelum/caelumweb2/trunk", new File(
 					"/home/integra/build/caelumweb2"), "caelumweb2");
 			projects.register(p);
 		}
