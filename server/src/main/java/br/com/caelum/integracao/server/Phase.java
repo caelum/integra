@@ -65,7 +65,18 @@ public class Phase {
 		}
 		build.getFile(position + "/" + id).mkdirs();
 		for (ExecuteCommand command : commands) {
-			Client client = clients.getFreeClient(getId() + "/"+command.getName());
+			Client client;
+			try {
+				client = clients.getFreeClient(getId() + "/"+command.getName());
+			} catch (IllegalStateException e) {
+				// there is no client available
+				try {
+					build.finish((int) position, command.getPosition(), "NOT ENOUGHT CLIENTS", false, clients);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				return;
+			}
 			command.executeAt(client, build, control, File.createTempFile("connection", "txt"));
 		}
 	}

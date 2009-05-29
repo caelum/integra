@@ -60,15 +60,15 @@ public class Project {
 		return uri;
 	}
 
-	public String run(File baseDir, String revision, List<String> command) {
+	public ProjectRunResult run(File baseDir, String revision, List<String> command) {
 		File dir = new File(baseDir, name);
 		StringWriter writer = new StringWriter();
-		logger.debug("Checking out project @ " + revision + " to " + baseDir + "/" + name);
+		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDir + "/" + name);
 		new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir).runAs("svn-checkout");
 		String[] commands = command.toArray(new String[command.size()]);
 		logger.debug("Ready to execute " + Arrays.toString(commands));
-		new CommandToExecute(commands).at(dir).logTo(writer).runAs("");
-		return writer.getBuffer().toString();
+		int result = new CommandToExecute(commands).at(dir).logTo(writer).runAs("");
+		return new ProjectRunResult(writer.getBuffer().toString(), result);
 	}
 
 }

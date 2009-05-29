@@ -31,27 +31,37 @@ import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 import br.com.caelum.integracao.server.action.Dispatcher;
 
+/**
+ * Represents a client machine.
+ * 
+ * @author guilherme silveira
+ */
+@Entity
 public class Client {
 
+	@Id
+	@GeneratedValue
 	private Long id;
-	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	private int port;
-	
+
 	private String context;
 
 	private String host;
 
 	private String reason;
+	
+	private boolean busy;
+
+	public String getBaseUri() {
+		return "http://" + this.getHost() + ":" + this.getPort() + this.getContext();
+	}
 
 	public Dispatcher getConnection(File logFile, String myUrl) throws UnknownHostException, IOException {
 		return new Dispatcher(this, logFile, myUrl);
@@ -61,8 +71,16 @@ public class Client {
 		return context;
 	}
 
+	public String getCurrentJob() {
+		return reason;
+	}
+
 	public String getHost() {
 		return host;
+	}
+
+	public Long getId() {
+		return id;
 	}
 
 	public int getPort() {
@@ -73,24 +91,38 @@ public class Client {
 		this.context = context;
 	}
 
+	public void setCurrentJob(String reason) {
+		this.reason = reason;
+	}
+
 	public void setHost(String host) {
 		this.host = host;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public void setPort(int port) {
 		this.port = port;
 	}
 
-	public String getBaseUri() {
-		return "http://" + this.getHost() + ":" + this.getPort() + this.getContext();
+	public void setBusy(boolean busy) {
+		this.busy = busy;
 	}
 
-	public void setCurrentJob(String reason) {
-		this.reason = reason;
+	public boolean isBusy() {
+		return busy;
 	}
-	
-	public String getCurrentJob() {
-		return reason;
+
+	public void work(String job) {
+		this.busy = true;
+		this.reason = job;
+	}
+
+	public void leaveJob() {
+		this.busy = false;
+		this.reason = "";
 	}
 
 }

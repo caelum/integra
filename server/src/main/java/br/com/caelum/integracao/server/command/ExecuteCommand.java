@@ -45,4 +45,6 @@ public interface ExecuteCommand {
 
 	String getName();
 
+	int getPosition();
+
 }

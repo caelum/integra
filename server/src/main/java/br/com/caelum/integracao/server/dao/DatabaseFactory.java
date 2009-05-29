@@ -25,11 +25,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.logic;
+package br.com.caelum.integracao.server.dao;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AnnotationConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 @ApplicationScoped
-public class Database {
+public class DatabaseFactory {
+	
+	private final Logger logger = LoggerFactory.getLogger(DatabaseFactory.class);
+
+	private SessionFactory factory;
+
+	@PostConstruct
+	public void startup() {
+		logger.debug("Starting up database");
+		this.factory = new AnnotationConfiguration().configure().buildSessionFactory();
+	}
+
+	@PreDestroy
+	public void destroy() {
+		if (factory != null) {
+			logger.debug("Shutting down database");
+			this.factory.close();
+		}
+	}
+
+	public Session getSession() {
+		return this.factory.openSession();
+	}
 
 }

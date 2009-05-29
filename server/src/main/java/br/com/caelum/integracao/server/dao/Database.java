@@ -25,51 +25,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
-
-import java.util.List;
+package br.com.caelum.integracao.server.dao;
 
 import org.hibernate.Session;
 
-import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
 @RequestScoped
-@SuppressWarnings("unchecked")
-public class Clients {
-
+@Component
+public class Database {
+	
 	private final Session session;
 
-	public Clients(Database database) {
-		this.session = database.getSession();
+	public Database(DatabaseFactory factory) {
+		this.session = factory.getSession();
+	}
+	
+	public void close() {
+		this.session.close();
 	}
 
-	public void register(Client client) {
-		this.session.save(client);
-	}
-
-	public List<Client> freeClients() {
-		return this.session.createQuery("from Client as c where c.busy = false").list();
-	}
-
-	public List<Client> lockedClients() {
-		return this.session.createQuery("from Client as c where c.busy = true").list();
-	}
-
-	public Client getFreeClient(String reason) {
-		List<Client> clients = freeClients();
-		if (clients.isEmpty()) {
-			throw new IllegalStateException("There are not enough clients");
-		}
-		Client client = clients.get(0);
-		client.work(reason);
-		clients.remove(client);
-		return client;
-	}
-
-	public void release(Long id) {
-		Client client = (Client) session.load(Client.class, id);
-		client.leaveJob();
+	public Session getSession() {
+		return this.session;
 	}
 
 }

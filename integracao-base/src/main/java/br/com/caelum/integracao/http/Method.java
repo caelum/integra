@@ -32,8 +32,17 @@ import java.io.IOException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Executes a web method.
+ * 
+ * @author guilherme silveira
+ */
 public class Method {
+
+	private final Logger logger = LoggerFactory.getLogger(Method.class);
 
 	private final PostMethod post;
 	private final HttpClient client;
@@ -43,18 +52,23 @@ public class Method {
 		this.client = client;
 		this.post = post;
 	}
-	
+
 	public Method with(String key, String value) {
+		logger.debug("with " + key + "=" + value);
 		post.addParameter(key, value);
 		return this;
 	}
-	
+
 	public void send() throws HttpException, IOException {
 		this.result = client.executeMethod(post);
 	}
-	
+
 	public int getResult() {
 		return result;
+	}
+
+	public String getContent() throws IOException {
+		return post.getResponseBodyAsString();
 	}
 
 }

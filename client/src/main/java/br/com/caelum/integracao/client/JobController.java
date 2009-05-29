@@ -28,12 +28,12 @@
 package br.com.caelum.integracao.client;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.client.project.Project;
+import br.com.caelum.integracao.client.project.ProjectRunResult;
 import br.com.caelum.integracao.client.project.Projects;
 import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.http.Method;
@@ -51,6 +51,8 @@ public class JobController {
 
 	private Project currentJob;
 
+	private Thread thread;
+
 	public JobController(EntryPoint point, Projects projects) {
 		this.point = point;
 		this.projects = projects;
@@ -66,25 +68,32 @@ public class JobController {
 		if (this.currentJob == null) {
 			throw new RuntimeException("Unable to find project " + project.getName());
 		}
-		new Thread(new Runnable() {
+		Runnable runnable = new Runnable() {
 			public void run() {
-				final StringBuffer result = new StringBuffer();
-				final AtomicBoolean success = new AtomicBoolean(false);
+				ProjectRunResult result = null;
+				boolean success = false;
 				try {
-					result.append(currentJob.run(point.getBaseDir(), revision, command));
-					success.set(true);
+					result = currentJob.run(point.getBaseDir(), revision, command);
+					success = result.getResult() == 0;
 				} finally {
 					if (currentJob != null) {
+						logger.debug("Job " + currentJob.getName() + " has finished");
+						Http http = new Http();
+						logger.debug("Acessing uri " + resultUri + " to finish the job");
+						Method post = http.post(resultUri);
 						try {
-							logger.debug("Job " + currentJob.getName() + " has finished");
-							Http http = new Http();
-							Method put = http.post(resultUri);
-							put.with("result", result.toString()).with("project.name", currentJob.getName());
-							put.with("revision", revision);
-							put.with("success", "" + success.get()).with("client.id", clientId).send();
-							if (put.getResult() != 200) {
+							if (result != null) {
+								post.with("result", result.getContent());
+							} else {
+								post.with("result", "unable-to-read-result");
+							}
+							post.with("project.name", currentJob.getName());
+							post.with("revision", revision);
+							post.with("success", "" + success).with("client.id", clientId).send();
+							if (post.getResult() != 200) {
+								logger.error(post.getContent());
 								throw new RuntimeException("The server returned a problematic answer: "
-										+ put.getResult());
+										+ post.getResult());
 							}
 						} catch (Exception e) {
 							logger.error("Was unable to notify the server of this request.", e);
@@ -94,6 +103,16 @@ public class JobController {
 					}
 				}
 			}
-		}).start();
+		};
+		this.thread = new Thread(runnable);
+		thread.start();
+	}
+
+	public Project current() {
+		return currentJob;
+	}
+
+	public void stop() {
+		thread.stop();
 	}
 }

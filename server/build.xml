@@ -101,4 +101,23 @@
       </lib>
     </war>
   </target>
+
+	<macrodef name="hsqldb" description="-->starts a hsqldb">
+		<attribute name="dbport" />
+		<sequential>
+			<echo message="Starting HSQLDB on port @{dbport}" />
+			<java classpath="src/main/webapp/WEB-INF/lib/hsqldb-1.8.0.7.jar"
+				classname="org.hsqldb.Server" failonerror="true">
+				<arg line="-database.0 mem:integracao" />
+				<arg line="-dbname.0 integracao" />
+				<arg line="-port @{dbport}" />
+			</java>
+		</sequential>
+	</macrodef>
+
+	<target name="hsqldb" description="-->starts a hsqldb">
+		<hsqldb dbport="9999" />
+		<input message="Type enter to stop..."/>
+	</target>
+
 </project>

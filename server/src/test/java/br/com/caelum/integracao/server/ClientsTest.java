@@ -41,7 +41,7 @@ public class ClientsTest {
 
 	@Before
 	public void setup() {
-		this.clients = new Clients();
+		this.clients = new Clients(null);
 		this.bebado = new Client();
 		clients.register(bebado);
 	}

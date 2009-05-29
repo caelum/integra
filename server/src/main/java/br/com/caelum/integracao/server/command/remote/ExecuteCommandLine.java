@@ -48,14 +48,14 @@ public class ExecuteCommandLine implements ExecuteCommand {
 
 	private final int phaseCount;
 
-	private final int commandCount;
+	private final int position;
 
 	private final String myUrl;
 
 	public ExecuteCommandLine(String myUrl, int phaseCount, int commandCount, String... cmd) {
 		this.myUrl = myUrl;
 		this.phaseCount = phaseCount;
-		this.commandCount = commandCount;
+		this.position = commandCount;
 		this.cmd = cmd;
 	}
 
@@ -63,7 +63,7 @@ public class ExecuteCommandLine implements ExecuteCommand {
 		logger.debug("Trying to execute " + Arrays.toString(cmd) + " @ " + client.getHost() + ":" + client.getPort());
 		Dispatcher connection = client.getConnection(logFile, myUrl);
 		try {
-			connection.register(build.getProject()).execute(build,phaseCount,commandCount, cmd).close();
+			connection.register(build.getProject()).execute(build,phaseCount,position, cmd).close();
 		} finally {
 			connection.close();
 		}
@@ -71,6 +71,10 @@ public class ExecuteCommandLine implements ExecuteCommand {
 
 	public String getName() {
 		return Arrays.toString(cmd);
+	}
+	
+	public int getPosition() {
+		return position;
 	}
 
 }

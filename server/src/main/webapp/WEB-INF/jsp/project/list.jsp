@@ -35,3 +35,9 @@
 		</c:forEach>
 	</ul>
 </c:forEach>
+
+<form action="new">
+	Uri: <input name="project.uri" />
+	Name: <input name="project.name" />
+	Base directory: <input name="project.baseDir" />
+</form>

@@ -123,10 +123,10 @@ public class Build {
 		return currentPhase;
 	}
 
-	public synchronized void finish(int phaseId, int commandId, String result, boolean sucess, Clients clients)
+	public synchronized void finish(int phaseId, int commandId, String result, boolean success, Clients clients)
 			throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException {
-		sucessSoFar &= sucess;
+		sucessSoFar &= success;
 		executedCommandsFromThisPhase.add(commandId);
 		File file = getFile(phaseId + "/" + commandId + ".txt");
 		file.getParentFile().mkdirs();
