@@ -27,58 +27,38 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.util.Collection;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
-import org.hibernate.Session;
+import java.util.ArrayList;
 
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.project.Build;
-import br.com.caelum.vraptor.ioc.RequestScoped;
+import org.jmock.Expectations;
+import org.junit.Test;
 
-/**
- * Represents all projects.
- * 
- * @author guilherme silveira
- */
-@RequestScoped
-public class Projects {
+import br.com.caelum.integracao.server.project.BaseTest;
 
-	private final Session session;
+public class PhaseTest extends BaseTest {
+	@Test
+	public void commandRemovalShouldUpdateOtherIndexes() {
+		final ExecuteCommandLine test = new ExecuteCommandLine();
+		test.setPosition(1);
+		ExecuteCommandLine deploy = new ExecuteCommandLine();
+		deploy.setPosition(2);
+		final Projects projects = mockery.mock(Projects.class);
 
-	public Projects(Database database) {
-		this.session = database.getSession();
-	}
-
-	public Project get(String name) {
-		return (Project) session.createQuery("from Project as p where p.name=:name").setParameter("name",name).uniqueResult();
-	}
-
-	public Collection<Project> all() {
-		return session.createQuery("from Project").list();
-	}
-
-	public void register(Project p) {
-		session.save(p);
-	}
-
-	public void create(Phase phase) {
-		session.save(phase);
-	}
-
-	public void create(ExecuteCommandLine cmd) {
-		session.save(cmd);
-	}
-
-	public ExecuteCommandLine load(ExecuteCommandLine command) {
-		return (ExecuteCommandLine) session.load(ExecuteCommandLine.class, command.getId());
-	}
-
-	public void remove(ExecuteCommandLine command) {
-		session.delete(command);
-	}
-
-	public void register(Build build) {
-		session.save(build);
+		Phase compile = new Phase();
+		compile.setCommands(new ArrayList<ExecuteCommandLine>());
+		compile.getCommands().add(test);
+		compile.getCommands().add(deploy);
+		mockery.checking(new Expectations() {
+			{
+				one(projects).remove(test);
+			}
+		});
+		compile.remove(projects, test);
+		assertThat(deploy.getPosition(), is(equalTo(1)));
+		mockery.assertIsSatisfied();
 	}
 
 }

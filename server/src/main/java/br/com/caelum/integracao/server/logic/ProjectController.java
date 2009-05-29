@@ -112,7 +112,10 @@ public class ProjectController {
 				try {
 					logger.debug("Starting building project " + found.getName());
 					Database db = new Database(factory);
-					found.build().start(new Clients(db));
+					Project toBuild = new Projects(db).get(found.getName()); 
+					Build build = toBuild.build();
+					new Projects(db).register(build);
+					build.start(new Clients(db));
 					db.close();
 					jobs.remove(job);
 				} catch (Exception e) {
@@ -159,7 +162,7 @@ public class ProjectController {
 			Client client) throws IOException, InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		clients.release(client.getId());
-		logger.debug("Finishing " + project.getName() + " phase " + phasePosition + " command " + commandId);
+		logger.debug("Finishing " + project.getName() + " build " + buildId + " phase " + phasePosition + " command " + commandId);
 		project = projects.get(project.getName());
 		Build build = project.getBuild(buildId);
 		build.finish(phasePosition, commandId, result, success, clients);
