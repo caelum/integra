@@ -8,7 +8,7 @@
 	<table>
 		<tr>
 			<c:forEach var="phase" items="${project.phases }">
-				<td>${phase.id }</td>
+				<td>${phase.position }</td>
 				<td>--></td>
 			</c:forEach>
 			<td><a href="phase?_method=post&project.name=${project.name }&phase.id=unnamed">new phase</a></td>
@@ -18,7 +18,7 @@
 				<td>
 				<ul>
 					<c:forEach var="cmd" items="${phase.commands}">
-						<li>${cmd.name }</li>
+						<li>${cmd.name } (<a href="command/${cmd.id}?_method=DELETE">remove</a>)</li>
 					</c:forEach>
 					<li><a href="command?_method=post&project.name=${project.name }&phase.position=${phase.phasePosition}">new command</a></li>
 				</ul>

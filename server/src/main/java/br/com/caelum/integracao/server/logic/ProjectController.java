@@ -37,12 +37,16 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.ExecuteCommandLine;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
+import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.dao.DatabaseFactory;
 import br.com.caelum.integracao.server.jobs.Job;
 import br.com.caelum.integracao.server.jobs.Jobs;
 import br.com.caelum.integracao.server.project.Build;
+import br.com.caelum.vraptor.Delete;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
@@ -63,12 +67,15 @@ public class ProjectController {
 	private final Jobs jobs;
 	private final Result result;
 
-	public ProjectController(Clients clients, Projects projects, Validator validator, Jobs jobs, Result result) {
+	private final DatabaseFactory factory;
+
+	public ProjectController(Clients clients, Projects projects, Validator validator, Jobs jobs, Result result, DatabaseFactory factory) {
 		this.clients = clients;
 		this.projects = projects;
 		this.validator = validator;
 		this.jobs = jobs;
 		this.result = result;
+		this.factory = factory;
 	}
 
 	public void addAll(String myUrl) {
@@ -104,7 +111,9 @@ public class ProjectController {
 			public void run() {
 				try {
 					logger.debug("Starting building project " + found.getName());
-					found.build().start(clients);
+					Database db = new Database(factory);
+					found.build().start(new Clients(db));
+					db.close();
 					jobs.remove(job);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -155,6 +164,13 @@ public class ProjectController {
 		Build build = project.getBuild(buildId);
 		build.finish(phasePosition, commandId, result, success, clients);
 		this.result.use(Results.nothing());
+	}
+	
+	@Delete
+	@Path("/project/command/{command.id}") 
+	public void removeCommand(ExecuteCommandLine command){
+		Phase phase = projects.load(command).getPhase();
+		phase.remove(projects, command);
 	}
 
 }

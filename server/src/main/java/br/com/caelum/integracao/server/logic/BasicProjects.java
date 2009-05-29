@@ -79,6 +79,28 @@ public class BasicProjects {
 			saveInternals(p);
 		}
 		{
+			Project p = new Project(SvnControl.class,
+					"svn://svn.paranamer.codehaus.org/paranamer/trunk", new File(
+							"/home/integra/build/paranamer"), "paranamer");
+			projects.register(p);
+			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "mvn", "clean", "compile")));
+			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "mvn", "clean", "test")));
+			p.add(new Phase("double-test", new ExecuteCommandLine(myUrl, 2, 0, "mvn", "clean", "test"),
+					new ExecuteCommandLine(myUrl, 2, 1, "mvn", "clean", "test")));
+			saveInternals(p);
+		}
+		{
+			Project p = new Project(SvnControl.class,
+					"http://seleniumdsl.svn.sourceforge.net/svnroot/seleniumdsl/trunk", new File(
+							"/home/integra/build/selenium-dsl"), "selenium-dsl");
+			projects.register(p);
+			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "mvn", "clean", "compile")));
+			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "mvn", "clean", "test")));
+			p.add(new Phase("double-test", new ExecuteCommandLine(myUrl, 2, 0, "mvn", "clean", "test"),
+					new ExecuteCommandLine(myUrl, 2, 1, "mvn", "clean", "test")));
+			saveInternals(p);
+		}
+		{
 			Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject",
 					new File("/Users/guilherme/int"), "my-anted");
 			projects.register(p);

@@ -68,4 +68,12 @@ public class Projects {
 		session.save(cmd);
 	}
 
+	public ExecuteCommandLine load(ExecuteCommandLine command) {
+		return (ExecuteCommandLine) session.load(ExecuteCommandLine.class, command.getId());
+	}
+
+	public void remove(ExecuteCommandLine command) {
+		session.delete(command);
+	}
+
 }

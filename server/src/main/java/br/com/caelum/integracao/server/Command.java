@@ -42,23 +42,27 @@ public class Command {
 
 	private String value;
 
-	public Long getId() {
-		return id;
+	protected Command() {
+
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public Command(String value) {
+		this.value = value;
+	}
+
+	public Long getId() {
+		return id;
 	}
 
 	public String getValue() {
 		return value;
 	}
 
-	public void setValue(String value) {
-		this.value = value;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
-	public Command(String value) {
+	public void setValue(String value) {
 		this.value = value;
 	}
 

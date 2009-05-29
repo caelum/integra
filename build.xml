@@ -20,8 +20,13 @@
 	</target>
 
 	<target name="war" depends="deploy">
-		<ant dir="server" target="war" />
-		<ant dir="client" target="war" />
+		<ant antfile="build.xml" inheritall="false" dir="server" target="clean-war" />
+		<ant antfile="build.xml" inheritall="false" dir="client" target="clean-war" />
+	</target>
+	
+	<target name="remote-deploy">
+		<scp file="server/target/integracao-server.war" todir="integra@192.168.0.2:~/"></scp>
+		<scp file="server/target/integracao-client.war" todir="integra@192.168.0.159:~/"></scp>
 	</target>
 
 	<target name="all" depends="deploy" />

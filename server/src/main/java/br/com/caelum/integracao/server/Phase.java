@@ -154,4 +154,13 @@ public class Phase {
 		return project;
 	}
 
+	public void remove(Projects projects, ExecuteCommandLine command) {
+		for(ExecuteCommandLine cmd : getCommands()) {
+			if(cmd.getPosition()>command.getPosition()) {
+				cmd.setPosition(cmd.getPosition()-1);
+			}
+		}
+		projects.remove(command);
+	}
+
 }

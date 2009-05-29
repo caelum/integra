@@ -195,4 +195,12 @@ public class Project {
 		this.uri = uri;
 	}
 
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
 }
