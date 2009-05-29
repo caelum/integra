@@ -38,11 +38,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.validator.Min;
+import org.hibernate.validator.NotEmpty;
+import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,24 +62,29 @@ import br.com.caelum.integracao.server.scm.ScmControl;
 public class Project {
 
 	@Min(10)
-	private long checkInterval;
-	
+	private long checkInterval = 60;
+
 	@Id
 	@GeneratedValue
 	private Long id;
 
 	private static final Logger logger = LoggerFactory.getLogger(Project.class);
 	private Class<?> controlType;
+	@NotEmpty
 	private String uri;
+	@NotEmpty
 	private String name;
-	@OneToMany
+	@OneToMany(mappedBy = "project")
+	@OrderBy("position")
 	private List<Phase> phases = new ArrayList<Phase>();
+	@NotNull
 	private File baseDir;
 
 	private Long buildCount = 0L;
 
 	@Transient
 	private final List<Build> builds = new ArrayList<Build>();
+	@NotNull
 	private Calendar lastBuild = new GregorianCalendar();
 
 	protected Project() {

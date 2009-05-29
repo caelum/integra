@@ -32,10 +32,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,24 +56,30 @@ import br.com.caelum.integracao.server.scm.ScmControl;
 public class Phase {
 
 	private static final Logger logger = LoggerFactory.getLogger(Phase.class);
-	
-	@OneToMany
+
+	@OneToMany(mappedBy = "phase")
+	@OrderBy("position")
 	private List<ExecuteCommandLine> commands;
-	
+
 	@Id
 	@GeneratedValue
 	private Long id;
 	private String name;
+	
+	@Column(name="pos")
 	private long position;
+
+	@ManyToOne
+	private Project project;
 
 	public Phase(String id, ExecuteCommandLine... cmds) {
 		this.name = id;
 		this.commands = new ArrayList<ExecuteCommandLine>();
-		for(ExecuteCommandLine cmd : cmds) {
+		for (ExecuteCommandLine cmd : cmds) {
 			commands.add(cmd);
 		}
 	}
-	
+
 	public Phase() {
 	}
 
@@ -83,7 +92,7 @@ public class Phase {
 		for (ExecuteCommandLine command : commands) {
 			Client client;
 			try {
-				client = clients.getFreeClient(getName() + "/"+command.getName());
+				client = clients.getFreeClient(getName() + "/" + command.getName());
 			} catch (IllegalStateException e) {
 				// there is no client available
 				try {
@@ -100,19 +109,19 @@ public class Phase {
 	public int getCommandCount() {
 		return commands.size();
 	}
-	
+
 	public long getPhasePosition() {
 		return position;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public List<ExecuteCommandLine> getCommands() {
 		return commands;
 	}
-	
+
 	public void setCommands(List<ExecuteCommandLine> commands) {
 		this.commands = commands;
 	}
@@ -120,7 +129,7 @@ public class Phase {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public void setPosition(long position) {
 		this.position = position;
 	}
@@ -136,5 +145,13 @@ public class Phase {
 	public long getPosition() {
 		return position;
 	}
-	
+
+	public void setProject(Project project) {
+		this.project = project;
+	}
+
+	public Project getProject() {
+		return project;
+	}
+
 }

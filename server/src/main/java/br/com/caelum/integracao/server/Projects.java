@@ -60,4 +60,12 @@ public class Projects {
 		session.save(p);
 	}
 
+	public void create(Phase phase) {
+		session.save(phase);
+	}
+
+	public void create(ExecuteCommandLine cmd) {
+		session.save(cmd);
+	}
+
 }

@@ -32,11 +32,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +50,8 @@ import br.com.caelum.integracao.server.project.Build;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 @Entity
-public class ExecuteCommandLine  {
-	
+public class ExecuteCommandLine {
+
 	@Id
 	@GeneratedValue
 	private Long id;
@@ -54,20 +59,30 @@ public class ExecuteCommandLine  {
 	private static final Logger logger = LoggerFactory.getLogger(ExecuteCommandLine.class);
 
 	@OneToMany
+	@OrderBy("id")
+	@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
 	private List<Command> commands;
 
 	private int phaseCount;
 
+	@Column(name = "pos")
 	private int position;
 
 	private String myUrl;
+
+	@NotNull
+	@ManyToOne
+	private Phase phase;
 	
+	protected ExecuteCommandLine() {
+	}
+
 	public ExecuteCommandLine(String myUrl, int phaseCount, int commandCount, String... cmds) {
 		this.myUrl = myUrl;
 		this.phaseCount = phaseCount;
 		this.position = commandCount;
 		this.commands = new ArrayList<Command>();
-		for(String command : cmds) {
+		for (String command : cmds) {
 			this.commands.add(new Command(command));
 		}
 	}
@@ -76,7 +91,7 @@ public class ExecuteCommandLine  {
 		logger.debug("Trying to execute " + getName() + " @ " + client.getHost() + ":" + client.getPort());
 		Dispatcher connection = client.getConnection(logFile, myUrl);
 		try {
-			connection.register(build.getProject()).execute(build,phaseCount,position, commands).close();
+			connection.register(build.getProject()).execute(build, phaseCount, position, commands).close();
 		} finally {
 			connection.close();
 		}
@@ -84,12 +99,12 @@ public class ExecuteCommandLine  {
 
 	public String getName() {
 		String name = "";
-		for(Command cmd : commands) {
+		for (Command cmd : commands) {
 			name += cmd.getValue() + " ";
 		}
 		return name;
 	}
-	
+
 	public int getPosition() {
 		return position;
 	}
@@ -120,6 +135,14 @@ public class ExecuteCommandLine  {
 
 	public void setPosition(int position) {
 		this.position = position;
+	}
+
+	public void setPhase(Phase phase) {
+		this.phase = phase;
+	}
+
+	public Phase getPhase() {
+		return phase;
 	}
 
 }

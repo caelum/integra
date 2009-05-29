@@ -37,14 +37,12 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
-import br.com.caelum.integracao.server.ExecuteCommandLine;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.jobs.Job;
 import br.com.caelum.integracao.server.jobs.Jobs;
 import br.com.caelum.integracao.server.project.Build;
-import br.com.caelum.integracao.server.scm.svn.SvnControl;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
@@ -74,34 +72,7 @@ public class ProjectController {
 	}
 
 	public void addAll(String myUrl) {
-		{
-			Project p = new Project(SvnControl.class, "svn+ssh://localhost/svn/caelum/caelumweb2/trunk",
-					new File("/home/integra/build/caelumweb2"), "caelumweb2");
-			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "ant", "clear", "compile")));
-			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "ant", "clear", "test")));
-			p.add(new Phase("integration-test", new ExecuteCommandLine(myUrl, 2, 0, "ant", "clear",
-					"integration-test-1"), new ExecuteCommandLine(myUrl, 2, 1, "ant", "integration-test-2")));
-			projects.register(p);
-		}
-		{
-			Project p = new Project(SvnControl.class,
-					"https://vraptor2.svn.sourceforge.net/svnroot/vraptor2/trunk/core", new File(
-							"/home/integra/build/vraptor2"), "vraptor2");
-			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "mvn", "clean", "compile")));
-			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "mvn", "clean", "test")));
-			p.add(new Phase("double-test", new ExecuteCommandLine(myUrl, 2, 0, "mvn", "clean", "test"),
-					new ExecuteCommandLine(myUrl, 2, 1, "mvn", "test")));
-			projects.register(p);
-		}
-		{
-			Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject",
-					new File("/Users/guilherme/int"), "my-anted");
-			p.add(new Phase("compile", new ExecuteCommandLine(myUrl, 0, 0, "ant", "compile")));
-			p.add(new Phase("test", new ExecuteCommandLine(myUrl, 1, 0, "ant", "test")));
-			p.add(new Phase("deploy", new ExecuteCommandLine(myUrl, 2, 0, "ant", "deploy"), new ExecuteCommandLine(
-					myUrl, 2, 1, "ant", "while-deploy")));
-			projects.register(p);
-		}
+		new BasicProjects(projects).add(myUrl);
 		result.use(Results.logic()).redirectTo(ProjectController.class).list();
 	}
 
