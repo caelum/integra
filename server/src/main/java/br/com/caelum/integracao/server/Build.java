@@ -78,7 +78,7 @@ public class Build {
 	@CollectionOfElements
 	private Set<Integer> executedCommandsFromThisPhase = new HashSet<Integer>();
 
-	private boolean sucessSoFar = true;
+	private boolean successSoFar = true;
 	private boolean finished = false;
 
 	private Calendar startTime = new GregorianCalendar();
@@ -134,7 +134,7 @@ public class Build {
 
 	private void finish(boolean success) {
 		this.finished = true;
-		this.sucessSoFar = success;
+		this.successSoFar = success;
 		this.finishTime = new GregorianCalendar();
 	}
 
@@ -160,7 +160,7 @@ public class Build {
 	public synchronized void finish(int phasePosition, int commandId, String result, boolean success, Clients clients,
 			Application app) throws IOException, InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
-		sucessSoFar &= success;
+		successSoFar &= success;
 		executedCommandsFromThisPhase.add(commandId);
 		File file = getFile(phasePosition + "/" + commandId + ".txt");
 		file.getParentFile().mkdirs();
@@ -169,10 +169,10 @@ public class Build {
 		writer.close();
 		boolean executedAllCommands = executedCommandsFromThisPhase.size() == project.getPhases().get(phasePosition)
 				.getCommandCount();
-		if (executedAllCommands && !sucessSoFar) {
+		if (executedAllCommands && !successSoFar) {
 			finish(false);
 		}
-		if (executedAllCommands && sucessSoFar) {
+		if (executedAllCommands && successSoFar) {
 			currentPhase++;
 			executedCommandsFromThisPhase.clear();
 			if (project.getPhases().size() != currentPhase) {
@@ -188,7 +188,7 @@ public class Build {
 	}
 
 	public boolean isSuccessSoFar() {
-		return sucessSoFar;
+		return successSoFar;
 	}
 
 	public boolean isFinished() {

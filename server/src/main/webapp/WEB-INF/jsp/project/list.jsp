@@ -2,7 +2,7 @@
 	<h2>${project.name}</h2>
 	Uri: ${project.uri }<br />
 	Basedir: ${project.buildsDirectory.absolutePath }<br />
-	Control: ${project.controlType.name } <br/>
+	Control: ${project.controlType.name } <br />
 	Actions: <a href="run?project.name=${project.name }">run</a>
 	<br />
 	Last build: ${project.lastBuild.time }<br />
@@ -10,7 +10,7 @@
 	<table>
 		<tr>
 			<c:forEach var="phase" items="${project.phases }">
-				<td>${phase.position }</td>
+				<td>${phase.name } (${phase.position })</td>
 				<td>--></td>
 			</c:forEach>
 			<td>
@@ -38,13 +38,27 @@
 			</c:forEach>
 		</tr>
 	</table>
-	<ul>
+	<table>
 		<c:forEach var="build" items="${project.builds }">
-			<li>(<a
-				href="${pageContext.request.contextPath }/project/${project.name}/${build.buildCount}?filename=">results</a>)
-			build-${build.buildCount} : revision '${build.revision }'</li>
+			<tr>
+				<td><a
+					href="${pageContext.request.contextPath }/project/${project.name}/${build.buildCount}?filename=">results</a>
+				</td>
+				<td>build-${build.buildCount}</td>
+				<td>revision '${build.revision }'</td>
+				<td><c:if test="${not build.finished }">
+					<font color="orange">building... who knows?</font>
+				</c:if> <c:if test="${build.finished }">
+					<c:if test="${build.successSoFar }">
+						<font color="green">success</font>
+					</c:if>
+					<c:if test="${not build.successSoFar }">
+						<font color="red">fail</font>
+					</c:if>
+				</c:if></td>
+			</tr>
 		</c:forEach>
-	</ul>
+	</table>
 </c:forEach>
 
 <form action="" method="post">
