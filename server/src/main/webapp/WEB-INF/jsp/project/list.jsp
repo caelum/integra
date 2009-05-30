@@ -2,6 +2,7 @@
 	<h2>${project.name}</h2>
 	Uri: ${project.uri }<br />
 	Basedir: ${project.buildsDirectory.absolutePath }<br />
+	Control: ${project.controlType.name } <br/>
 	Actions: <a href="run?project.name=${project.name }">run</a>
 	<br />
 	Last build: ${project.lastBuild.time }<br />

@@ -127,7 +127,15 @@ public class Build {
 				Phase phase = phases.get(0);
 				phase.execute(control, this, clients, app);
 			}
+		} else {
+			finish(false);
 		}
+	}
+
+	private void finish(boolean success) {
+		this.finished = true;
+		this.sucessSoFar = success;
+		this.finishTime = new GregorianCalendar();
 	}
 
 	private int checkout(ScmControl control) throws InstantiationException, IllegalAccessException,
@@ -162,8 +170,7 @@ public class Build {
 		boolean executedAllCommands = executedCommandsFromThisPhase.size() == project.getPhases().get(phasePosition)
 				.getCommandCount();
 		if (executedAllCommands && !sucessSoFar) {
-			finishTime = new GregorianCalendar();
-			finished = true;
+			finish(false);
 		}
 		if (executedAllCommands && sucessSoFar) {
 			currentPhase++;
@@ -171,8 +178,7 @@ public class Build {
 			if (project.getPhases().size() != currentPhase) {
 				project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients, app);
 			} else {
-				finishTime = new GregorianCalendar();
-				finished = true;
+				finish(true);
 			}
 		}
 	}

@@ -45,6 +45,7 @@ import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
+import br.com.caelum.integracao.server.scm.svn.SvnControl;
 import br.com.caelum.vraptor.Delete;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
@@ -103,6 +104,7 @@ public class ProjectController {
 	@Path("/project/")
 	public void create(Project project, String baseDir) {
 		project.setBaseDir(new File(baseDir));
+		project.setControlType(SvnControl.class);
 		projects.register(project);
 		showList();
 	}

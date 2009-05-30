@@ -89,7 +89,7 @@ public class Project {
 	}
 
 	public Project(Class<?> controlType, String uri, File dir, String name) {
-		this.controlType = controlType;
+		this.setControlType(controlType);
 		this.uri = uri;
 		this.name = name;
 		this.setBaseDir(dir);
@@ -140,8 +140,8 @@ public class Project {
 
 	public ScmControl getControl() throws InstantiationException, IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException {
-		logger.debug("Creating scm control " + controlType.getName() + " for project " + getName());
-		return (ScmControl) controlType.getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
+		logger.debug("Creating scm control " + getControlType().getName() + " for project " + getName());
+		return (ScmControl) getControlType().getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
 				baseDir, name);
 	}
 
@@ -202,4 +202,12 @@ public class Project {
 		return id;
 	}
 
+	public void setControlType(Class<?> controlType) {
+		this.controlType = controlType;
+	}
+
+	public Class<?> getControlType() {
+		return controlType;
+	}
+	
 }
