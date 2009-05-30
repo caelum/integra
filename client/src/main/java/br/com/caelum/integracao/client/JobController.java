@@ -27,6 +27,9 @@
  */
 package br.com.caelum.integracao.client;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -75,6 +78,11 @@ public class JobController {
 				try {
 					result = currentJob.run(point.getBaseDir(), revision, command);
 					success = result.getResult() == 0;
+				} catch (IOException e) {
+					StringWriter writer = new StringWriter();
+					e.printStackTrace(new PrintWriter(writer, true));
+					result = new ProjectRunResult(writer.toString() ,-1);
+					success = false;
 				} finally {
 					if (currentJob != null) {
 						logger.debug("Job " + currentJob.getName() + " has finished");

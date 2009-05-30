@@ -25,55 +25,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.client.project;
+package br.com.caelum.integracao;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import org.junit.Assert;
+import org.junit.Test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import br.com.caelum.integracao.CommandToExecute;
-
-public class Project {
-
-	private final Logger logger = LoggerFactory.getLogger(Project.class);
-	private String name;
-
-	private String uri;
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
-
-	public String getUri() {
-		return uri;
-	}
-
-	public ProjectRunResult run(File baseDir, String revision, List<String> command) throws IOException {
-		File dir = new File(baseDir, name);
-		File tmp = File.createTempFile("integra-run-" + revision, ".txt");
-		FileWriter tmpOutput = new FileWriter(tmp);
-		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDir + "/" + name);
-		new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir).runAs();
-		String[] commands = command.toArray(new String[command.size()]);
-		logger.debug("Ready to execute " + Arrays.toString(commands));
-		int result = new CommandToExecute(commands).at(dir).logTo(tmpOutput).runAs();
-		Scanner sc = new Scanner(new FileInputStream(tmp)).useDelimiter("117473826478234211");
-		return new ProjectRunResult(sc.next(), result);
+public class CommandToExecuteTest {
+	
+	@Test
+	public void a() {
+		Assert.fail("implement tests");
 	}
 
 }
