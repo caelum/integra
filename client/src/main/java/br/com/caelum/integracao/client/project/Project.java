@@ -66,6 +66,7 @@ public class Project {
 	public ProjectRunResult run(File baseDir, String revision, List<String> command) throws IOException {
 		File dir = new File(baseDir, name);
 		File tmp = File.createTempFile("integra-run-" + revision, ".txt");
+		tmp.deleteOnExit();
 		FileWriter tmpOutput = new FileWriter(tmp);
 		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDir + "/" + name);
 		new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir).runAs();

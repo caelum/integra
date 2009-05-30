@@ -133,6 +133,7 @@ public class Build {
 	private int checkout(ScmControl control) throws InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException, IOException {
 		File tmpFile = File.createTempFile("loading-checkout", ".log");
+		tmpFile.deleteOnExit();
 		int result = control.checkout(tmpFile);
 		this.revision = control.getRevision();
 		tmpFile.renameTo(getFile("checkout.txt"));
