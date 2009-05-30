@@ -14,9 +14,9 @@
 			</c:forEach>
 			<td>
 			<form action="phase" method="post"><input type="hidden"
-				name="project.name" value="${project.name }" /> <input
-				type="hidden" name="phase.name" value="${unnamed }" /> <input
-				type="submit" value="new phase" /></form>
+				name="project.name" value="${project.name }" /> <input size="5"
+				name="phase.name" value="unnamed" /> <input type="submit"
+				value="new phase" /></form>
 			</td>
 		</tr>
 		<tr>
@@ -29,7 +29,7 @@
 					<li>
 					<form action="command" method="post"><input type="hidden"
 						name="phase.id" value="${phase.id }" /> <input type="text"
-						name="command" value="" length="10" /> <input type="submit"
+						name="command" value="" size="5" /> <input type="submit"
 						value="new command" /></form>
 				</ul>
 				</td>
