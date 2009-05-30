@@ -46,6 +46,7 @@ public class Project {
 	private String name;
 
 	private String uri;
+	private CommandToExecute executing;
 
 	public void setName(String name) {
 		this.name = name;
@@ -69,12 +70,22 @@ public class Project {
 		tmp.deleteOnExit();
 		FileWriter tmpOutput = new FileWriter(tmp);
 		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDir + "/" + name);
-		new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir).runAs();
+		this.executing = new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir);
+		this.executing.runAs();
+
 		String[] commands = command.toArray(new String[command.size()]);
 		logger.debug("Ready to execute " + Arrays.toString(commands));
-		int result = new CommandToExecute(commands).at(dir).logTo(tmpOutput).runAs();
+		this.executing = new CommandToExecute(commands).at(dir).logTo(tmpOutput);
+		int result = this.executing.runAs();
 		Scanner sc = new Scanner(new FileInputStream(tmp)).useDelimiter("117473826478234211");
 		return new ProjectRunResult(sc.next(), result);
+
+	}
+
+	public void stop() {
+		if (this.executing != null) {
+			executing.stop();
+		}
 	}
 
 }

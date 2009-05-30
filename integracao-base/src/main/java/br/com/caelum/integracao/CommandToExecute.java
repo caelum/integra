@@ -42,6 +42,9 @@ public class CommandToExecute {
 	private File baseDir;
 	private PrintWriter outputWriter = new PrintWriter(System.out, true);
 	private boolean closeWriter = false;
+	private Thread waitThread;
+	private Thread outputThread;
+	private Process process;
 
 	public CommandToExecute(String... cmd) {
 		this.cmd = cmd;
@@ -59,7 +62,7 @@ public class CommandToExecute {
 		builder.command(Arrays.asList(cmd));
 		builder.redirectErrorStream(true);
 		try {
-			final Process process = builder.start();
+			this.process = builder.start();
 			Runnable waitRun = new Runnable() {
 				public void run() {
 					try {
@@ -69,24 +72,24 @@ public class CommandToExecute {
 					}
 				}
 			};
-			Thread waitThread = new Thread(waitRun);
+			this.waitThread = new Thread(waitRun);
 			waitThread.start();
 			Runnable outputRun = new Runnable() {
 				public void run() {
 					InputStream is = process.getInputStream();
 					Scanner sc = new Scanner(is).useDelimiter("\\n");
-					while(sc.hasNext()) {
+					while (sc.hasNext()) {
 						outputWriter.println(sc.next());
 						outputWriter.flush();
 					}
 					sc.close();
 				}
 			};
-			Thread outputThread = new Thread(outputRun);
+			this.outputThread = new Thread(outputRun);
 			outputThread.start();
 			waitThread.join();
 			outputThread.join();
-			if(closeWriter) {
+			if (closeWriter) {
 				this.outputWriter.close();
 			}
 			return process.exitValue();
@@ -105,5 +108,17 @@ public class CommandToExecute {
 		this.outputWriter = new PrintWriter(writer, true);
 		this.closeWriter = true;
 		return this;
+	}
+
+	public void stop() {
+		if (this.waitThread != null) {
+			this.waitThread.stop();
+		}
+		if (this.outputThread != null) {
+			this.outputThread.stop();
+		}
+		if (this.process != null) {
+			this.process.destroy();
+		}
 	}
 }

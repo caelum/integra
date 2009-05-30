@@ -41,6 +41,7 @@ import br.com.caelum.integracao.client.project.Projects;
 import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.http.Method;
 import br.com.caelum.vraptor.Resource;
+import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 @ApplicationScoped
@@ -56,9 +57,12 @@ public class JobController {
 
 	private Thread thread;
 
-	public JobController(EntryPoint point, Projects projects) {
+	private final Result result;
+
+	public JobController(EntryPoint point, Projects projects, Result result) {
 		this.point = point;
 		this.projects = projects;
+		this.result = result;
 		this.currentJob = null;
 	}
 
@@ -73,54 +77,64 @@ public class JobController {
 		}
 		Runnable runnable = new Runnable() {
 			public void run() {
-				ProjectRunResult result = null;
-				boolean success = false;
-				try {
-					result = currentJob.run(point.getBaseDir(), revision, command);
-					success = result.getResult() == 0;
-				} catch (IOException e) {
-					StringWriter writer = new StringWriter();
-					e.printStackTrace(new PrintWriter(writer, true));
-					result = new ProjectRunResult(writer.toString() ,-1);
-					success = false;
-				} finally {
-					if (currentJob != null) {
-						logger.debug("Job " + currentJob.getName() + " has finished");
-						Http http = new Http();
-						logger.debug("Acessing uri " + resultUri + " to finish the job");
-						Method post = http.post(resultUri);
-						try {
-							if (result != null) {
-								post.with("result", result.getContent());
-							} else {
-								post.with("result", "unable-to-read-result");
-							}
-							post.with("project.name", currentJob.getName());
-							post.with("revision", revision);
-							post.with("success", "" + success).with("client.id", clientId).send();
-							if (post.getResult() != 200) {
-								logger.error(post.getContent());
-								throw new RuntimeException("The server returned a problematic answer: "
-										+ post.getResult());
-							}
-						} catch (Exception e) {
-							logger.error("Was unable to notify the server of this request.", e);
-						} finally {
-							currentJob = null;
-						}
-					}
-				}
+				executeBuildFor(revision, command, resultUri, clientId);
 			}
 		};
 		this.thread = new Thread(runnable);
 		thread.start();
 	}
 
-	public Project current() {
-		return currentJob;
+	private void executeBuildFor(final String revision, final List<String> command, final String resultUri,
+			final String clientId) {
+		ProjectRunResult result = null;
+		boolean success = false;
+		try {
+			result = currentJob.run(point.getBaseDir(), revision, command);
+			success = result.getResult() == 0;
+		} catch (IOException e) {
+			StringWriter writer = new StringWriter();
+			e.printStackTrace(new PrintWriter(writer, true));
+			result = new ProjectRunResult(writer.toString(), -1);
+			success = false;
+		} finally {
+			if (currentJob != null) {
+				logger.debug("Job " + currentJob.getName() + " has finished");
+				Http http = new Http();
+				logger.debug("Acessing uri " + resultUri + " to finish the job");
+				Method post = http.post(resultUri);
+				try {
+					if (result != null) {
+						post.with("result", result.getContent());
+					} else {
+						post.with("result", "unable-to-read-result");
+					}
+					post.with("project.name", currentJob.getName());
+					post.with("revision", revision);
+					post.with("success", "" + success).with("client.id", clientId).send();
+					if (post.getResult() != 200) {
+						logger.error(post.getContent());
+						throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
+					}
+				} catch (Exception e) {
+					logger.error("Was unable to notify the server of this request.", e);
+				} finally {
+					this.currentJob = null;
+					this.thread = null;
+				}
+			}
+		}
+	}
+
+	public void current() {
+		logger.debug("Displaying info on current job: " + currentJob);
+		result.include("project", currentJob);
+		result.include("thread", thread);
 	}
 
 	public void stop() {
-		thread.stop();
+		if (this.thread != null) {
+			this.thread.stop();
+			this.currentJob.stop();
+		}
 	}
 }

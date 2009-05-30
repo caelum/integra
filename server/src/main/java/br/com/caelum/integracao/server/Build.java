@@ -83,7 +83,7 @@ public class Build {
 
 	private Calendar startTime = new GregorianCalendar();
 	private Calendar finishTime;
-
+	
 	protected Build() {
 	}
 
