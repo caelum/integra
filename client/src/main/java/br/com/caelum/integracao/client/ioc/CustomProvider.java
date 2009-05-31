@@ -27,6 +27,8 @@
  */
 package br.com.caelum.integracao.client.ioc;
 
+import br.com.caelum.integracao.client.CurrentJob;
+import br.com.caelum.integracao.client.Settings;
 import br.com.caelum.integracao.client.project.Projects;
 import br.com.caelum.vraptor.ComponentRegistry;
 import br.com.caelum.vraptor.ioc.pico.PicoProvider;
@@ -37,6 +39,8 @@ public class CustomProvider extends PicoProvider {
 	protected void registerComponents(ComponentRegistry container) {
 		super.registerComponents(container);
 		container.register(Projects.class, Projects.class);
+		container.register(Settings.class, Settings.class);
+		container.register(CurrentJob.class, CurrentJob.class);
 	}
 
 }

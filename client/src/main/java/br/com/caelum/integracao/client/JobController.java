@@ -27,19 +27,13 @@
  */
 package br.com.caelum.integracao.client;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.client.project.Project;
-import br.com.caelum.integracao.client.project.ProjectRunResult;
 import br.com.caelum.integracao.client.project.Projects;
-import br.com.caelum.integracao.http.Http;
-import br.com.caelum.integracao.http.Method;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
@@ -50,91 +44,29 @@ public class JobController {
 
 	private final Logger logger = LoggerFactory.getLogger(JobController.class);
 
-	private final EntryPoint point;
 	private final Projects projects;
 
-	private Project currentJob;
-
-	private Thread thread;
+	private final CurrentJob job;
 
 	private final Result result;
 
-	public JobController(EntryPoint point, Projects projects, Result result) {
-		this.point = point;
+	public JobController(Projects projects, CurrentJob job, Result result) {
 		this.projects = projects;
+		this.job = job;
 		this.result = result;
-		this.currentJob = null;
 	}
 
-	public synchronized void execute(Project project, final String revision, final List<String> command,
-			final String resultUri, final String clientId) {
-		if (this.currentJob != null) {
-			throw new RuntimeException("Cannot take another job as im currently processing " + currentJob.getName());
-		}
-		this.currentJob = projects.get(project.getName());
-		if (this.currentJob == null) {
-			throw new RuntimeException("Unable to find project " + project.getName());
-		}
-		Runnable runnable = new Runnable() {
-			public void run() {
-				executeBuildFor(revision, command, resultUri, clientId);
-			}
-		};
-		this.thread = new Thread(runnable);
-		thread.start();
-	}
-
-	private void executeBuildFor(final String revision, final List<String> command, final String resultUri,
-			final String clientId) {
-		ProjectRunResult result = null;
-		boolean success = false;
-		try {
-			result = currentJob.run(point.getBaseDir(), revision, command);
-			success = result.getResult() == 0;
-		} catch (IOException e) {
-			StringWriter writer = new StringWriter();
-			e.printStackTrace(new PrintWriter(writer, true));
-			result = new ProjectRunResult(writer.toString(), -1);
-			success = false;
-		} finally {
-			if (currentJob != null) {
-				logger.debug("Job " + currentJob.getName() + " has finished");
-				Http http = new Http();
-				logger.debug("Acessing uri " + resultUri + " to finish the job");
-				Method post = http.post(resultUri);
-				try {
-					if (result != null) {
-						post.with("result", result.getContent());
-					} else {
-						post.with("result", "unable-to-read-result");
-					}
-					post.with("project.name", currentJob.getName());
-					post.with("revision", revision);
-					post.with("success", "" + success).with("client.id", clientId).send();
-					if (post.getResult() != 200) {
-						logger.error(post.getContent());
-						throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
-					}
-				} catch (Exception e) {
-					logger.error("Was unable to notify the server of this request.", e);
-				} finally {
-					this.currentJob = null;
-					this.thread = null;
-				}
-			}
-		}
+	public synchronized void execute(Project project, String revision, List<String> command, String resultUri,
+			String clientId) {
+		job.start(projects.get(project.getName()), revision, command, resultUri, clientId);
 	}
 
 	public void current() {
-		logger.debug("Displaying info on current job: " + currentJob);
-		result.include("project", currentJob);
-		result.include("thread", thread);
+		logger.debug("Displaying info on current job: " + job.getProject().getName());
+		result.include("job", job);
 	}
 
 	public void stop() {
-		if (this.thread != null) {
-			this.thread.stop();
-			this.currentJob.stop();
-		}
+		job.stop();
 	}
 }

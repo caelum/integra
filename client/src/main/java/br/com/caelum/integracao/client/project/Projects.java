@@ -37,15 +37,18 @@ import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 @ApplicationScoped
 public class Projects {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(Projects.class);
-	private final Map<String, Project> projects = new HashMap<String,Project>();
-	
+	private final Map<String, Project> projects = new HashMap<String, Project>();
+
 	public Projects() {
 		logger.info("Creating Projects instance");
 	}
 
 	public Project get(String name) {
+		if (!projects.containsKey(name)) {
+			throw new RuntimeException("Unable to find project " + name);
+		}
 		return projects.get(name);
 	}
 
