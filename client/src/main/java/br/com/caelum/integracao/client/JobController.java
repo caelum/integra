@@ -34,10 +34,16 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.client.project.Project;
 import br.com.caelum.integracao.client.project.Projects;
+import br.com.caelum.vraptor.Get;
+import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
+/**
+ * Resource controlling the current job.
+ * @author guilherme silveira
+ */
 @ApplicationScoped
 @Resource
 public class JobController {
@@ -56,13 +62,18 @@ public class JobController {
 		this.result = result;
 	}
 
+	@Post
 	public synchronized void execute(Project project, String revision, List<String> command, String resultUri,
 			String clientId) {
 		job.start(projects.get(project.getName()), revision, command, resultUri, clientId);
 	}
 
+	@Get
 	public void current() {
-		logger.debug("Displaying info on current job: " + job.getProject().getName());
+		// TODO possible sync fail
+		if (job.getProject() != null) {
+			logger.debug("Displaying info on current job: " + job.getProject().getName());
+		}
 		result.include("job", job);
 	}
 

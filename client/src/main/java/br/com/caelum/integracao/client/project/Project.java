@@ -78,7 +78,13 @@ public class Project {
 		this.executing = new CommandToExecute(commands).at(dir).logTo(tmpOutput);
 		int result = this.executing.runAs();
 		Scanner sc = new Scanner(new FileInputStream(tmp)).useDelimiter("117473826478234211");
-		return new ProjectRunResult(sc.next(), result);
+		String content;
+		if(sc.hasNext()) {
+			content = "";
+		} else {
+			content = sc.next();
+		}
+		return new ProjectRunResult(content, result);
 
 	}
 

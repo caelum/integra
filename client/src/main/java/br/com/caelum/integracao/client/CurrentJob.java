@@ -31,6 +31,7 @@ package br.com.caelum.integracao.client;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Calendar;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -50,6 +51,8 @@ public class CurrentJob {
 	private Project project;
 	private Thread thread;
 	private final Settings point;
+	
+	private Calendar start;
 
 	public CurrentJob(Settings settings) {
 		this.point = settings;
@@ -72,6 +75,7 @@ public class CurrentJob {
 		if (isRunning()) {
 			throw new RuntimeException("Cannot take another job as im currently processing " + this.project.getName());
 		}
+		this.start = Calendar.getInstance();
 		this.project = project;
 		Runnable runnable = new Runnable() {
 			public void run() {
@@ -80,10 +84,11 @@ public class CurrentJob {
 				} finally {
 					CurrentJob.this.project = null;
 					CurrentJob.this.thread = null;
+					CurrentJob.this.start = null;
 				}
 			}
 		};
-		this.thread = new Thread(runnable);
+		this.thread = new Thread(runnable, project.getName() + " revision " + revision);
 		thread.start();
 	}
 
@@ -134,8 +139,14 @@ public class CurrentJob {
 		if (this.project != null) {
 			this.project.stop();
 		}
-		this.thread = null;
-		this.project = null;
+	}
+	
+	public double getTime() {
+		return (System.currentTimeMillis() - start.getTimeInMillis())/1000.0;
+	}
+	
+	public Calendar getStart() {
+		return start;
 	}
 
 }
