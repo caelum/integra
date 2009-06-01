@@ -25,42 +25,58 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.plugin;
 
 import java.util.List;
 
-import org.hibernate.Session;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.Component;
-import br.com.caelum.vraptor.ioc.RequestScoped;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+import org.hibernate.validator.NotNull;
 
-@RequestScoped
-@Component
-public class Application {
+import br.com.caelum.integracao.server.Phase;
 
-	private final Session session;
+@Entity
+public class PluginToRun {
+
+	@Id
+	@GeneratedValue
+	private Long id;
+
+	@Column(name = "pos")
+	private int position;
+
+	@NotNull
+	private Class<? extends Plugin> type;
 	
-	public Application(Database db) {
-		this.session = db.getSession();
+	@ManyToOne
+	private Phase phase;
+
+	@OneToMany
+	@Cascade(value = CascadeType.ALL)
+	private List<PluginParameter> config;
+	
+	public PluginToRun(Class<? extends Plugin> type, Phase phase) {
+		this.type = type;
+		this.phase = phase;
+		this.position = phase.getPlugins().size() + 1;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Config getConfig() {
-		List<Config> list = session.createQuery("from Config").list();
-		if(list.isEmpty()) {
-			Config cfg = new Config();
-			cfg.registerBasicPlugins();
-			session.save(cfg);
-			return cfg;
-		}
-		return list.get(0);
+	protected PluginToRun() {
 	}
-
-	public void update(Config config) {
-		Config result=getConfig();
-		result.setHostname(config.getHostname());
-		result.setPort(config.getPort());
+	
+	public Class<? extends Plugin> getType() {
+		return type;
+	}
+	
+	public Long getId() {
+		return id;
 	}
 
 }

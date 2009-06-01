@@ -44,4 +44,17 @@ public class ApplicationTest extends BaseTest {
 		assertThat(result.getPort(), is(equalTo(9091)));
 	}
 
+	@Test
+	public void shouldReturnACustomConfigInstanceIfAlreadyExists() {
+		Application app = new Application(database);
+		Config result = app.getConfig();
+		result.setHostname("custom");
+		result.setPort(2030);
+		app.update(result);
+		database.getSession().clear();
+		result = app.getConfig();
+		assertThat(result.getHostname(), is(equalTo("custom")));
+		assertThat(result.getPort(), is(equalTo(2030)));
+	}
+
 }

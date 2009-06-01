@@ -23,16 +23,39 @@
 		<tr>
 			<c:forEach var="phase" items="${project.phases }">
 				<td>
-				<ul>
+				<table>
 					<c:forEach var="cmd" items="${phase.commands}">
-						<li>${cmd.name } (<a href="command/${cmd.id}?_method=DELETE">remove</a>)</li>
+						<tr>
+							<td>${cmd.name }</td>
+							<td>(<a href="command/${cmd.id}?_method=DELETE">remove</a>)</td>
+						</tr>
 					</c:forEach>
-					<li>
-					<form action="command" method="post"><input type="hidden"
-						name="phase.id" value="${phase.id }" /> <input type="text"
-						name="command" value="" size="5" /> <input type="submit"
-						value="new command" /></form>
-				</ul>
+					<tr>
+						<td>
+						<form action="command" method="post"><input type="hidden"
+							name="phase.id" value="${phase.id }" /> <input type="text"
+							name="command" value="" size="5" /> <input type="submit"
+							value="new command" /></form>
+						</td>
+					</tr>
+					<c:forEach var="plugin" items="${phase.plugins}">
+						<tr>
+							<td>${plugin.type.name }</td>
+							<td>(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)</td>
+						</tr>
+					</c:forEach>
+					<tr>
+						<td>
+						<form action="plugin" method="post"><input type="hidden"
+							name="phase.id" value="${phase.id }" /> <select
+							name="pluginType">
+							<c:forEach var="plugin" items="${plugins }">
+								<option value="${plugin.name }">${plugin.simpleName }</option>
+							</c:forEach>
+						</select> <input type="submit" value="add" /></form>
+						</td>
+					</tr>
+				</table>
 				</td>
 				<td></td>
 			</c:forEach>

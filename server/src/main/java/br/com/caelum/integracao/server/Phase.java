@@ -43,6 +43,7 @@ import javax.persistence.OrderBy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 /**
@@ -58,7 +59,11 @@ public class Phase {
 
 	@OneToMany(mappedBy = "phase")
 	@OrderBy("position")
-	private List<ExecuteCommandLine> commands;
+	private List<ExecuteCommandLine> commands = new ArrayList<ExecuteCommandLine>();
+	
+	@OneToMany(mappedBy="phase")
+	@OrderBy("position")
+	private List<PluginToRun> plugins;
 
 	@Id
 	@GeneratedValue
@@ -164,6 +169,10 @@ public class Phase {
 		}
 		getCommands().remove(command);
 		projects.remove(command);
+	}
+	
+	public List<PluginToRun> getPlugins() {
+		return plugins;
 	}
 
 }

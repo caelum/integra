@@ -27,9 +27,17 @@
  */
 package br.com.caelum.integracao.server;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+
+import org.hibernate.annotations.CollectionOfElements;
+
+import br.com.caelum.integracao.server.plugin.Plugin;
+import br.com.caelum.integracao.server.plugin.copy.CopyFiles;
 
 @Entity
 public class Config {
@@ -41,6 +49,9 @@ public class Config {
 	private String hostname = "localhost";
 	
 	private Integer port = 9091;
+
+	@CollectionOfElements
+	private List<Class<? extends Plugin>> plugins;
 
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
@@ -60,6 +71,17 @@ public class Config {
 
 	public String getUrl() {
 		return getHostname() + ":" + getPort();
+	}
+	
+	public void registerBasicPlugins() {
+		getAvailablePlugins().add(CopyFiles.class);
+	}
+	
+	public List<Class<? extends Plugin>> getAvailablePlugins() {
+		if(plugins==null) {
+			plugins = new ArrayList<Class<? extends Plugin>>();
+		}
+		return plugins;
 	}
 
 }

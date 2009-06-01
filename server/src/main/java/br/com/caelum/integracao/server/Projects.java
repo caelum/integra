@@ -32,6 +32,7 @@ import java.util.Collection;
 import org.hibernate.Session;
 
 import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
 /**
@@ -86,6 +87,14 @@ public class Projects {
 
 	public void register(Phase phase) {
 		session.save(phase);
+	}
+
+	public Phase load(Phase phase) {
+		return (Phase) session.load(Phase.class, phase.getId());
+	}
+
+	public void register(PluginToRun pluginToRun) {
+		session.save(pluginToRun);
 	}
 
 }

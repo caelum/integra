@@ -67,6 +67,8 @@ public class Project {
 	private Long id;
 
 	private static final Logger logger = LoggerFactory.getLogger(Project.class);
+	
+	@NotNull
 	private Class<?> controlType;
 	@NotEmpty
 	private String uri;

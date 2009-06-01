@@ -25,42 +25,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.plugin;
 
-import java.util.List;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 
-import org.hibernate.Session;
-
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.Component;
-import br.com.caelum.vraptor.ioc.RequestScoped;
-
-@RequestScoped
-@Component
-public class Application {
-
-	private final Session session;
-	
-	public Application(Database db) {
-		this.session = db.getSession();
-	}
-	
-	@SuppressWarnings("unchecked")
-	public Config getConfig() {
-		List<Config> list = session.createQuery("from Config").list();
-		if(list.isEmpty()) {
-			Config cfg = new Config();
-			cfg.registerBasicPlugins();
-			session.save(cfg);
-			return cfg;
-		}
-		return list.get(0);
-	}
-
-	public void update(Config config) {
-		Config result=getConfig();
-		result.setHostname(config.getHostname());
-		result.setPort(config.getPort());
-	}
+/**
+ * Basic plugin info is saved somewhere else
+ * 
+ * @author guilherme silveira
+ */
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public interface Plugin {
 
 }

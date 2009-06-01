@@ -25,42 +25,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.plugin.copy;
 
-import java.util.List;
+import br.com.caelum.integracao.server.plugin.Plugin;
 
-import org.hibernate.Session;
-
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.Component;
-import br.com.caelum.vraptor.ioc.RequestScoped;
-
-@RequestScoped
-@Component
-public class Application {
-
-	private final Session session;
+/**
+ * Copies artifacts from the client machine to the server.
+ * 
+ * @author guilherme silveira
+ */
+public class CopyFiles implements Plugin{
 	
-	public Application(Database db) {
-		this.session = db.getSession();
-	}
 	
-	@SuppressWarnings("unchecked")
-	public Config getConfig() {
-		List<Config> list = session.createQuery("from Config").list();
-		if(list.isEmpty()) {
-			Config cfg = new Config();
-			cfg.registerBasicPlugins();
-			session.save(cfg);
-			return cfg;
-		}
-		return list.get(0);
-	}
-
-	public void update(Config config) {
-		Config result=getConfig();
-		result.setHostname(config.getHostname());
-		result.setPort(config.getPort());
-	}
 
 }
