@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server.plugin;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +95,10 @@ public class PluginToRun {
 			map.put(param.getKey(), param.getValue());
 		}
 		return map;
+	}
+	
+	public PluginInformation getInformation() throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		return type.getConstructor().newInstance();
 	}
 
 }

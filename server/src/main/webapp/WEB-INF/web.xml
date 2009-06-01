@@ -8,10 +8,10 @@
 
 	<jsp-config>
 		<jsp-property-group>
-			<display-name>todos os jsps</display-name>
+			<display-name>all freemarker templates</display-name>
 			<url-pattern>*.ftl</url-pattern>
 			<page-encoding>ISO-8859-1</page-encoding>
-			<include-prelude>/header.jspf</include-prelude>
+			<include-prelude>/header.ftlf</include-prelude>
 		</jsp-property-group>
 	</jsp-config>
 
@@ -69,6 +69,7 @@
 	<servlet-mapping>
 		<servlet-name>freemarker</servlet-name>
 		<url-pattern>*.ftl</url-pattern>
+		<url-pattern>*.ftlf</url-pattern>
 	</servlet-mapping>
   
 

@@ -27,37 +27,46 @@
  */
 package br.com.caelum.integracao.server.logic;
 
+import javax.servlet.http.HttpServletRequest;
+
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.vraptor.InterceptionException;
 import br.com.caelum.vraptor.Intercepts;
+import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.core.InterceptorStack;
+import br.com.caelum.vraptor.ioc.RequestScoped;
 import br.com.caelum.vraptor.resource.ResourceMethod;
 
+@RequestScoped
 @Intercepts
-public class DatabaseInterceptor  implements br.com.caelum.vraptor.Interceptor {
+public class DatabaseInterceptor implements br.com.caelum.vraptor.Interceptor {
 
-    private final Database controller;
+	private final Database controller;
+	private final Result result;
+	private final HttpServletRequest request;
 
-    public DatabaseInterceptor(Database controller) {
-        this.controller = controller;
-    }
-    
+	public DatabaseInterceptor(Database controller, Result result, HttpServletRequest request) {
+		this.controller = controller;
+		this.result = result;
+		this.request = request;
+	}
 
-    public void intercept(InterceptorStack stack, ResourceMethod method, Object instance) throws InterceptionException {
-        try {
-            controller.beginTransaction();
-            stack.next(method, instance);
-            controller.commit();
-        } finally {
-            if (controller.hasTransaction()) {
-                controller.rollback();
-            }
-            controller.close();
-        }
-    }
+	public void intercept(InterceptorStack stack, ResourceMethod method, Object instance) throws InterceptionException {
+		result.include("contextPath", request.getContextPath());
+		try {
+			controller.beginTransaction();
+			stack.next(method, instance);
+			controller.commit();
+		} finally {
+			if (controller.hasTransaction()) {
+				controller.rollback();
+			}
+			controller.close();
+		}
+	}
 
-    public boolean accepts(ResourceMethod method) {
-        return true;
-    }
+	public boolean accepts(ResourceMethod method) {
+		return true;
+	}
 
 }
