@@ -1,0 +1,9 @@
+<decorators defaultdir="/decorators">
+	<excludes>
+		<pattern>*.js</pattern>
+		<pattern>*.css</pattern>
+	</excludes>
+	<decorator name="integracao" page="main.jsp">
+		<pattern>/*</pattern>
+	</decorator>
+</decorators>

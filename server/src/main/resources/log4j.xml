@@ -36,7 +36,7 @@
         </category>
 
         <category name="freemarker">
-                <priority value="INFO" />
+                <priority value="DEBUG" />
                 <appender-ref ref="stdout" />
         </category>
 
