@@ -31,6 +31,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.jmock.Expectations;
@@ -59,6 +61,22 @@ public class PhaseTest extends BaseTest {
 		compile.remove(projects, test);
 		assertThat(deploy.getPosition(), is(equalTo(1)));
 		mockery.assertIsSatisfied();
+	}
+	
+	@Test
+	public void shouldOnlyCreateADirIfThereAreNoCommands() throws IOException {
+		final Build build = mockery.mock(Build.class);
+		Phase compile = new Phase();
+		compile.setPosition(5L);
+		final File dir = new File(baseDir, "custom-dir");
+		mockery.checking(new Expectations() {
+			{
+				one(build).getFile("5"); will(returnValue(dir));
+			}
+		});
+		compile.execute(null, build, null, null);
+		mockery.assertIsSatisfied();
+		assertThat(dir.exists(), is(equalTo(true)));
 	}
 
 }
