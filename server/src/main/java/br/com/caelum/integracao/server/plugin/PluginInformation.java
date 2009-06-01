@@ -25,63 +25,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.plugin;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 
-import org.hibernate.annotations.CollectionOfElements;
-
-import br.com.caelum.integracao.server.plugin.PluginInformation;
-import br.com.caelum.integracao.server.plugin.copy.CopyFiles;
-
-@Entity
-public class Config {
+/**
+ * Basic plugin info is saved somewhere else
+ * 
+ * @author guilherme silveira
+ */
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public interface PluginInformation {
 	
-	@Id
-	@GeneratedValue
-	public Long id;
+	List<String> getParameters();
 	
-	private String hostname = "localhost";
-	
-	private Integer port = 9091;
-
-	@CollectionOfElements
-	private List<Class<? extends PluginInformation>> plugins;
-
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
-	}
-
-	public String getHostname() {
-		return hostname;
-	}
-
-	public void setPort(Integer port) {
-		this.port = port;
-	}
-
-	public Integer getPort() {
-		return port;
-	}
-
-	public String getUrl() {
-		return getHostname() + ":" + getPort();
-	}
-	
-	public void registerBasicPlugins() {
-		getAvailablePlugins().add(CopyFiles.class);
-	}
-	
-	public List<Class<? extends PluginInformation>> getAvailablePlugins() {
-		if(plugins==null) {
-			plugins = new ArrayList<Class<? extends PluginInformation>>();
-		}
-		return plugins;
-	}
+	Plugin getPlugin(Map<String, String> parameters);
 
 }

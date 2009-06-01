@@ -25,63 +25,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.plugin.copy;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.hibernate.annotations.CollectionOfElements;
+import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.plugin.Plugin;
 
-import br.com.caelum.integracao.server.plugin.PluginInformation;
-import br.com.caelum.integracao.server.plugin.copy.CopyFiles;
+/**
+ * A plugin instance.
+ * @author guilherme silveira
+ */
+public class CopyFilesInstance implements Plugin{
 
-@Entity
-public class Config {
 	
-	@Id
-	@GeneratedValue
-	public Long id;
-	
-	private String hostname = "localhost";
-	
-	private Integer port = 9091;
+	private final Logger logger = LoggerFactory.getLogger(CopyFilesInstance.class);
+	private final String[] dirs;
 
-	@CollectionOfElements
-	private List<Class<? extends PluginInformation>> plugins;
-
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
+	public CopyFilesInstance(String[] dirs) {
+		this.dirs = dirs;
 	}
 
-	public String getHostname() {
-		return hostname;
-	}
-
-	public void setPort(Integer port) {
-		this.port = port;
-	}
-
-	public Integer getPort() {
-		return port;
-	}
-
-	public String getUrl() {
-		return getHostname() + ":" + getPort();
-	}
-	
-	public void registerBasicPlugins() {
-		getAvailablePlugins().add(CopyFiles.class);
-	}
-	
-	public List<Class<? extends PluginInformation>> getAvailablePlugins() {
-		if(plugins==null) {
-			plugins = new ArrayList<Class<? extends PluginInformation>>();
-		}
-		return plugins;
+	public boolean after(Phase phase) {
+		// connects to the computer who executed this phase and asks it to send the files
+		
+		logger.debug("Copying " + Arrays.toString(dirs));
+		return false;
 	}
 
 }

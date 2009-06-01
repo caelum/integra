@@ -40,9 +40,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
@@ -60,17 +63,18 @@ public class Phase {
 	@OneToMany(mappedBy = "phase")
 	@OrderBy("position")
 	private List<ExecuteCommandLine> commands = new ArrayList<ExecuteCommandLine>();
-	
-	@OneToMany(mappedBy="phase")
+
+	@OneToMany
 	@OrderBy("position")
-	private List<PluginToRun> plugins;
+	@Cascade(CascadeType.ALL)
+	private List<PluginToRun> plugins = new ArrayList<PluginToRun>();
 
 	@Id
 	@GeneratedValue
 	private Long id;
 	private String name;
-	
-	@Column(name="pos")
+
+	@Column(name = "pos")
 	private long position;
 
 	@ManyToOne
@@ -106,7 +110,8 @@ public class Phase {
 				}
 				return;
 			}
-			command.executeAt(client, build, control, File.createTempFile("connection", "txt"), app.getConfig().getUrl());
+			command.executeAt(client, build, control, File.createTempFile("connection", "txt"), app.getConfig()
+					.getUrl());
 		}
 	}
 
@@ -123,7 +128,7 @@ public class Phase {
 	}
 
 	public List<ExecuteCommandLine> getCommands() {
-		if(commands==null) {
+		if (commands == null) {
 			this.commands = new ArrayList<ExecuteCommandLine>();
 		}
 		return commands;
@@ -162,17 +167,36 @@ public class Phase {
 	}
 
 	public void remove(Projects projects, ExecuteCommandLine command) {
-		for(ExecuteCommandLine cmd : getCommands()) {
-			if(cmd.getPosition()>command.getPosition()) {
-				cmd.setPosition(cmd.getPosition()-1);
+		for (ExecuteCommandLine cmd : getCommands()) {
+			if (cmd.getPosition() > command.getPosition()) {
+				cmd.setPosition(cmd.getPosition() - 1);
 			}
 		}
 		getCommands().remove(command);
 		projects.remove(command);
 	}
-	
+
 	public List<PluginToRun> getPlugins() {
 		return plugins;
+	}
+
+	public boolean runAfter() {
+		for (PluginToRun toRun : getPlugins()) {
+			Plugin plugin = toRun.getPlugin();
+			if (plugin == null) {
+				return false;
+			} else {
+				if (!plugin.after(this)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public void add(PluginToRun run) {
+		getPlugins().add(run);
+		run.setPosition(this.getPlugins().size());
 	}
 
 }

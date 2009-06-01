@@ -83,7 +83,7 @@ public class Build {
 
 	private Calendar startTime = new GregorianCalendar();
 	private Calendar finishTime;
-	
+
 	protected Build() {
 	}
 
@@ -145,7 +145,7 @@ public class Build {
 		int result = control.checkout(tmpFile);
 		this.revision = control.getRevision();
 		tmpFile.renameTo(getFile("checkout.txt"));
-		logger.debug("Checking out " + project.getName() + ", build = " + buildCount + " resulted in " +result);
+		logger.debug("Checking out " + project.getName() + ", build = " + buildCount + " resulted in " + result);
 		return result;
 	}
 
@@ -167,18 +167,19 @@ public class Build {
 		PrintWriter writer = new PrintWriter(new FileWriter(file), true);
 		writer.print(result);
 		writer.close();
-		boolean executedAllCommands = executedCommandsFromThisPhase.size() == project.getPhases().get(phasePosition)
-				.getCommandCount();
-		if (executedAllCommands && !successSoFar) {
-			finish(false);
-		}
-		if (executedAllCommands && successSoFar) {
-			currentPhase++;
-			executedCommandsFromThisPhase.clear();
-			if (project.getPhases().size() != currentPhase) {
-				project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients, app);
+		Phase actualPhase = project.getPhases().get(phasePosition);
+		boolean executedAllCommands = executedCommandsFromThisPhase.size() == actualPhase.getCommandCount();
+		if (executedAllCommands) {
+			if (successSoFar && actualPhase.runAfter()) {
+				currentPhase++;
+				executedCommandsFromThisPhase.clear();
+				if (project.getPhases().size() != currentPhase) {
+					project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients, app);
+				} else {
+					finish(true);
+				}
 			} else {
-				finish(true);
+				finish(false);
 			}
 		}
 	}

@@ -27,15 +27,18 @@
  */
 package br.com.caelum.integracao.server.plugin;
 
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import br.com.caelum.integracao.server.Phase;
 
 /**
- * Basic plugin info is saved somewhere else
- * 
+ * A real plugin.
  * @author guilherme silveira
  */
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public interface Plugin {
+
+	/**
+	 * Runs after a phase is sucessfully executed. Should return false in order
+	 * to stop the flow, meaning the build should fail.
+	 */
+	boolean after(Phase phase);
 
 }

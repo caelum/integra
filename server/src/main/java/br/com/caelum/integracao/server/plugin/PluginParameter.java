@@ -30,6 +30,7 @@ package br.com.caelum.integracao.server.plugin;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class PluginParameter {
@@ -38,8 +39,24 @@ public class PluginParameter {
 	@GeneratedValue
 	private Long id;
 	
+	@ManyToOne
+	private PluginToRun plugin;
+	
+	public PluginParameter(PluginToRun plugin) {
+		this.plugin = plugin;
+	}
+	protected PluginParameter() {
+	}
+	
 	private String key;
 	
 	private String value;
+
+	public String getKey() {
+		return key;
+	}
+	public String getValue() {
+		return value;
+	}
 
 }

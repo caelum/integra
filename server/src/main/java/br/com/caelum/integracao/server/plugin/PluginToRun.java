@@ -27,23 +27,24 @@
  */
 package br.com.caelum.integracao.server.plugin;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.NotNull;
-
-import br.com.caelum.integracao.server.Phase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Entity
 public class PluginToRun {
+	
+	private static final Logger logger = LoggerFactory.getLogger(PluginToRun.class);
 
 	@Id
 	@GeneratedValue
@@ -53,30 +54,46 @@ public class PluginToRun {
 	private int position;
 
 	@NotNull
-	private Class<? extends Plugin> type;
+	private Class<? extends PluginInformation> type;
 	
-	@ManyToOne
-	private Phase phase;
-
-	@OneToMany
-	@Cascade(value = CascadeType.ALL)
+	@OneToMany(mappedBy="plugin")
 	private List<PluginParameter> config;
 	
-	public PluginToRun(Class<? extends Plugin> type, Phase phase) {
+	public PluginToRun(Class<? extends PluginInformation> type) {
 		this.type = type;
-		this.phase = phase;
-		this.position = phase.getPlugins().size() + 1;
 	}
 	
 	protected PluginToRun() {
 	}
 	
-	public Class<? extends Plugin> getType() {
+	public Class<? extends PluginInformation> getType() {
 		return type;
 	}
 	
 	public Long getId() {
 		return id;
+	}
+	
+	public void setPosition(int position) {
+		this.position = position;
+	}
+	
+	public Plugin getPlugin() {
+		try {
+			PluginInformation plugin = type.getDeclaredConstructor().newInstance();
+			return plugin.getPlugin(createParameters());
+		} catch (Exception e) {
+			logger.error("Unable to instantiate the plugin " + type.getName(), e);
+			return null;
+		}
+	}
+
+	private Map<String, String> createParameters() {
+		Map<String, String> map = new HashMap<String, String>();
+		for(PluginParameter param : config) {
+			map.put(param.getKey(), param.getValue());
+		}
+		return map;
 	}
 
 }

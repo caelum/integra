@@ -27,15 +27,32 @@
  */
 package br.com.caelum.integracao.server.plugin.copy;
 
-import br.com.caelum.integracao.server.plugin.Plugin;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.plugin.PluginInformation;
 
 /**
  * Copies artifacts from the client machine to the server.
  * 
  * @author guilherme silveira
  */
-public class CopyFiles implements Plugin{
+public class CopyFiles implements PluginInformation{
 	
+	public List<String> getParameters() {
+		return Arrays.asList(new String[] {"artifactDirectories"});
+	}
 	
+	public boolean after(Phase phase) {
+		return false;
+	}
+	
+	public CopyFilesInstance getPlugin(Map<String, String> parameters) {
+		String[] dirs = parameters.get("artifactDirectories").split(",");
+		return new CopyFilesInstance(dirs);
+	}
+
 
 }
