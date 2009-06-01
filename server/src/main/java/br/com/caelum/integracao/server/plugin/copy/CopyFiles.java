@@ -39,20 +39,20 @@ import br.com.caelum.integracao.server.plugin.PluginInformation;
  * 
  * @author guilherme silveira
  */
-public class CopyFiles implements PluginInformation{
-	
+public class CopyFiles implements PluginInformation {
+
 	public List<String> getParameters() {
-		return Arrays.asList(new String[] {"artifactDirectories"});
+		return Arrays.asList(new String[] { "artifactDirectories" });
 	}
-	
+
 	public boolean after(Phase phase) {
 		return false;
 	}
-	
+
 	public CopyFilesInstance getPlugin(Map<String, String> parameters) {
-		String[] dirs = parameters.get("artifactDirectories").split(",");
+		String value = parameters.get("artifactDirectories");
+		String[] dirs = value == null ? new String[0] : value.split(",");
 		return new CopyFilesInstance(dirs);
 	}
-
 
 }

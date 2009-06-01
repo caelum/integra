@@ -19,4 +19,9 @@
                 <appender-ref ref="stdout" />
         </category>
 
+        <category name="org.apache.commons">
+                <priority value="INFO" />
+                <appender-ref ref="stdout" />
+        </category>
+
 </log4j:configuration>
