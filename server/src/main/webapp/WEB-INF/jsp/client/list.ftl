@@ -1,14 +1,14 @@
 <h2>Clients list</h2>
 <table>
-	<c:forEach var="client" items="${free}">
+	<#list free as client>
 		<tr>
 			<td>${client.host }</td>
 			<td>${client.port }</td>
 			<td>free</td>
 			<td><a href="${client.id }/deactivate">deactivate</a></td>
 		</tr>
-	</c:forEach>
-	<c:forEach var="client" items="${locked}">
+	</#list>
+	<#list locked as client>
 		<tr>
 			<td>${client.host }</td>
 			<td>${client.port }</td>
@@ -16,13 +16,13 @@
 			<td><a href="http://${client.host }:${client.port }${client.context }/job/current">ask for its job</a></td>
 			<td><a href="http://${client.host }:${client.port }${client.context }/job/stop">stop</a></td>
 		</tr>
-	</c:forEach>
-	<c:forEach var="client" items="${inactive}">
+	</#list>
+	<#list inactive as client>
 		<tr>
 			<td>${client.host }</td>
 			<td>${client.port }</td>
 			<td>inactive</td>
 			<td><a href="${client.id }/activate">activate</a></td>
 		</tr>
-	</c:forEach>
+	</#list>
 </table>

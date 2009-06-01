@@ -1,18 +1,18 @@
-<c:forEach var="project" items="${projectList}">
+<#list projectList as project>
 	<h2>${project.name}</h2>
 	Uri: ${project.uri }<br />
 	Basedir: ${project.buildsDirectory.absolutePath }<br />
 	Control: ${project.controlType.name } <br />
 	Actions: <a href="run?project.name=${project.name }">run</a>
 	<br />
-	Last build: ${project.lastBuild.time }<br />
+	Last build: ${project.lastBuild.time?datetime }<br />
 
 	<table>
 		<tr>
-			<c:forEach var="phase" items="${project.phases }">
+			<#list project.phases as phase>
 				<td>${phase.name } (${phase.position })</td>
 				<td>--></td>
-			</c:forEach>
+			</#list>
 			<td>
 			<form action="phase" method="post"><input type="hidden"
 				name="project.name" value="${project.name }" /> <input size="5"
@@ -21,15 +21,15 @@
 			</td>
 		</tr>
 		<tr>
-			<c:forEach var="phase" items="${project.phases }">
+			<#list project.phases as phase>
 				<td>
 				<table>
-					<c:forEach var="cmd" items="${phase.commands}">
+					<#list phase.commands as cmd>
 						<tr>
 							<td>${cmd.name }</td>
 							<td>(<a href="command/${cmd.id}?_method=DELETE">remove</a>)</td>
 						</tr>
-					</c:forEach>
+					</#list>
 					<tr>
 						<td>
 						<form action="command" method="post"><input type="hidden"
@@ -38,51 +38,55 @@
 							value="new command" /></form>
 						</td>
 					</tr>
-					<c:forEach var="plugin" items="${phase.plugins}">
+					<#list phase.plugins as plugin>
 						<tr>
-							<td>${plugin.type.name }</td>
+							<td>${plugin.type.simpleName }
+							<div id="plugin_${plugin.id }"></div>
+							</td>
+							<td>(<a href="#" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)</td>
 							<td>(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)</td>
 						</tr>
-					</c:forEach>
+					</#list>
 					<tr>
 						<td>
 						<form action="plugin" method="post"><input type="hidden"
 							name="phase.id" value="${phase.id }" /> <select
 							name="pluginType">
-							<c:forEach var="plugin" items="${plugins }">
+							<#list plugins as plugin>
 								<option value="${plugin.name }">${plugin.simpleName }</option>
-							</c:forEach>
+							</#list>
 						</select> <input type="submit" value="add" /></form>
 						</td>
 					</tr>
 				</table>
 				</td>
 				<td></td>
-			</c:forEach>
+			</#list>
 		</tr>
 	</table>
 	<table>
-		<c:forEach var="build" items="${project.builds }">
+		<#list project.builds as build>
 			<tr>
 				<td><a
-					href="${pageContext.request.contextPath }/project/${project.name}/${build.buildCount}?filename=">results</a>
+					href="${project.name}/${build.buildCount}?filename=">results</a>
 				</td>
 				<td>build-${build.buildCount}</td>
 				<td>revision '${build.revision }'</td>
-				<td><c:if test="${not build.finished }">
+				<td>
+				<#if !build.finished>
 					<font color="orange">building... who knows?</font>
-				</c:if> <c:if test="${build.finished }">
-					<c:if test="${build.successSoFar }">
+				<#else>
+					<#if build.successSoFar>
 						<font color="green">success</font>
-					</c:if>
-					<c:if test="${not build.successSoFar }">
+					<#else>
 						<font color="red">fail</font>
-					</c:if>
-				</c:if></td>
+					</#if>
+				</#if>
+				</td>
 			</tr>
-		</c:forEach>
+		</#list>
 	</table>
-</c:forEach>
+</#list>
 
 <form action="" method="post">
 <table>
