@@ -5,15 +5,15 @@
 
   <display-name>integracao-server</display-name>
 
+	<filter>
+		<filter-name>sitemesh</filter-name>
+		<filter-class>com.opensymphony.module.sitemesh.filter.PageFilter</filter-class>
+	</filter>
 
-	<jsp-config>
-		<jsp-property-group>
-			<display-name>all freemarker templates</display-name>
-			<url-pattern>*.ftl</url-pattern>
-			<page-encoding>ISO-8859-1</page-encoding>
-			<include-prelude>/header.ftlf</include-prelude>
-		</jsp-property-group>
-	</jsp-config>
+	<filter-mapping>
+		<filter-name>sitemesh</filter-name>
+		<url-pattern>*.ftl</url-pattern>
+	</filter-mapping>
 
   <context-param>
     <param-name>br.com.caelum.vraptor.provider</param-name>

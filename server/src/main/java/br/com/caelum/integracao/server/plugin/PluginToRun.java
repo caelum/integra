@@ -100,5 +100,14 @@ public class PluginToRun {
 	public PluginInformation getInformation() throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		return type.getConstructor().newInstance();
 	}
+	
+	public String get(String key) {
+		for(PluginParameter param : this.config) {
+			if(param.getKey().equals(key)) {
+				return param.getValue();
+			}
+		}
+		return "";
+	}
 
 }
