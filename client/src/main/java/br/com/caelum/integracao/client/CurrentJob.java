@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.client.project.Project;
 import br.com.caelum.integracao.client.project.ProjectRunResult;
+import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.http.Method;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
@@ -106,7 +107,7 @@ public class CurrentJob {
 		} finally {
 			if (project != null) {
 				logger.debug("Job " + project.getName() + " has finished");
-				Http http = new Http();
+				Http http = new DefaultHttp();
 				logger.debug("Acessing uri " + resultUri + " to finish the job");
 				Method post = http.post(resultUri);
 				try {
