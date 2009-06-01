@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import org.jmock.Expectations;
 import org.junit.Test;
 
+import br.com.caelum.integracao.server.plugin.Plugin;
+import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.project.BaseTest;
 
 public class PhaseTest extends BaseTest {
@@ -75,8 +77,67 @@ public class PhaseTest extends BaseTest {
 			}
 		});
 		compile.execute(null, build, null, null);
-		mockery.assertIsSatisfied();
 		assertThat(dir.exists(), is(equalTo(true)));
+		mockery.assertIsSatisfied();
+	}
+	
+	@Test
+	public void shouldInvokeAfterPhaseOnAllPlugins() {
+		final PluginToRun run = mockery.mock(PluginToRun.class);
+		final PluginToRun second = mockery.mock(PluginToRun.class, "second");
+		final Phase test = new Phase();
+		final Plugin plugin = mockery.mock(Plugin.class);
+		mockery.checking(new Expectations() {
+			{
+				one(run).setPosition(1);
+				one(second).setPosition(2);
+				one(run).getPlugin(); will(returnValue(plugin));
+				one(second).getPlugin(); will(returnValue(plugin));
+				exactly(2).of(plugin).after(test); will(returnValue(true));
+			}
+		});
+		test.add(run);
+		test.add(second);
+		assertThat(test.runAfter(), is(equalTo(true)));
+		mockery.assertIsSatisfied();
+	}
+	
+	@Test
+	public void shouldNotInvokeNextPluginIfPreviousOneWasntCreated() {
+		final PluginToRun run = mockery.mock(PluginToRun.class);
+		final PluginToRun second = mockery.mock(PluginToRun.class, "second");
+		final Phase test = new Phase();
+		mockery.checking(new Expectations() {
+			{
+				one(run).setPosition(1);
+				one(second).setPosition(2);
+				one(run).getPlugin(); will(returnValue(null));
+			}
+		});
+		test.add(run);
+		test.add(second);
+		assertThat(test.runAfter(), is(equalTo(false)));
+		mockery.assertIsSatisfied();
+	}
+
+	@Test
+	public void shouldNotInvokeNextPluginIfPreviousOneReturnedFalse() {
+		final PluginToRun run = mockery.mock(PluginToRun.class);
+		final PluginToRun second = mockery.mock(PluginToRun.class, "second");
+		final Phase test = new Phase();
+		final Plugin plugin = mockery.mock(Plugin.class);
+		mockery.checking(new Expectations() {
+			{
+				one(run).setPosition(1);
+				one(second).setPosition(2);
+				one(run).getPlugin(); will(returnValue(plugin));
+				one(plugin).after(test); will(returnValue(false));
+			}
+		});
+		test.add(run);
+		test.add(second);
+		assertThat(test.runAfter(), is(equalTo(false)));
+		mockery.assertIsSatisfied();
 	}
 
 }
