@@ -25,64 +25,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.http;
 
-import java.util.List;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.params.HttpClientParams;
 
-import org.hibernate.Session;
-
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.RequestScoped;
-
-@RequestScoped
-@SuppressWarnings("unchecked")
-public class Clients {
-
-	private final Session session;
-
-	public Clients(Database database) {
-		this.session = database.getSession();
+public class DefaultHttp implements Http {
+	
+	private final HttpClient client;
+	
+	public DefaultHttp() {
+		HttpClientParams param = new HttpClientParams();
+		param.setConnectionManagerTimeout(1000);
+		client  = new HttpClient(param);
+	}
+	
+	public Method post(String uri) {
+		PostMethod post = new PostMethod(uri);
+		return new Method(client, post);
 	}
 
-	public void register(Client client) {
-		client.activate();
-		this.session.save(client);
-	}
-
-	public List<Client> freeClients() {
-		return this.session.createQuery("from Client as c where c.busy = false and c.active = true").list();
-	}
-
-	public List<Client> lockedClients() {
-		return this.session.createQuery("from Client as c where c.busy = true and c.active = true").list();
-	}
-
-	public List<Client> inactiveClients() {
-		return this.session.createQuery("from Client as c where c.active = false").list();
-	}
-
-	public Client getFreeClient(String reason) {
-		List<Client> clients = freeClients();
-		if (clients.isEmpty()) {
-			throw new IllegalStateException("There are not enough clients");
-		}
-		for (Client client : clients) {
-			if(client.isAlive()) {
-				client.work(reason);
-				clients.remove(client);
-				return client;
-			}
-		}
-		throw new IllegalStateException("There are not online clients");
-	}
-
-	public void release(Long id) {
-		Client client = (Client) session.load(Client.class, id);
-		client.leaveJob();
-	}
-
-	public Client get(Client client) {
-		return (Client) session.load(Client.class, client.getId());
-	}
-
+	
 }

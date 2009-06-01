@@ -32,6 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.validator.Min;
@@ -83,6 +85,9 @@ public class Build {
 
 	private Calendar startTime = new GregorianCalendar();
 	private Calendar finishTime;
+	
+	@OneToMany(mappedBy="build")
+	private List<UsedClient> usedClients = new ArrayList<UsedClient>(); 
 
 	protected Build() {
 	}
@@ -228,5 +233,15 @@ public class Build {
 			return true;
 		}
 		return previous.isSuccessSoFar() != isSuccessSoFar();
+	}
+
+	public List<UsedClient> getClientsFor(Phase phase) {
+		List<UsedClient> clients = new ArrayList<UsedClient>();
+		for(UsedClient client : usedClients) {
+			if(phase.getCommands().contains(client.getExecutedCommand())) {
+				clients.add(client);
+			}
+		}
+		return clients;
 	}
 }

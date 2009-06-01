@@ -27,7 +27,10 @@
  */
 package br.com.caelum.integracao.client;
 
+import java.io.IOException;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,10 +59,13 @@ public class JobController {
 
 	private final Result result;
 
-	public JobController(Projects projects, CurrentJob job, Result result) {
+	private final HttpServletResponse response;
+
+	public JobController(Projects projects, CurrentJob job, Result result, HttpServletResponse response) {
 		this.projects = projects;
 		this.job = job;
 		this.result = result;
+		this.response = response;
 	}
 
 	@Post
@@ -69,12 +75,15 @@ public class JobController {
 	}
 
 	@Get
-	public void current() {
+	@Post
+	public void current() throws IOException {
 		// TODO possible sync fail
+		result.include("job", job);
 		if (job.getProject() != null) {
 			logger.debug("Displaying info on current job: " + job.getProject().getName());
+		} else {
+			response.sendError(410);
 		}
-		result.include("job", job);
 	}
 
 	public void stop() {

@@ -25,36 +25,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.plugin.copy;
+package br.com.caelum.integracao.server;
 
-import java.util.Arrays;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import br.com.caelum.integracao.server.Build;
-import br.com.caelum.integracao.server.Phase;
-import br.com.caelum.integracao.server.plugin.Plugin;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 /**
- * A plugin instance.
+ * Stores the information of a specific client used to execute a command in a
+ * client machine.
+ * 
  * @author guilherme silveira
+ * 
  */
-public class CopyFilesInstance implements Plugin{
+@Entity
+public class UsedClient {
 
-	
-	private final Logger logger = LoggerFactory.getLogger(CopyFilesInstance.class);
-	private final String[] dirs;
-
-	public CopyFilesInstance(String[] dirs) {
-		this.dirs = dirs;
+	public UsedClient(Client client) {
+		this.client = client;
 	}
 
-	public boolean after(Build build, Phase phase) {
-		// connects to the computer who executed this phase and asks it to send the files
-		
-		logger.debug("Copying " + Arrays.toString(dirs));
-		return false;
+	public UsedClient() {
+	}
+
+	@Id
+	@GeneratedValue
+	private Long id;
+
+	@ManyToOne
+	private ExecuteCommandLine command;
+
+	@ManyToOne
+	private Build build;
+
+	@ManyToOne
+	private Client client;
+
+	public ExecuteCommandLine getExecutedCommand() {
+		return command;
+	}
+
+	public Client getClient() {
+		return client;
 	}
 
 }

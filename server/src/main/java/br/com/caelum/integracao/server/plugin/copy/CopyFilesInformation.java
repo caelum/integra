@@ -25,64 +25,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.plugin.copy;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import org.hibernate.Session;
+import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.plugin.PluginInformation;
 
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.RequestScoped;
+/**
+ * Copies artifacts from the client machine to the server.
+ * 
+ * @author guilherme silveira
+ */
+public class CopyFilesInformation implements PluginInformation {
 
-@RequestScoped
-@SuppressWarnings("unchecked")
-public class Clients {
-
-	private final Session session;
-
-	public Clients(Database database) {
-		this.session = database.getSession();
+	public List<String> getParameters() {
+		return Arrays.asList(new String[] { "artifactDirectories" });
 	}
 
-	public void register(Client client) {
-		client.activate();
-		this.session.save(client);
+	public boolean after(Phase phase) {
+		return false;
 	}
 
-	public List<Client> freeClients() {
-		return this.session.createQuery("from Client as c where c.busy = false and c.active = true").list();
-	}
-
-	public List<Client> lockedClients() {
-		return this.session.createQuery("from Client as c where c.busy = true and c.active = true").list();
-	}
-
-	public List<Client> inactiveClients() {
-		return this.session.createQuery("from Client as c where c.active = false").list();
-	}
-
-	public Client getFreeClient(String reason) {
-		List<Client> clients = freeClients();
-		if (clients.isEmpty()) {
-			throw new IllegalStateException("There are not enough clients");
-		}
-		for (Client client : clients) {
-			if(client.isAlive()) {
-				client.work(reason);
-				clients.remove(client);
-				return client;
-			}
-		}
-		throw new IllegalStateException("There are not online clients");
-	}
-
-	public void release(Long id) {
-		Client client = (Client) session.load(Client.class, id);
-		client.leaveJob();
-	}
-
-	public Client get(Client client) {
-		return (Client) session.load(Client.class, client.getId());
+	public CopyFiles getPlugin(Map<String, String> parameters) {
+		String value = parameters.get("artifactDirectories");
+		String[] dirs = value == null ? new String[0] : value.split(",");
+		return new CopyFiles(dirs);
 	}
 
 }

@@ -35,6 +35,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.apache.commons.httpclient.HttpException;
+
+import br.com.caelum.integracao.http.Http;
+import br.com.caelum.integracao.http.Method;
 import br.com.caelum.integracao.server.action.Dispatcher;
 
 /**
@@ -133,6 +137,25 @@ public class Client {
 	
 	public void activate() {
 		this.active = true;
+	}
+
+	public boolean isAlive() {
+		Method post = new Http().post(getBaseUri() + "/job/current");
+		try {
+			post.send();
+		} catch (HttpException e) {
+			return false;
+		} catch (IOException e) {
+			return false;
+		}
+		if(post.getResult()==410) {
+			leaveJob();
+			return true;
+		}
+		if(post.getResult()!=200) {
+			return false;
+		}
+		return true;
 	}
 
 }

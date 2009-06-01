@@ -5,6 +5,7 @@
 			<td>${client.host }</td>
 			<td>${client.port }</td>
 			<td>free</td>
+			<td>${client.alive?string('alive', 'dead')}</td>
 			<td><a href="${client.id }/deactivate">deactivate</a></td>
 		</tr>
 	</#list>

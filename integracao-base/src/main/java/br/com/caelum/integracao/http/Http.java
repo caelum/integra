@@ -27,16 +27,13 @@
  */
 package br.com.caelum.integracao.http;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
+/**
+ * Provides a higher level api to http requests.
+ * @author guilherme silveira
+ *
+ */
+public interface Http {
 
-public class Http {
-	
-	private final HttpClient client = new HttpClient();
-	
-	public Method post(String uri) {
-		PostMethod post = new PostMethod(uri);
-		return new Method(client, post);
-	}
-	
+	public abstract Method post(String uri);
+
 }

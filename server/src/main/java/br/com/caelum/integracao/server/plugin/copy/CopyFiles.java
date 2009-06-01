@@ -27,32 +27,64 @@
  */
 package br.com.caelum.integracao.server.plugin.copy;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.httpclient.HttpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import br.com.caelum.integracao.http.Http;
+import br.com.caelum.integracao.http.Method;
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Phase;
-import br.com.caelum.integracao.server.plugin.PluginInformation;
+import br.com.caelum.integracao.server.UsedClient;
+import br.com.caelum.integracao.server.plugin.Plugin;
 
 /**
- * Copies artifacts from the client machine to the server.
+ * Copies files from another machine to the server.
  * 
  * @author guilherme silveira
  */
-public class CopyFiles implements PluginInformation {
+public class CopyFiles implements Plugin {
 
-	public List<String> getParameters() {
-		return Arrays.asList(new String[] { "artifactDirectories" });
+	private final Logger logger = LoggerFactory.getLogger(CopyFiles.class);
+	private final String[] dirs;
+	private final Http http;
+
+	public CopyFiles(Http http, String[] dirs) {
+		this.http = http;
+		this.dirs = dirs;
 	}
 
-	public boolean after(Phase phase) {
-		return false;
-	}
-
-	public CopyFilesInstance getPlugin(Map<String, String> parameters) {
-		String value = parameters.get("artifactDirectories");
-		String[] dirs = value == null ? new String[0] : value.split(",");
-		return new CopyFilesInstance(dirs);
+	public boolean after(Build build, Phase phase) {
+		String projectName = build.getProject().getName();
+		logger.debug("Copying for project " + projectName + " dirs " + Arrays.toString(dirs));
+		List<UsedClient> clients = build.getClientsFor(phase);
+		boolean success = true;
+		for (UsedClient client : clients) {
+			String uri = client.getClient().getBaseUri();
+			logger.debug("Copying from server " + uri);
+			Method post = http.post(uri + "/plugin/CopyFiles/" + projectName);
+			for(int i =0;i<dirs.length;i++) {
+				post.with("directory[" + i + "]", dirs[i]);
+			}
+			try {
+				post.send();
+				if (post.getResult() != 200) {
+					success = false;
+					logger.error("Unable to copy from server " + uri + " due to " + post.getResult());
+				}
+			} catch (HttpException e) {
+				logger.error("Unable to copy from server " + uri, e);
+				success = false;
+			} catch (IOException e) {
+				logger.error("Unable to copy from server " + uri, e);
+				success = false;
+			}
+		}
+		return success;
 	}
 
 }
