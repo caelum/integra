@@ -55,7 +55,7 @@ public class BuildController {
 
 
 	@Get
-	@Path("/project/{project.name}/{buildId}")
+	@Path("/project/{project.name}/build/{buildId}")
 	public void show(Project project, Long buildId, String filename) {
 		logger.debug("Displaying build result for " + project.getName() + "@build-" + buildId + "@" + filename);
 		project = projects.get(project.getName());
@@ -74,7 +74,7 @@ public class BuildController {
 	}
 
 	@Get
-	@Path("/download/project/{project.name}/{buildId}")
+	@Path("/download/project/{project.name}/build/{buildId}")
 	public File showFile(Project project, Long buildId, String filename) {
 		logger.debug("Displaying file for " + project.getName() + "@" + buildId + ", file=" + filename);
 		project = projects.get(project.getName());

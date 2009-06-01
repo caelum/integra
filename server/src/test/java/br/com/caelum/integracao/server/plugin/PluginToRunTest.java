@@ -27,42 +27,29 @@
  */
 package br.com.caelum.integracao.server.plugin;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
-@Entity
-public class PluginParameter {
-	
-	@Id
-	@GeneratedValue
-	private Long id;
-	
-	@ManyToOne
-	private PluginToRun plugin;
-	
-	private String key;
-	private String value;
-	
-	protected PluginParameter() {
-	}
-	
-	public PluginParameter(PluginToRun plugin, String key, String value) {
-		this.plugin = plugin;
-		this.key = key;
-		this.value = value;
-	}
+import java.util.Arrays;
 
-	public String getKey() {
-		return key;
+import org.junit.Test;
+
+public class PluginToRunTest {
+	
+	@Test
+	public void shouldInsertNewParameterValuesWhenUpdating() {
+		PluginToRun plugin = new PluginToRun();
+		plugin.updateParameters(Arrays.asList("host"), Arrays.asList("127.0.0.1"));
+		assertThat(plugin.getParameter("host").getValue(), is(equalTo("127.0.0.1")));
 	}
-	public String getValue() {
-		return value;
-	}
-	public void setValue(String value) {
-		this.value = value;
-		
+	
+	@Test
+	public void shouldOverrideParameterValeusWhenUpdating() {
+		PluginToRun plugin = new PluginToRun();
+		plugin.updateParameters(Arrays.asList("host"), Arrays.asList("127.0.0.1"));
+		plugin.updateParameters(Arrays.asList("host"), Arrays.asList("localhost"));
+		assertThat(plugin.getParameter("host").getValue(), is(equalTo("localhost")));
 	}
 
 }

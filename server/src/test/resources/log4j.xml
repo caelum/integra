@@ -15,7 +15,7 @@
         </category>
 
         <category name="br.com.caelum.integracao">
-                <priority value="INFO" />
+                <priority value="DEBUG" />
                 <appender-ref ref="stdout" />
         </category>
 

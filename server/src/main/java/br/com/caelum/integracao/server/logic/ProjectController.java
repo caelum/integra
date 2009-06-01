@@ -87,7 +87,7 @@ public class ProjectController {
 		result.include("projectList", projects.all());
 		result.include("plugins", app.getConfig().getAvailablePlugins());
 	}
-	
+
 	@Post
 	@Path("/project/")
 	public void create(Project project, String baseDir) {
@@ -136,16 +136,36 @@ public class ProjectController {
 
 	@Post
 	@Path("/finish/project/{project.name}/{buildId}/{phasePosition}/{commandId}")
-	public void finish(Project project, Long buildId, int phasePosition, int commandId, String result, boolean success,
+	public void finish(final Project project, final Long buildId, final int phasePosition, final int commandId, final String result, final boolean success,
 			Client client) throws IOException, InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		clients.release(client.getId());
-		logger.debug("Finishing " + project.getName() + " build " + buildId + " phase " + phasePosition + " command "
-				+ commandId);
-		project = projects.get(project.getName());
-		Build build = project.getBuild(buildId);
-		build.finish(phasePosition, commandId, result, success, clients, app);
+		new Thread(new Runnable() {
+			public void run() {
+				nextPhase(project, buildId, phasePosition, commandId, result, success);
+			}
+		}).start();
 		this.result.use(Results.nothing());
+	}
+	
+	private void nextPhase(Project project, Long buildId, int phasePosition, int commandId, String result, boolean success) {
+		Database db = new Database(factory);
+		db.beginTransaction();
+		try {
+			logger.debug("Finishing " + project.getName() + " build " + buildId + " phase " + phasePosition
+					+ " command " + commandId);
+			project = new Projects(db).get(project.getName());
+			Build build = project.getBuild(buildId);
+			build.finish(phasePosition, commandId, result, success, new Clients(db), app);
+			db.commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (db.hasTransaction()) {
+				db.rollback();
+			}
+			db.close();
+		}
 	}
 
 	private void showList() {

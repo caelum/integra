@@ -28,10 +28,12 @@
 package br.com.caelum.integracao.server;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.Session;
 
 import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.plugin.PluginParameter;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
@@ -95,6 +97,12 @@ public class Projects {
 
 	public PluginToRun get(PluginToRun plugin) {
 		return (PluginToRun) session.load(PluginToRun.class, plugin.getId());
+	}
+
+	public void registerOrUpdate(List<PluginParameter> config) {
+		for(PluginParameter param : config) {
+			session.saveOrUpdate(param);
+		}
 	}
 
 

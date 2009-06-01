@@ -74,12 +74,12 @@ public class Project {
 		this.executing.runAs();
 
 		String[] commands = command.toArray(new String[command.size()]);
-		logger.debug("Ready to execute " + Arrays.toString(commands));
+		logger.debug("Ready to execute " + Arrays.toString(commands) + " @ " + tmp.getAbsolutePath());
 		this.executing = new CommandToExecute(commands).at(dir).logTo(tmpOutput);
 		int result = this.executing.runAs();
 		Scanner sc = new Scanner(new FileInputStream(tmp)).useDelimiter("117473826478234211");
 		String content;
-		if(sc.hasNext()) {
+		if(!sc.hasNext()) {
 			content = "";
 		} else {
 			content = sc.next();

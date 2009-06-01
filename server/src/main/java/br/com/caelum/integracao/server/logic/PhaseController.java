@@ -27,6 +27,11 @@
  */
 package br.com.caelum.integracao.server.logic;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import br.com.caelum.integracao.server.ExecuteCommandLine;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
@@ -40,10 +45,14 @@ import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Put;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
+import br.com.caelum.vraptor.ioc.RequestScoped;
 import br.com.caelum.vraptor.view.Results;
 
+@RequestScoped
 @Resource
 public class PhaseController {
+	
+	private final Logger logger = LoggerFactory.getLogger(PhaseController.class);
 
 	private final Projects projects;
 	private final Result result;
@@ -83,6 +92,7 @@ public class PhaseController {
 		showList();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Post
 	@Path("/project/plugin")
 	public void addPlugin(Phase phase, String pluginType) throws ClassNotFoundException {
@@ -93,16 +103,19 @@ public class PhaseController {
 	}
 
 	@Get
-	@Path("/project/plugin/${plugin.id}")
+	@Path("/project/plugin/{plugin.id}")
 	public void viewPlugin(PluginToRun plugin) throws ClassNotFoundException {
 		result.include("plugin", projects.get(plugin));
 	}
 
 	@Put
-	@Path("/project/plugin/${plugin.id}")
-	public void updatePlugin(PluginToRun plugin) throws ClassNotFoundException {
+	@Path("/project/plugin/{plugin.id}")
+	public void updatePlugin(PluginToRun plugin, List<String> keys, List<String> values) throws ClassNotFoundException {
+		logger.debug("Updating " + plugin.getId());
 		plugin = projects.get(plugin);
-		result.include("plugin", projects.get(plugin));
+		plugin.updateParameters(keys, values);
+		projects.registerOrUpdate(plugin.getConfig());
+		showList();
 	}
 
 }

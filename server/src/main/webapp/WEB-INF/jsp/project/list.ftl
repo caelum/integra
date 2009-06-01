@@ -43,7 +43,7 @@
 							<td>${plugin.type.simpleName }
 							<div id="plugin_${plugin.id }"></div>
 							</td>
-							<td>(<a href="#" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)</td>
+							<td>(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)</td>
 							<td>(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)</td>
 						</tr>
 					</#list>
@@ -68,10 +68,10 @@
 		<#list project.builds as build>
 			<tr>
 				<td><a
-					href="${project.name}/${build.buildCount}?filename=">results</a>
+					href="${project.name}/build/${build.buildCount}?filename=">results</a>
 				</td>
 				<td>build-${build.buildCount}</td>
-				<td>revision '${build.revision }'</td>
+				<td>revision '${build.revision!'unknown' }'</td>
 				<td>
 				<#if !build.finished>
 					<font color="orange">building... who knows?</font>

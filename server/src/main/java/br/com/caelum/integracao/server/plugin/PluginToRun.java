@@ -28,6 +28,7 @@
 package br.com.caelum.integracao.server.plugin;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 @Entity
 public class PluginToRun {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(PluginToRun.class);
 
 	@Id
@@ -56,29 +57,29 @@ public class PluginToRun {
 
 	@NotNull
 	private Class<? extends PluginInformation> type;
-	
-	@OneToMany(mappedBy="plugin")
+
+	@OneToMany(mappedBy = "plugin")
 	private List<PluginParameter> config;
-	
+
 	public PluginToRun(Class<? extends PluginInformation> type) {
 		this.type = type;
 	}
-	
+
 	protected PluginToRun() {
 	}
-	
+
 	public Class<? extends PluginInformation> getType() {
 		return type;
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
-	
+
 	public void setPosition(int position) {
 		this.position = position;
 	}
-	
+
 	public Plugin getPlugin() {
 		try {
 			PluginInformation plugin = type.getDeclaredConstructor().newInstance();
@@ -91,23 +92,45 @@ public class PluginToRun {
 
 	private Map<String, String> createParameters() {
 		Map<String, String> map = new HashMap<String, String>();
-		for(PluginParameter param : config) {
+		for (PluginParameter param : config) {
 			map.put(param.getKey(), param.getValue());
 		}
 		return map;
 	}
-	
-	public PluginInformation getInformation() throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+
+	public PluginInformation getInformation() throws IllegalArgumentException, SecurityException,
+			InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		return type.getConstructor().newInstance();
 	}
-	
-	public String get(String key) {
-		for(PluginParameter param : this.config) {
-			if(param.getKey().equals(key)) {
-				return param.getValue();
+
+	public PluginParameter getParameter(String key) {
+		for (PluginParameter param : this.config) {
+			if (param.getKey().equals(key)) {
+				return param;
 			}
 		}
-		return "";
+		PluginParameter plugin = new PluginParameter(this, key, "");
+		config.add(plugin);
+		return plugin;
+	}
+
+	public void updateParameters(List<String> keys, List<String> values) {
+		for (int i = 0; i < keys.size(); i++) {
+			String key = keys.get(i);
+			PluginParameter param = getParameter(key);
+			param.setValue(values.get(i));
+		}
+	}
+
+	public List<PluginParameter> getConfig() {
+		if (config == null) {
+			config = new ArrayList<PluginParameter>();
+		}
+		return config;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }
