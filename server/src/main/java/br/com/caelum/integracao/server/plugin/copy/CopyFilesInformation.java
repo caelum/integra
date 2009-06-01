@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
 
@@ -52,7 +53,7 @@ public class CopyFilesInformation implements PluginInformation {
 	public CopyFiles getPlugin(Map<String, String> parameters) {
 		String value = parameters.get("artifactDirectories");
 		String[] dirs = value == null ? new String[0] : value.split(",");
-		return new CopyFiles(dirs);
+		return new CopyFiles(new Http(), dirs);
 	}
 
 }

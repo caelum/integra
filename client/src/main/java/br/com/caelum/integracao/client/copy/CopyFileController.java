@@ -25,70 +25,31 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.client;
+package br.com.caelum.integracao.client.copy;
 
-import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import br.com.caelum.integracao.client.project.Project;
-import br.com.caelum.integracao.client.project.Projects;
-import br.com.caelum.vraptor.Get;
+import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
-import br.com.caelum.vraptor.ioc.ApplicationScoped;
 import br.com.caelum.vraptor.view.Results;
 
-/**
- * Resource controlling the current job.
- * @author guilherme silveira
- */
-@ApplicationScoped
 @Resource
-public class JobController {
-
-	private final Logger logger = LoggerFactory.getLogger(JobController.class);
-
-	private final Projects projects;
-
-	private final CurrentJob job;
+public class CopyFileController {
 
 	private final Result result;
 
-	private final HttpServletResponse response;
-
-	public JobController(Projects projects, CurrentJob job, Result result, HttpServletResponse response) {
-		this.projects = projects;
-		this.job = job;
+	public CopyFileController(Result result) {
 		this.result = result;
-		this.response = response;
 	}
 
 	@Post
-	public synchronized void execute(Project project, String revision, List<String> command, String resultUri,
-			String clientId) {
-		job.start(projects.get(project.getName()), revision, command, resultUri, clientId);
+	@Path("/plugin/CopyFiles/{project.name}")
+	public void download(Project project, List<String> directory) {
+		
+		result.use(Results.nothing());
 	}
 
-	@Get
-	@Post
-	public void current() throws IOException {
-		// TODO possible sync fail
-		result.include("job", job);
-		if (job.getProject() != null) {
-			logger.debug("Displaying info on current job: " + job.getProject().getName());
-		} else {
-			response.sendError(410);
-			result.use(Results.nothing());
-		}
-	}
-
-	public void stop() {
-		job.stop();
-	}
 }
