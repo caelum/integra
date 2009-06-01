@@ -170,7 +170,8 @@ public class Build {
 		Phase actualPhase = project.getPhases().get(phasePosition);
 		boolean executedAllCommands = executedCommandsFromThisPhase.size() == actualPhase.getCommandCount();
 		if (executedAllCommands) {
-			if (successSoFar && actualPhase.runAfter()) {
+			successSoFar &= actualPhase.runAfter(this);
+			if (successSoFar) {
 				currentPhase++;
 				executedCommandsFromThisPhase.clear();
 				if (project.getPhases().size() != currentPhase) {
@@ -218,5 +219,14 @@ public class Build {
 
 	public Long getId() {
 		return id;
+	}
+
+	public boolean buildStatusChangedFromLastBuild() {
+		Build previous = getProject().getBuild(getBuildCount() - 1);
+		if (previous == null) {
+			// first build ever
+			return true;
+		}
+		return previous.isSuccessSoFar() != isSuccessSoFar();
 	}
 }

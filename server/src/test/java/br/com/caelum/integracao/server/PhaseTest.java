@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.jmock.Expectations;
+import org.junit.Before;
 import org.junit.Test;
 
 import br.com.caelum.integracao.server.plugin.Plugin;
@@ -43,6 +44,13 @@ import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.project.BaseTest;
 
 public class PhaseTest extends BaseTest {
+	
+	private Build build;
+
+	@Before
+	public void mockData() {
+		this.build = mockery.mock(Build.class);
+	}
 	@Test
 	public void commandRemovalShouldUpdateOtherIndexes() {
 		final ExecuteCommandLine test = new ExecuteCommandLine();
@@ -67,7 +75,6 @@ public class PhaseTest extends BaseTest {
 	
 	@Test
 	public void shouldOnlyCreateADirIfThereAreNoCommands() throws IOException {
-		final Build build = mockery.mock(Build.class);
 		Phase compile = new Phase();
 		compile.setPosition(5L);
 		final File dir = new File(baseDir, "custom-dir");
@@ -93,12 +100,12 @@ public class PhaseTest extends BaseTest {
 				one(second).setPosition(2);
 				one(run).getPlugin(); will(returnValue(plugin));
 				one(second).getPlugin(); will(returnValue(plugin));
-				exactly(2).of(plugin).after(test); will(returnValue(true));
+				exactly(2).of(plugin).after(build, test); will(returnValue(true));
 			}
 		});
 		test.add(run);
 		test.add(second);
-		assertThat(test.runAfter(), is(equalTo(true)));
+		assertThat(test.runAfter(build), is(equalTo(true)));
 		mockery.assertIsSatisfied();
 	}
 	
@@ -116,7 +123,7 @@ public class PhaseTest extends BaseTest {
 		});
 		test.add(run);
 		test.add(second);
-		assertThat(test.runAfter(), is(equalTo(false)));
+		assertThat(test.runAfter(build), is(equalTo(false)));
 		mockery.assertIsSatisfied();
 	}
 
@@ -131,12 +138,12 @@ public class PhaseTest extends BaseTest {
 				one(run).setPosition(1);
 				one(second).setPosition(2);
 				one(run).getPlugin(); will(returnValue(plugin));
-				one(plugin).after(test); will(returnValue(false));
+				one(plugin).after(build, test); will(returnValue(false));
 			}
 		});
 		test.add(run);
 		test.add(second);
-		assertThat(test.runAfter(), is(equalTo(false)));
+		assertThat(test.runAfter(build), is(equalTo(false)));
 		mockery.assertIsSatisfied();
 	}
 

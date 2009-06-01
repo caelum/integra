@@ -180,13 +180,18 @@ public class Phase {
 		return plugins;
 	}
 
-	public boolean runAfter() {
+	/**
+	 * Runs all plugins after this build phase has been completed, no matter
+	 * with a sucess or not. Plugins are run in order and if one tells the
+	 * system to stop, no other plugins are run.
+	 */
+	public boolean runAfter(Build build) {
 		for (PluginToRun toRun : getPlugins()) {
 			Plugin plugin = toRun.getPlugin();
 			if (plugin == null) {
 				return false;
 			} else {
-				if (!plugin.after(this)) {
+				if (!plugin.after(build, this)) {
 					return false;
 				}
 			}

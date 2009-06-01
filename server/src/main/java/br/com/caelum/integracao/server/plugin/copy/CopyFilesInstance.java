@@ -32,6 +32,7 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.plugin.Plugin;
 
@@ -49,7 +50,7 @@ public class CopyFilesInstance implements Plugin{
 		this.dirs = dirs;
 	}
 
-	public boolean after(Phase phase) {
+	public boolean after(Build build, Phase phase) {
 		// connects to the computer who executed this phase and asks it to send the files
 		
 		logger.debug("Copying " + Arrays.toString(dirs));

@@ -83,6 +83,7 @@ public class Project {
 	private Long buildCount = 0L;
 	
 	@OneToMany(mappedBy="project")
+	@OrderBy("buildCount")
 	private final List<Build> builds = new ArrayList<Build>();
 	@NotNull
 	private Calendar lastBuild = new GregorianCalendar();

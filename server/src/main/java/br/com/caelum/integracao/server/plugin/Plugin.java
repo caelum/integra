@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server.plugin;
 
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Phase;
 
 /**
@@ -39,6 +40,6 @@ public interface Plugin {
 	 * Runs after a phase is sucessfully executed. Should return false in order
 	 * to stop the flow, meaning the build should fail.
 	 */
-	boolean after(Phase phase);
+	boolean after(Build build, Phase phase);
 
 }

@@ -156,7 +156,7 @@ public class ProjectController {
 					+ " command " + commandId);
 			project = new Projects(db).get(project.getName());
 			Build build = project.getBuild(buildId);
-			build.finish(phasePosition, commandId, result, success, new Clients(db), app);
+			build.finish(phasePosition, commandId, result, success, new Clients(db), new Application(db));
 			db.commit();
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -34,6 +34,7 @@ import org.apache.commons.mail.SimpleEmail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.plugin.Plugin;
 
@@ -57,7 +58,7 @@ public class SendMail implements Plugin {
 		this.fromMail = fromMail;
 	}
 
-	public boolean after(Phase phase) {
+	public boolean after(Build build, Phase phase) {
 		logger.debug("Preparing to send mail to " + Arrays.toString(recipients));
 		try {
 			SimpleEmail email = new SimpleEmail();
@@ -66,14 +67,21 @@ public class SendMail implements Plugin {
 				email.addTo(recipient, recipient);
 			}
 			email.setFrom(fromMail, fromName);
-			email.setSubject(phase.getProject().getName() + " built.");
-			email.setMsg("Build completed.");
+			if(build.isSuccessSoFar()) {
+				if(build.buildStatusChangedFromLastBuild()) {
+					email.setSubject(phase.getProject().getName()  + " " + build.getRevision() + " was a success.");
+					email.setMsg(phase.getProject().getName()  + " build " + build.getRevision() + " was a success.");
+				}
+			} else {
+				email.setSubject(phase.getProject().getName()  + " " + build.getRevision() + " failed.");
+				email.setMsg(phase.getProject().getName()  + " build " + build.getRevision() + " failed.");
+			}
 			email.send();
+			return true;
 		} catch (EmailException e) {
 			logger.debug("Unable to send mail", e);
 			return false;
 		}
-		return false;
 	}
 
 }
