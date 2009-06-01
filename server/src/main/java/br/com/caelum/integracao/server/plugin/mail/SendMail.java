@@ -71,6 +71,9 @@ public class SendMail implements Plugin {
 				if(build.buildStatusChangedFromLastBuild()) {
 					email.setSubject(phase.getProject().getName()  + " " + build.getRevision() + " was a success.");
 					email.setMsg(phase.getProject().getName()  + " build " + build.getRevision() + " was a success.");
+				} else {
+					logger.debug("There is no need to send the email...");
+					return true;
 				}
 			} else {
 				email.setSubject(phase.getProject().getName()  + " " + build.getRevision() + " failed.");

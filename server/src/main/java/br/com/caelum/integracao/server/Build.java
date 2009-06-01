@@ -175,6 +175,7 @@ public class Build {
 		Phase actualPhase = project.getPhases().get(phasePosition);
 		boolean executedAllCommands = executedCommandsFromThisPhase.size() == actualPhase.getCommandCount();
 		if (executedAllCommands) {
+			logger.debug("Preparing to execute plugins for " + getProject().getName() + " with success = " + successSoFar);
 			successSoFar &= actualPhase.runAfter(this);
 			if (successSoFar) {
 				currentPhase++;
