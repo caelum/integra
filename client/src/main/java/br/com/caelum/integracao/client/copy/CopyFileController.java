@@ -29,6 +29,7 @@ package br.com.caelum.integracao.client.copy;
 
 import java.util.List;
 
+import br.com.caelum.integracao.client.Settings;
 import br.com.caelum.integracao.client.project.Project;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
@@ -40,15 +41,19 @@ import br.com.caelum.vraptor.view.Results;
 public class CopyFileController {
 
 	private final Result result;
+	private final Settings settings;
 
-	public CopyFileController(Result result) {
+	public CopyFileController(Result result, Settings settings) {
 		this.result = result;
+		this.settings = settings;
 	}
 
 	@Post
 	@Path("/plugin/CopyFiles/{project.name}")
 	public void download(Project project, List<String> directory) {
-		
+		//for(String dir : directory) {
+			//settings.getBaseDir() + project.getName();
+		//}
 		result.use(Results.nothing());
 	}
 

@@ -28,11 +28,15 @@
 
 package br.com.caelum.integracao.client;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Scanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +56,10 @@ public class CurrentJob {
 	private Project project;
 	private Thread thread;
 	private final Settings point;
-	
+
 	private Calendar start;
+
+	private File outputFile;
 
 	public CurrentJob(Settings settings) {
 		this.point = settings;
@@ -86,6 +92,7 @@ public class CurrentJob {
 					CurrentJob.this.project = null;
 					CurrentJob.this.thread = null;
 					CurrentJob.this.start = null;
+					CurrentJob.this.outputFile = null;
 				}
 			}
 		};
@@ -97,7 +104,9 @@ public class CurrentJob {
 		ProjectRunResult result = null;
 		boolean success = false;
 		try {
-			result = project.run(point.getBaseDir(), revision, command);
+			this.outputFile = File.createTempFile("integra-run-" + revision, ".txt");
+			outputFile.deleteOnExit();
+			result = project.run(point.getBaseDir(), revision, command, outputFile);
 			success = result.getResult() == 0;
 		} catch (IOException e) {
 			StringWriter writer = new StringWriter();
@@ -141,13 +150,25 @@ public class CurrentJob {
 			this.project.stop();
 		}
 	}
-	
+
 	public double getTime() {
-		return (System.currentTimeMillis() - start.getTimeInMillis())/1000.0;
+		return (System.currentTimeMillis() - start.getTimeInMillis()) / 1000.0;
 	}
-	
+
 	public Calendar getStart() {
 		return start;
+	}
+
+	public String getOutputContent() throws FileNotFoundException {
+		Scanner sc = new Scanner(new FileInputStream(this.outputFile)).useDelimiter("117473826478234211");
+		try {
+			if (sc.hasNext()) {
+				return sc.next();
+			}
+			return "";
+		} finally {
+			sc.close();
+		}
 	}
 
 }

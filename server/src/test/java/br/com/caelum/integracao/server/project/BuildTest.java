@@ -106,7 +106,7 @@ public class BuildTest extends BaseTest {
 				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkout((File) with(an(File.class)));
+				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision();
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
@@ -132,7 +132,7 @@ public class BuildTest extends BaseTest {
 				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkout((File) with(an(File.class)));
+				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision();
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
@@ -164,7 +164,7 @@ public class BuildTest extends BaseTest {
 				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkout((File) with(an(File.class)));
+				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision();
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
@@ -196,7 +196,7 @@ public class BuildTest extends BaseTest {
 				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkout((File) with(an(File.class)));
+				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision();
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();

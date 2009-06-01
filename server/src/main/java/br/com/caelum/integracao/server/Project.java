@@ -170,7 +170,7 @@ public class Project {
 
 	public void setBaseDir(File dir) {
 		this.baseDir = dir;
-		new File(baseDir, name).mkdirs();
+		this.baseDir.mkdirs();
 	}
 
 	public void setBuildCount(Long buildCount) {

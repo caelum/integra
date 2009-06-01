@@ -10,6 +10,9 @@
 	<textarea cols="120" rows="20"><c:forEach var="trace"
 		items="${job.thread.stackTrace}">${trace.className}.${trace.methodName }:${trace.lineNumber }
 </c:forEach></textarea>
+<pre>
+${job.outputContent }
+</pre>
 </c:if>
 <c:if test="${not job.running}">
 	No jobs running

@@ -30,11 +30,16 @@ package br.com.caelum.integracao.server.scm;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * An scm implementation.
+ * 
+ * @author guilherme silveira
+ */
 public interface ScmControl {
 
 	public File getDir();
 
-	int checkout(File log) throws IOException;
+	int checkoutOrUpdate(File log) throws IOException;
 
 	String getRevision();
 

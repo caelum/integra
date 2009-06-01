@@ -64,17 +64,15 @@ public class Project {
 		return uri;
 	}
 
-	public ProjectRunResult run(File baseDir, String revision, List<String> command) throws IOException {
+	public ProjectRunResult run(File baseDir, String revision, List<String> command, File tmp) throws IOException {
 		File dir = new File(baseDir, name);
-		File tmp = File.createTempFile("integra-run-" + revision, ".txt");
-		tmp.deleteOnExit();
 		FileWriter tmpOutput = new FileWriter(tmp);
 		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDir + "/" + name);
 		this.executing = new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir);
 		this.executing.run();
 
 		String[] commands = command.toArray(new String[command.size()]);
-		logger.debug("Ready to execute " + Arrays.toString(commands) + " @ " + tmp.getAbsolutePath());
+		logger.debug("Ready to execute " + Arrays.toString(commands) + " @ " + dir.getAbsolutePath() + " using log=" + tmp.getAbsolutePath());
 		this.executing = new CommandToExecute(commands).at(dir).logTo(tmpOutput);
 		int result = this.executing.run();
 		Scanner sc = new Scanner(new FileInputStream(tmp)).useDelimiter("117473826478234211");

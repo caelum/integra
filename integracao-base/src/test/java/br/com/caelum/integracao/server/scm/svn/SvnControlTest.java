@@ -41,25 +41,27 @@ public class SvnControlTest extends AtDirectoryTest {
 
 	@Test
 	public void shouldCommitAndReceiveUpdate() throws IOException {
+		File log = new File(this.baseDir, "control1-checkout");
+
 		SvnControl control1 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1");
-		Assert.assertEquals(0,control1.checkout(new File(this.baseDir, "control1-checkout")));
+		Assert.assertEquals(0,control1.checkoutOrUpdate(log));
 		
 		SvnControl control2 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-2");
-		Assert.assertEquals(0,control2.checkout(new File(this.baseDir, "control2-checkout")));
+		Assert.assertEquals(0,control2.checkoutOrUpdate(new File(this.baseDir, "control2-checkout")));
 		
 		File file = new File(control1.getDir(), "test-file");
 		givenA(file, "misc content");
 		
 		control1.add(file);
 		control1.commit("commiting test file");
-		control2.update();
+		control2.update(log);
 		File found = new File(control2.getDir(), "test-file");
 		Assert.assertTrue(found.exists());
 		String content = new BufferedReader(new FileReader(found)).readLine();
 		Assert.assertEquals("misc content", content);
 		control2.remove(found);
 		control2.commit("removed test file");
-		control1.update();
+		control1.update(log);
 		Assert.assertFalse(file.exists());
 	}
 

@@ -46,8 +46,12 @@ public class GitControl implements ScmControl {
 		this.baseName = name;
 	}
 
-	public int checkout(File log) throws IOException {
-		return prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
+	public int checkoutOrUpdate(File log) throws IOException {
+		if(new File(new File(baseDirectory, baseName),".git").exists()) {
+			return update(log);
+		} else {
+			return prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
+		}
 	}
 
 	public File getDir() {
@@ -71,8 +75,8 @@ public class GitControl implements ScmControl {
 		return prepare("git", "push").at(getDir()).run();
 	}
 
-	public int update() {
-		return prepare("git", "pull").at(getDir()).run();
+	public int update(File log) throws IOException {
+		return prepare("git", "pull").at(getDir()).logTo(log).run();
 	}
 
 	public int remove(File file) {

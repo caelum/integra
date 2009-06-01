@@ -21,8 +21,12 @@ public class SvnControl implements ScmControl {
 		this.baseDirectory = new File(baseDir, baseName);
 	}
 
-	public int checkout(File log) throws IOException {
-		return prepare("svn", "co", uri, baseName).at(baseDir).logTo(log).run();
+	public int checkoutOrUpdate(File log) throws IOException {
+		if(new File(baseDirectory, ".svn").exists()) {
+			return update(log); 
+		} else {
+			return prepare("svn", "co", uri, baseName).at(baseDir).logTo(log).run();
+		}
 	}
 
 	public File getDir() {
@@ -41,8 +45,8 @@ public class SvnControl implements ScmControl {
 		return prepare("svn", "commit", "-m", message).at(getDir()).run();
 	}
 
-	public int update() {
-		return prepare("svn", "update").at(getDir()).run();
+	public int update(File log) throws IOException {
+		return prepare("svn", "update").at(getDir()).logTo(log).run();
 	}
 
 	public int remove(File file) {

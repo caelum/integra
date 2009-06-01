@@ -125,7 +125,7 @@ public class Build {
 		logger.debug("Starting executing process for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
 		ScmControl control = project.getControl();
-		int result = checkout(control);
+		int result = update(control);
 		if (result == 0) {
 			List<Phase> phases = project.getPhases();
 			if (!phases.isEmpty()) {
@@ -143,11 +143,10 @@ public class Build {
 		this.finishTime = new GregorianCalendar();
 	}
 
-	private int checkout(ScmControl control) throws InstantiationException, IllegalAccessException,
+	private int update(ScmControl control) throws InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException, IOException {
 		File tmpFile = File.createTempFile("loading-checkout", ".log");
-		tmpFile.deleteOnExit();
-		int result = control.checkout(tmpFile);
+		int result = control.checkoutOrUpdate(tmpFile);
 		this.revision = control.getRevision();
 		tmpFile.renameTo(getFile("checkout.txt"));
 		logger.debug("Checking out " + project.getName() + ", build = " + buildCount + " resulted in " + result);
