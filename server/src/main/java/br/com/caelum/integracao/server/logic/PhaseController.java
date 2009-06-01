@@ -34,6 +34,7 @@ import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.vraptor.Delete;
+import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Resource;
@@ -88,6 +89,12 @@ public class PhaseController {
 		PluginToRun plugin = new PluginToRun((Class<? extends PluginInformation>) Class.forName(pluginType));
 		phase.add(plugin);
 		showList();
+	}
+
+	@Get
+	@Path("/project/plugin/${plugin.id}")
+	public void viewPlugin(PluginToRun plugin) throws ClassNotFoundException {
+		result.include("plugin", projects.get(plugin));
 	}
 
 }

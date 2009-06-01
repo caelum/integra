@@ -25,77 +25,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.plugin.mail;
 
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import org.hibernate.Session;
-
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.plugin.PluginToRun;
-import br.com.caelum.vraptor.ioc.RequestScoped;
+import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.plugin.PluginInformation;
 
 /**
- * Represents all projects.
+ * Copies artifacts from the client machine to the server.
  * 
  * @author guilherme silveira
  */
-@RequestScoped
-public class Projects {
+public class SendMailInformation implements PluginInformation {
 
-	private final Session session;
-
-	public Projects(Database database) {
-		this.session = database.getSession();
+	public List<String> getParameters() {
+		return Arrays.asList(new String[] { "host", "recipients", "from.name", "from.mail" });
 	}
 
-	public Project get(String name) {
-		return (Project) session.createQuery("from Project as p where p.name=:name").setParameter("name",name).uniqueResult();
+	public boolean after(Phase phase) {
+		return false;
 	}
 
-	public Collection<Project> all() {
-		return session.createQuery("from Project").list();
+	public SendMail getPlugin(Map<String, String> parameters) {
+		String value = parameters.get("recipients");
+		String[] recipients = value == null ? new String[0] : value.split(",");
+		return new SendMail(parameters.get("host"), recipients, parameters.get("from.name"), parameters.get("from.mail"));
 	}
-
-	public void register(Project p) {
-		session.save(p);
-	}
-
-	public void create(Phase phase) {
-		session.save(phase);
-	}
-
-	public void create(ExecuteCommandLine cmd) {
-		session.save(cmd);
-	}
-
-	public ExecuteCommandLine load(ExecuteCommandLine command) {
-		return (ExecuteCommandLine) session.load(ExecuteCommandLine.class, command.getId());
-	}
-
-	public void remove(ExecuteCommandLine command) {
-		session.delete(command);
-	}
-
-	public void register(Build build) {
-		session.save(build);
-	}
-
-	public void register(ExecuteCommandLine line) {
-		session.save(line);
-	}
-
-	public void register(Phase phase) {
-		session.save(phase);
-	}
-
-	public Phase load(Phase phase) {
-		return (Phase) session.load(Phase.class, phase.getId());
-	}
-
-	public PluginToRun get(PluginToRun plugin) {
-		return (PluginToRun) session.load(PluginToRun.class, plugin.getId());
-	}
-
 
 }

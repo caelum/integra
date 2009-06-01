@@ -25,77 +25,55 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.plugin.mail;
 
-import java.util.Collection;
+import java.util.Arrays;
 
-import org.hibernate.Session;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.plugin.PluginToRun;
-import br.com.caelum.vraptor.ioc.RequestScoped;
+import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.plugin.Plugin;
 
 /**
- * Represents all projects.
+ * A plugin instance.
  * 
  * @author guilherme silveira
  */
-@RequestScoped
-public class Projects {
+public class SendMail implements Plugin {
 
-	private final Session session;
+	private final Logger logger = LoggerFactory.getLogger(SendMail.class);
+	private final String fromMail;
+	private final String fromName;
+	private final String[] recipients;
+	private final String host;
 
-	public Projects(Database database) {
-		this.session = database.getSession();
+	public SendMail(String host, String[] recipients, String fromName, String fromMail) {
+		this.host = host;
+		this.recipients = recipients;
+		this.fromName = fromName;
+		this.fromMail = fromMail;
 	}
 
-	public Project get(String name) {
-		return (Project) session.createQuery("from Project as p where p.name=:name").setParameter("name",name).uniqueResult();
+	public boolean after(Phase phase) {
+		logger.debug("Preparing to send mail to " + Arrays.toString(recipients));
+		try {
+			SimpleEmail email = new SimpleEmail();
+			email.setHostName(host);
+			for(String recipient : recipients) {
+				email.addTo(recipient, recipient);
+			}
+			email.setFrom(fromMail, fromName);
+			email.setSubject(phase.getProject().getName() + " built.");
+			email.setMsg("Build completed.");
+			email.send();
+		} catch (EmailException e) {
+			logger.debug("Unable to send mail", e);
+			return false;
+		}
+		return false;
 	}
-
-	public Collection<Project> all() {
-		return session.createQuery("from Project").list();
-	}
-
-	public void register(Project p) {
-		session.save(p);
-	}
-
-	public void create(Phase phase) {
-		session.save(phase);
-	}
-
-	public void create(ExecuteCommandLine cmd) {
-		session.save(cmd);
-	}
-
-	public ExecuteCommandLine load(ExecuteCommandLine command) {
-		return (ExecuteCommandLine) session.load(ExecuteCommandLine.class, command.getId());
-	}
-
-	public void remove(ExecuteCommandLine command) {
-		session.delete(command);
-	}
-
-	public void register(Build build) {
-		session.save(build);
-	}
-
-	public void register(ExecuteCommandLine line) {
-		session.save(line);
-	}
-
-	public void register(Phase phase) {
-		session.save(phase);
-	}
-
-	public Phase load(Phase phase) {
-		return (Phase) session.load(Phase.class, phase.getId());
-	}
-
-	public PluginToRun get(PluginToRun plugin) {
-		return (PluginToRun) session.load(PluginToRun.class, plugin.getId());
-	}
-
 
 }
