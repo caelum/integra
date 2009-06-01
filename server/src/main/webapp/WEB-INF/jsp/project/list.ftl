@@ -91,6 +91,12 @@
 <form action="" method="post">
 <table>
 	<tr>
+		<td>Scm: <select name="scmType">
+		<option value="br.com.caelum.integracao.server.scm.svn.SvnControl">svn</option>
+		<option value="br.com.caelum.integracao.server.scm.git.GitControl">git</option>
+		</select></td>
+	</tr>
+	<tr>
 		<td>Uri: <input name="project.uri" /></td>
 	</tr>
 	<tr>

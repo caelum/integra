@@ -31,6 +31,7 @@ import java.io.File;
 
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
+import br.com.caelum.integracao.server.scm.git.GitControl;
 import br.com.caelum.integracao.server.scm.svn.SvnControl;
 
 public class BasicProjects {
@@ -69,13 +70,13 @@ public class BasicProjects {
 			projects.register(p);
 		}
 		{
-			Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject", new File(
-					"/Users/guilherme/int/anted"), "my-anted");
+			Project p = new Project(GitControl.class, "git://github.com/caelum/calopsita.git", new File(
+					"/home/integra/build/calopsita"), "calopsita");
 			projects.register(p);
 		}
 		{
 			Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject", new File(
-					"/Users/guilherme/int/wicked"), "wicked");
+					"/Users/guilherme/int/anted"), "my-anted");
 			projects.register(p);
 		}
 	}

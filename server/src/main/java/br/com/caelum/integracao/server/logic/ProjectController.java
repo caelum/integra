@@ -42,7 +42,6 @@ import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
-import br.com.caelum.integracao.server.scm.svn.SvnControl;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
@@ -90,9 +89,9 @@ public class ProjectController {
 
 	@Post
 	@Path("/project/")
-	public void create(Project project, String baseDir) {
+	public void create(Project project, String baseDir, String scmType) throws ClassNotFoundException {
 		project.setBaseDir(new File(baseDir));
-		project.setControlType(SvnControl.class);
+		project.setControlType(Class.forName(scmType));
 		projects.register(project);
 		showList();
 	}

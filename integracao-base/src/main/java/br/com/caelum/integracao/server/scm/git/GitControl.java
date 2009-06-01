@@ -25,73 +25,66 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.client.project;
+package br.com.caelum.integracao.server.scm.git;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.StringWriter;
 
 import br.com.caelum.integracao.CommandToExecute;
+import br.com.caelum.integracao.server.scm.ScmControl;
 
-public class Project {
+public class GitControl implements ScmControl {
 
-	private final Logger logger = LoggerFactory.getLogger(Project.class);
-	private String name;
+	private final String uri;
+	private final File baseDirectory;
+	private final String baseName;
 
-	private String uri;
-	private CommandToExecute executing;
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setUri(String uri) {
+	public GitControl(String uri, File baseDirectory, String name) {
 		this.uri = uri;
+		this.baseDirectory = baseDirectory;
+		this.baseName = name;
 	}
 
-	public String getUri() {
-		return uri;
+	public int checkout(File log) throws IOException {
+		return prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
 	}
 
-	public ProjectRunResult run(File baseDir, String revision, List<String> command) throws IOException {
-		File dir = new File(baseDir, name);
-		File tmp = File.createTempFile("integra-run-" + revision, ".txt");
-		tmp.deleteOnExit();
-		FileWriter tmpOutput = new FileWriter(tmp);
-		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDir + "/" + name);
-		this.executing = new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir);
-		this.executing.run();
+	public File getDir() {
+		return new File(baseDirectory, baseName);
+	}
 
-		String[] commands = command.toArray(new String[command.size()]);
-		logger.debug("Ready to execute " + Arrays.toString(commands) + " @ " + tmp.getAbsolutePath());
-		this.executing = new CommandToExecute(commands).at(dir).logTo(tmpOutput);
-		int result = this.executing.run();
-		Scanner sc = new Scanner(new FileInputStream(tmp)).useDelimiter("117473826478234211");
-		String content;
-		if(!sc.hasNext()) {
-			content = "";
-		} else {
-			content = sc.next();
+	public int add(File file) {
+		return prepare("git", "add", file.getAbsolutePath()).at(file.getParentFile()).run();
+	}
+
+	private CommandToExecute prepare(String... cmd) {
+		return new CommandToExecute(cmd);
+	}
+
+	public int commit(String message) {
+		int localCommit = prepare("git", "commit", "-a", "-m", "'" + message.replace('\'', '\"') + "'").at(getDir())
+				.run();
+		if (localCommit != 0) {
+			return localCommit;
 		}
-		return new ProjectRunResult(content, result);
-
+		return prepare("git", "push").at(getDir()).run();
 	}
 
-	public void stop() {
-		if (this.executing != null) {
-			executing.stop();
-		}
+	public int update() {
+		return prepare("git", "pull").at(getDir()).run();
+	}
+
+	public int remove(File file) {
+		return prepare("git", "rm", file.getAbsolutePath()).at(file.getParentFile()).run();
+	}
+
+	public String getRevision() {
+		StringWriter writer = new StringWriter();
+		prepare("git", "log").logTo(writer).at(getDir()).run();
+		String content = writer.getBuffer().toString();
+		int pos = content.indexOf("commit ");
+		return content.substring(pos + "commit ".length(), content.indexOf("\n", pos));
 	}
 
 }

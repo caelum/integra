@@ -55,7 +55,7 @@ public class CommandToExecute {
 		return this;
 	}
 
-	public int runAs() {
+	public int run() {
 		ProcessBuilder builder = new ProcessBuilder();
 		baseDir.mkdirs();
 		builder.directory(baseDir);
