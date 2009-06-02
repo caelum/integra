@@ -36,11 +36,17 @@ import org.hibernate.cfg.AnnotationConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.Application;
+import br.com.caelum.integracao.server.Config;
+import br.com.caelum.integracao.server.RegisteredPlugin;
+import br.com.caelum.integracao.server.plugin.build.RemoveOldBuildsInformation;
+import br.com.caelum.integracao.server.plugin.copy.CopyFilesInformation;
+import br.com.caelum.integracao.server.plugin.mail.SendMailInformation;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 @ApplicationScoped
 public class DatabaseFactory {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(DatabaseFactory.class);
 
 	private SessionFactory factory;
@@ -49,6 +55,25 @@ public class DatabaseFactory {
 	public void startup() {
 		logger.debug("Starting up database");
 		this.factory = new AnnotationConfiguration().configure().buildSessionFactory();
+		Database db = new Database(this);
+		if (new Application(db).getConfig() == null) {
+			Config cfg = new Config();
+			Session session = db.getSession();
+			try {
+				db.beginTransaction();
+				logger.debug("Creating database for the first time");
+				session.save(cfg);
+				session.save(new RegisteredPlugin(cfg, CopyFilesInformation.class));
+				session.save(new RegisteredPlugin(cfg, SendMailInformation.class));
+				session.save(new RegisteredPlugin(cfg, RemoveOldBuildsInformation.class));
+				db.commit();
+			} finally {
+				if (db.hasTransaction()) {
+					db.rollback();
+					logger.error("Was unable to insert the basic data in the database. Something really nasty will happen");
+				}
+			}
+		}
 	}
 
 	@PreDestroy

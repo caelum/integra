@@ -28,6 +28,7 @@
 		<mapping class="br.com.caelum.integracao.server.Build"/>
 		<mapping class="br.com.caelum.integracao.server.Config"/>
 		<mapping class="br.com.caelum.integracao.server.UsedClient"/>
+		<mapping class="br.com.caelum.integracao.server.RegisteredPlugin"/>
 
 		<mapping class="br.com.caelum.integracao.server.plugin.PluginParameter"/>
 		<mapping class="br.com.caelum.integracao.server.plugin.PluginToRun"/>

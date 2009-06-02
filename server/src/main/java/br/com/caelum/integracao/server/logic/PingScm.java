@@ -83,14 +83,15 @@ public class PingScm {
 	public void pingSystem() {
 		Database db = new Database(factory);
 		try {
+			Config config = new Application(db).getConfig();
+			int time = config.getCheckInterval();
+			Thread.sleep(time * 1000);
 			Projects projects = new Projects(db);
-			for(Project project : projects.all()) {
+			for (Project project : projects.all()) {
 				tryToBuild(db, project);
 			}
-			Config config = new Application(db).getConfig();
-			Thread.sleep(config.getCheckInterval() * 1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		} catch (Exception ex) {
+			logger.error("Something really nasty ocurred while pinging the scm servers", ex);
 		} finally {
 			db.close();
 		}
@@ -98,21 +99,26 @@ public class PingScm {
 
 	private void tryToBuild(Database db, Project project) {
 		Build lastBuild = project.getBuild(project.getBuildCount());
+		if (lastBuild == null) {
+			// no build so far
+			return;
+		}
 		logger.debug("Project " + project.getName() + " last build finished=" + lastBuild.isFinished());
-		if(lastBuild.isFinished()) {
+		if (lastBuild.isFinished()) {
 			String lastRevision = lastBuild.getRevision();
 			try {
 				File log = File.createTempFile("integra-revision-", ".txt");
 				String revision = project.getControl().getRevision(log);
-				if(!lastRevision.equals(revision)) {
+				if (!lastRevision.equals(revision)) {
 					try {
 						db.beginTransaction();
-						logger.debug("Project " + project.getName() + " has a new revision, therefore we will start the build");
+						logger.debug("Project " + project.getName()
+								+ " has a new revision, therefore we will start the build");
 						Build build = project.build();
 						build.start(new Clients(db), new Application(db), db);
 						db.commit();
 					} catch (Exception e) {
-						if(db.hasTransaction()) {
+						if (db.hasTransaction()) {
 							db.rollback();
 						}
 						logger.debug("Unable to build project " + project.getName(), e);
@@ -128,7 +134,7 @@ public class PingScm {
 	public void destroy() {
 		if (thread != null && thread.isAlive()) {
 			logger.debug("Shutting down ping thread");
-			thread.interrupt();
+			thread.stop();
 		}
 	}
 

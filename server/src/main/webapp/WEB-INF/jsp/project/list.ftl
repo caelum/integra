@@ -22,7 +22,7 @@
 				name="project.name" value="${project.name }" /> <select
 				name="pluginType">
 				<#list plugins as plugin>
-					<option value="${plugin.name }">${plugin.simpleName }</option>
+					<option value="${plugin.type.name }">${plugin.type.simpleName }</option>
 				</#list>
 			</select> <input type="submit" value="add" /></form>
 			</td>
@@ -75,7 +75,7 @@
 							name="phase.id" value="${phase.id }" /> <select
 							name="pluginType">
 							<#list plugins as plugin>
-								<option value="${plugin.name }">${plugin.simpleName }</option>
+								<option value="${plugin.type.name }">${plugin.type.simpleName }</option>
 							</#list>
 						</select> <input type="submit" value="add" /></form>
 						</td>

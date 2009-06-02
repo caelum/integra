@@ -6,3 +6,9 @@
 		<input type="submit" value="update" />
 	</form>
 </div>
+
+<ul>
+<#list config.availablePlugins as registered>
+	<li>${registered.type.simpleName}</li>
+</#list>
+</ul>

@@ -3,7 +3,6 @@
 	<input type="hidden" name="_method" value="put" />
 <#assign i=0>
 ${plugin.information}
-${plugin.information.parameters?size}
 <#list plugin.information.parameters as param>
 	<div> <input type="hidden" name="keys[${i}]" value="${param}" />${param}:
 	 <input type="text" name="values[${i}]" value="${plugin.getParameter(param).value}" /> </div>

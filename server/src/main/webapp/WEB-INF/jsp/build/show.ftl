@@ -25,7 +25,15 @@ Commands finished so far:
 ${cmd },
 </#list>
 <br />
-
+<#list build.project.phases as phase>
+	${phase.name}
+	<table>
+	<#assign clients=build.getClientsFor(phase)>
+	<#list clients as client>
+		<tr><td>${client.executedCommand.name} @ ${client.client.baseUri}</td></tr>
+	</#list>
+	</table>
+</#list>
 
 <ul>
 	<#list content as file>

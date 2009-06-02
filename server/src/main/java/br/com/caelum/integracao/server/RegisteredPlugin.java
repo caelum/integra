@@ -25,73 +25,54 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.http;
+package br.com.caelum.integracao.server;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hibernate.validator.NotNull;
 
-/**
- * Executes a web method.
- * 
- * @author guilherme silveira
- */
-public class Method {
-
-	private final Logger logger = LoggerFactory.getLogger(Method.class);
-
-	private final PostMethod post;
-	private final HttpClient client;
-	private int result;
-
-	public Method(HttpClient client, PostMethod post) {
-		this.client = client;
-		this.post = post;
+@Entity
+public class RegisteredPlugin {
+	
+	@Id
+	@GeneratedValue
+	private Long id;
+	
+	@NotNull
+	private Class<?> type;
+	
+	@ManyToOne
+	private Config config;
+	
+	protected RegisteredPlugin() {
+	}
+	
+	public RegisteredPlugin(Config config,Class<?> type) {
+		this.setConfig(config);
+		this.type = type;
 	}
 
-	public Method with(String key, String value) {
-		logger.debug("with " + key + "=" + value);
-		post.addParameter(key, value);
-		return this;
+	public Class<?> getType() {
+		return type;
 	}
 
-	public void send() throws HttpException, IOException {
-		this.result = client.executeMethod(post);
+	public void setConfig(Config config) {
+		this.config = config;
 	}
 
-	public int getResult() {
-		return result;
+	public Config getConfig() {
+		return config;
 	}
 
-	public String getContent() throws IOException {
-		return post.getResponseBodyAsString();
+	public void setId(Long id) {
+		this.id = id;
 	}
 
-	/**
-	 * Saves the result of the http request to the disk.
-	 */
-	public void saveContentToDisk(File target) throws IOException {
-		InputStream is = post.getResponseBodyAsStream();
-		FileOutputStream fos = new FileOutputStream(target);
-		BufferedOutputStream bos = new BufferedOutputStream(fos);
-		while (true) {
-			int b = is.read();
-			if (b == -1) {
-				break;
-			}
-			bos.write(b);
-		}
-		bos.close();
-		fos.close();
-		is.close();
+	public Long getId() {
+		return id;
 	}
 
 }

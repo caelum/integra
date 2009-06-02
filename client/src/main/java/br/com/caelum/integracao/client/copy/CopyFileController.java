@@ -27,34 +27,60 @@
  */
 package br.com.caelum.integracao.client.copy;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
+import br.com.caelum.integracao.CommandToExecute;
 import br.com.caelum.integracao.client.Settings;
 import br.com.caelum.integracao.client.project.Project;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
-import br.com.caelum.vraptor.view.Results;
 
 @Resource
 public class CopyFileController {
 
 	private final Result result;
 	private final Settings settings;
+	private final HttpServletResponse response;
 
-	public CopyFileController(Result result, Settings settings) {
+	public CopyFileController(Result result, Settings settings, HttpServletResponse response) {
 		this.result = result;
 		this.settings = settings;
+		this.response = response;
 	}
 
 	@Post
 	@Path("/plugin/CopyFiles/{project.name}")
-	public void download(Project project, List<String> directory) {
-		//for(String dir : directory) {
-			//settings.getBaseDir() + project.getName();
-		//}
-		result.use(Results.nothing());
+	public File download(Project project, List<String> directory) throws IOException {
+		File result = File.createTempFile("integra-copy-files-", ".zip");
+		result.delete();
+		List<String> cmds = new ArrayList<String>();
+		cmds.add("zip");
+		cmds.add("-ro");
+		cmds.add(result.getAbsolutePath());
+		for (String dir : directory) {
+			cmds.add(dir);
+		}
+		
+		File baseDirectory = new File(settings.getBaseDir(), project.getName());
+
+		File output = File.createTempFile("integra-copy-files-output-", ".txt");
+		output.deleteOnExit();
+		int cmdResult = new CommandToExecute(cmds.toArray(new String[0])).at(baseDirectory).logTo(output).run();
+		if (cmdResult != 0) {
+			// response.setStatus(500) doesnt work!!!
+			response.setStatus(200);
+			return output;
+		}
+		result.deleteOnExit();
+		response.setStatus(201);
+		return result;
 	}
 
 }
