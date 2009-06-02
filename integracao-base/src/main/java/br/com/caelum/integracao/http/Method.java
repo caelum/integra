@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +62,7 @@ public class Method {
 		return this;
 	}
 
-	public void send() throws HttpException, IOException {
+	public void send() throws IOException {
 		this.result = client.executeMethod(post);
 	}
 
@@ -72,26 +71,34 @@ public class Method {
 	}
 
 	public String getContent() throws IOException {
-		return post.getResponseBodyAsString();
+		try {
+			return post.getResponseBodyAsString();
+		} finally {
+			post.releaseConnection();
+		}
 	}
 
 	/**
 	 * Saves the result of the http request to the disk.
 	 */
 	public void saveContentToDisk(File target) throws IOException {
-		InputStream is = post.getResponseBodyAsStream();
-		FileOutputStream fos = new FileOutputStream(target);
-		BufferedOutputStream bos = new BufferedOutputStream(fos);
-		while (true) {
-			int b = is.read();
-			if (b == -1) {
-				break;
+		try {
+			InputStream is = post.getResponseBodyAsStream();
+			FileOutputStream fos = new FileOutputStream(target);
+			BufferedOutputStream bos = new BufferedOutputStream(fos);
+			while (true) {
+				int b = is.read();
+				if (b == -1) {
+					break;
+				}
+				bos.write(b);
 			}
-			bos.write(b);
+			bos.close();
+			fos.close();
+			is.close();
+		} finally {
+			post.releaseConnection();
 		}
-		bos.close();
-		fos.close();
-		is.close();
 	}
 
 }

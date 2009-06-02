@@ -34,65 +34,68 @@ import java.io.PrintWriter;
 import java.net.UnknownHostException;
 import java.util.List;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
-
+import br.com.caelum.integracao.http.DefaultHttp;
+import br.com.caelum.integracao.http.Method;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Command;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 
+/**
+ * Dispatch commands to register a project or execute an specific command from a build an specific client.
+ * 
+ * @author guilherme silveira
+ */
 public class Dispatcher {
 
 	private final PrintWriter log;
 
 	private final Client client;
 
-	private final String myUrl;
+	private final String myself;
 
-	public Dispatcher(Client client, File logFile, String myUrl) throws UnknownHostException, IOException {
+	public Dispatcher(Client client, File logFile, String myself) throws UnknownHostException, IOException {
 		this.client = client;
-		this.myUrl = myUrl;
+		this.myself = myself;
 		logFile.getParentFile().mkdirs();
 		this.log = new PrintWriter(new FileWriter(logFile), true);
 	}
 
 	public Dispatcher register(Project project) {
-		HttpClient client = new HttpClient();
-		PostMethod post = new PostMethod(this.client.getBaseUri() + "/project/register");
-		post.addParameter("project.name", project.getName());
-		post.addParameter("project.uri", project.getUri());
-		post.addParameter("project.scmType", project.getControlType().getName());
+		Method post = new DefaultHttp().post(this.client.getBaseUri() + "/project/register");
+		post.with("project.name", project.getName());
+		post.with("project.uri", project.getUri());
+		post.with("project.scmType", project.getControlType().getName());
 		try {
-			int result = client.executeMethod(post);
+			post.send();
+			int result = post.getResult();
 			if (result != 200) {
-				throw new RuntimeException("Unable to continue with result " + result);
+				throw new RuntimeException("Unable to continue with result " + result + " and " + post.getContent());
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throw new RuntimeException("Unable to continue. ", e);
 		}
 		return this;
 	}
 
-	public Dispatcher execute(Build build, Phase phase, int commandCount, List<Command> commands)
-			throws IOException {
-		HttpClient client = new HttpClient();
-		PostMethod post = new PostMethod(this.client.getBaseUri() + "/job/execute");
-		post.addParameter("revision", build.getRevision());
-		post.addParameter("project.name", build.getProject().getName());
-		post.addParameter("clientId", "" + this.client.getId());
-		post.addParameter("resultUri", "http://" + myUrl + "/integracao/finish/project/" + build.getProject().getName() + "/" + build.getBuildCount() + "/"
-				+ phase.getPosition() + "/" + commandCount);
+	public Dispatcher execute(Build build, Phase phase, int commandCount, List<Command> commands) throws IOException {
+		Method post = new DefaultHttp().post(this.client.getBaseUri() + "/job/execute");
+		post.with("revision", build.getRevision());
+		post.with("project.name", build.getProject().getName());
+		post.with("clientId", "" + this.client.getId());
+		post.with("resultUri", "http://" + myself + "/integracao/finish/project/" + build.getProject().getName()
+				+ "/" + build.getBuildCount() + "/" + phase.getPosition() + "/" + commandCount);
 		for (int i = 0; i < commands.size(); i++) {
-			post.addParameter("command[" + i + "]", commands.get(i).getValue());
+			post.with("command[" + i + "]", commands.get(i).getValue());
 		}
 		try {
-			int result = client.executeMethod(post);
+			post.send();
+			int result = post.getResult();
 			if (result != 200) {
 				throw new RuntimeException("Unable to continue with result " + result);
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throw new RuntimeException("Unable to continue. ", e);
 		}
 		return this;
