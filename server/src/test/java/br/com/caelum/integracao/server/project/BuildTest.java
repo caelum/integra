@@ -47,6 +47,8 @@ import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.plugin.Plugin;
+import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 public class BuildTest extends BaseTest {
@@ -124,8 +126,8 @@ public class BuildTest extends BaseTest {
 	}
 
 	@Test
-	public void keepsTheCurrentPhaseAndInvokesRunAfterOnPluginsIfNoSuccess() throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException, IOException {
+	public void keepsTheCurrentPhaseAndInvokesRunAfterOnPluginsIfNoSuccess() throws InstantiationException,
+			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
 		phases.add(first);
 		phases.add(second);
 		mockery.checking(new Expectations() {
@@ -139,14 +141,16 @@ public class BuildTest extends BaseTest {
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
-				one(first).getCommandCount(); will(returnValue(1));
+				one(first).getCommandCount();
+				will(returnValue(1));
 			}
 		});
 		final Build build = new Build(project);
 		mockery.checking(new Expectations() {
 			{
 				one(first).execute(control, build, clients, app);
-				one(first).runAfter(build); will(returnValue(true));
+				one(first).runAfter(build);
+				will(returnValue(true));
 			}
 		});
 		build.start(clients, app);
@@ -155,6 +159,7 @@ public class BuildTest extends BaseTest {
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
+
 	@Test
 	public void keepsTheCurrentPhaseIfSuccessButPluginsFail() throws InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException, IOException {
@@ -171,14 +176,16 @@ public class BuildTest extends BaseTest {
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
-				one(first).getCommandCount(); will(returnValue(1));
+				one(first).getCommandCount();
+				will(returnValue(1));
 			}
 		});
 		final Build build = new Build(project);
 		mockery.checking(new Expectations() {
 			{
 				one(first).execute(control, build, clients, app);
-				one(first).runAfter(build); will(returnValue(false));
+				one(first).runAfter(build);
+				will(returnValue(false));
 			}
 		});
 		build.start(clients, app);
@@ -204,7 +211,8 @@ public class BuildTest extends BaseTest {
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
-				one(first).getCommandCount(); will(returnValue(2));
+				one(first).getCommandCount();
+				will(returnValue(2));
 			}
 		});
 		final Build build = new Build(project);
@@ -236,7 +244,8 @@ public class BuildTest extends BaseTest {
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
-				one(first).getCommandCount(); will(returnValue(1));
+				one(first).getCommandCount();
+				will(returnValue(1));
 			}
 		});
 		final Build build = new Build(project);
@@ -244,7 +253,8 @@ public class BuildTest extends BaseTest {
 			{
 				one(first).execute(control, build, clients, app);
 				one(second).execute(control, build, clients, app);
-				one(first).runAfter(build); will(returnValue(true));
+				one(first).runAfter(build);
+				will(returnValue(true));
 			}
 		});
 		build.start(clients, app);
@@ -253,12 +263,12 @@ public class BuildTest extends BaseTest {
 		assertThat(build.getCurrentPhase(), is(equalTo(1)));
 		mockery.assertIsSatisfied();
 	}
-	
+
 	@Test
 	public void shouldNotStartPhaseIfResultIsZero() {
 		Assert.fail("not yet implemented");
 	}
-	
+
 	@Test
 	public void removeShouldEmptyItsDirectory() throws IOException {
 		mockery.checking(new Expectations() {
@@ -275,8 +285,81 @@ public class BuildTest extends BaseTest {
 		givenA(file, "custom-file-content");
 		Build build = new Build(project);
 		build.remove();
-		assertThat(file.exists(),is(equalTo(false)));
-		assertThat(buildDir.exists(),is(equalTo(false)));
+		assertThat(file.exists(), is(equalTo(false)));
+		assertThat(buildDir.exists(), is(equalTo(false)));
+		mockery.assertIsSatisfied();
+	}
+
+	@Test
+	public void invokesTheBeforeMethodOfAPlugin() throws InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException, IOException {
+		phases.add(first);
+		final PluginToRun firstPlugin = mockery.mock(PluginToRun.class, "firstPlugin");
+		final Plugin firstImplementation = mockery.mock(Plugin.class, "firstImplementation");
+		mockery.checking(new Expectations() {
+			{
+				one(project).nextBuild();
+				will(returnValue(3L));
+				allowing(project).getName();
+				will(returnValue("my-horses"));
+				one(control).checkoutOrUpdate((File) with(an(File.class)));
+				one(control).getRevision();
+				will(returnValue("my-revision"));
+				allowing(project).getBuildsDirectory();
+				will(returnValue(baseDir));
+				one(firstPlugin).getPlugin();
+				will(returnValue(firstImplementation));
+				one(firstPlugin).setPosition(1);
+			}
+		});
+		final Build build = new Build(project);
+		mockery.checking(new Expectations() {
+			{
+				one(firstImplementation).before(build); will(returnValue(true));
+				one(first).execute(control, build, clients, app);
+			}
+		});
+		build.add(firstPlugin);
+		build.start(clients, app);
+		mockery.assertIsSatisfied();
+	}
+
+	@Test
+	public void doesntContinueTheStartProcessIfAPluginTellsItToStop() throws InstantiationException,
+			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
+		phases.add(first);
+		final PluginToRun firstPlugin = mockery.mock(PluginToRun.class, "firstPlugin");
+		final Plugin firstImplementation = mockery.mock(Plugin.class, "firstImplementation");
+		final PluginToRun secondPlugin = mockery.mock(PluginToRun.class, "secondPlugin");
+		mockery.checking(new Expectations() {
+			{
+				one(project).nextBuild();
+				will(returnValue(3L));
+				allowing(project).getName();
+				will(returnValue("my-horses"));
+				one(control).checkoutOrUpdate((File) with(an(File.class)));
+				one(control).getRevision();
+				will(returnValue("my-revision"));
+				allowing(project).getBuildsDirectory();
+				will(returnValue(baseDir));
+				one(firstPlugin).getPlugin();
+				will(returnValue(firstImplementation));
+				one(firstPlugin).setPosition(1);
+				one(secondPlugin).setPosition(2);
+				allowing(firstPlugin).getType();will(returnValue(BuildTest.class));
+			}
+		});
+		final Build build = new Build(project);
+		mockery.checking(new Expectations() {
+			{
+				one(firstImplementation).before(build); will(returnValue(false));
+			}
+		});
+		build.add(firstPlugin);
+		build.add(secondPlugin);
+		build.start(clients, app);
+		assertThat(build.isFinished(), is(equalTo(true)));
+		assertThat(build.isSuccessSoFar(), is(equalTo(false)));
 		mockery.assertIsSatisfied();
 	}
 

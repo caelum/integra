@@ -87,4 +87,8 @@ public class SendMail implements Plugin {
 		}
 	}
 
+	public boolean before(Build build) {
+		return true;
+	}
+
 }

@@ -42,4 +42,10 @@ public interface Plugin {
 	 */
 	boolean after(Build build, Phase phase);
 
+	/**
+	 * Runs before a build begins.
+	 * @return true if the process should continue
+	 */
+	boolean before(Build build);
+
 }

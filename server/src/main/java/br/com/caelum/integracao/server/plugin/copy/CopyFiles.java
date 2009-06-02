@@ -87,4 +87,8 @@ public class CopyFiles implements Plugin {
 		return success;
 	}
 
+	public boolean before(Build build) {
+		return true;
+	}
+
 }

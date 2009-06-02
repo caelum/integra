@@ -44,12 +44,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.validator.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 /**
@@ -89,6 +93,11 @@ public class Build {
 	@OneToMany(mappedBy = "build")
 	private List<UsedClient> usedClients = new ArrayList<UsedClient>();
 
+	@OneToMany
+	@OrderBy("position")
+	@Cascade(CascadeType.ALL)
+	private List<PluginToRun> plugins = new ArrayList<PluginToRun>();
+
 	protected Build() {
 	}
 
@@ -127,6 +136,13 @@ public class Build {
 		ScmControl control = project.getControl();
 		int result = update(control);
 		if (result == 0) {
+			for (PluginToRun plugin : getPlugins()) {
+				if(!plugin.getPlugin().before(this)) {
+					logger.debug("Plugin " + plugin.getType().getName() + " told us to stop the build");
+					finish(false);
+					return;
+				}
+			}
 			List<Phase> phases = project.getPhases();
 			if (!phases.isEmpty()) {
 				Phase phase = phases.get(0);
@@ -135,6 +151,10 @@ public class Build {
 		} else {
 			finish(false);
 		}
+	}
+
+	public List<PluginToRun> getPlugins() {
+		return plugins;
 	}
 
 	private void finish(boolean success) {
@@ -261,5 +281,10 @@ public class Build {
 			}
 		}
 		dir.delete();
+	}
+	
+	public void add(PluginToRun plugin) {
+		plugin.setPosition(getPlugins().size()+1);
+		getPlugins().add(plugin);
 	}
 }
