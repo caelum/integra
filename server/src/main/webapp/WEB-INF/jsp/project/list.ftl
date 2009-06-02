@@ -6,6 +6,28 @@
 	Actions: <a href="run?project.name=${project.name }">run</a>
 	<br />
 	Last build: ${project.lastBuild.time?datetime }<br />
+	<table>
+		<#list phase.plugins as plugin>
+			<tr>
+				<td>${plugin.type.simpleName }
+				<div id="plugin_${plugin.id }"></div>
+				</td>
+				<td>(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)</td>
+				<td>(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)</td>
+			</tr>
+		</#list>
+		<tr>
+			<td>
+			<form action="plugin" method="post"><input type="hidden"
+				name="phase.id" value="${phase.id }" /> <select
+				name="pluginType">
+				<#list plugins as plugin>
+					<option value="${plugin.name }">${plugin.simpleName }</option>
+				</#list>
+			</select> <input type="submit" value="add" /></form>
+			</td>
+		</tr>
+	</table>
 
 	<table>
 		<tr>

@@ -60,6 +60,7 @@ public class BuildTest extends BaseTest {
 	private Phase first;
 	private Phase second;
 	private Application app;
+	private ArrayList<PluginToRun> plugins;
 
 	@Before
 	public void configProject() throws InstantiationException, IllegalAccessException, InvocationTargetException,
@@ -70,6 +71,7 @@ public class BuildTest extends BaseTest {
 		this.control = mockery.mock(ScmControl.class, "control");
 		this.first = mockery.mock(Phase.class, "first");
 		this.second = mockery.mock(Phase.class, "second");
+		this.plugins = new ArrayList<PluginToRun>();
 		mockery.checking(new Expectations() {
 			{
 				allowing(project).getBaseDir();
@@ -78,6 +80,8 @@ public class BuildTest extends BaseTest {
 				will(returnValue(control));
 				allowing(project).getPhases();
 				will(returnValue(phases));
+				allowing(project).getPlugins();
+				will(returnValue(plugins));
 			}
 		});
 		this.app = mockery.mock(Application.class);
@@ -309,9 +313,9 @@ public class BuildTest extends BaseTest {
 				will(returnValue(baseDir));
 				one(firstPlugin).getPlugin();
 				will(returnValue(firstImplementation));
-				one(firstPlugin).setPosition(1);
 			}
 		});
+		this.plugins.add(firstPlugin);
 		final Build build = new Build(project);
 		mockery.checking(new Expectations() {
 			{
@@ -319,7 +323,6 @@ public class BuildTest extends BaseTest {
 				one(first).execute(control, build, clients, app);
 			}
 		});
-		build.add(firstPlugin);
 		build.start(clients, app);
 		mockery.assertIsSatisfied();
 	}
@@ -331,6 +334,8 @@ public class BuildTest extends BaseTest {
 		final PluginToRun firstPlugin = mockery.mock(PluginToRun.class, "firstPlugin");
 		final Plugin firstImplementation = mockery.mock(Plugin.class, "firstImplementation");
 		final PluginToRun secondPlugin = mockery.mock(PluginToRun.class, "secondPlugin");
+		this.plugins.add(firstPlugin);
+		this.plugins.add(secondPlugin);
 		mockery.checking(new Expectations() {
 			{
 				one(project).nextBuild();
@@ -344,8 +349,6 @@ public class BuildTest extends BaseTest {
 				will(returnValue(baseDir));
 				one(firstPlugin).getPlugin();
 				will(returnValue(firstImplementation));
-				one(firstPlugin).setPosition(1);
-				one(secondPlugin).setPosition(2);
 				allowing(firstPlugin).getType();will(returnValue(BuildTest.class));
 			}
 		});
@@ -355,8 +358,6 @@ public class BuildTest extends BaseTest {
 				one(firstImplementation).before(build); will(returnValue(false));
 			}
 		});
-		build.add(firstPlugin);
-		build.add(secondPlugin);
 		build.start(clients, app);
 		assertThat(build.isFinished(), is(equalTo(true)));
 		assertThat(build.isSuccessSoFar(), is(equalTo(false)));

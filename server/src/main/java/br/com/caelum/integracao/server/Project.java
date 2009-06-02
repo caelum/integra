@@ -42,12 +42,15 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.Min;
 import org.hibernate.validator.NotEmpty;
 import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 /**
@@ -87,6 +90,12 @@ public class Project {
 	private final List<Build> builds = new ArrayList<Build>();
 	@NotNull
 	private Calendar lastBuild = new GregorianCalendar();
+
+	@OneToMany
+	@OrderBy("position")
+	@Cascade(CascadeType.ALL)
+	private List<PluginToRun> plugins = new ArrayList<PluginToRun>();
+
 
 	protected Project() {
 	}
@@ -212,5 +221,14 @@ public class Project {
 	public Class<?> getControlType() {
 		return controlType;
 	}
+
+	public void add(PluginToRun plugin) {
+		plugin.setPosition(getPlugins().size()+1);
+		getPlugins().add(plugin);
+	}
 	
+	public List<PluginToRun> getPlugins() {
+		return plugins;
+	}
+
 }
