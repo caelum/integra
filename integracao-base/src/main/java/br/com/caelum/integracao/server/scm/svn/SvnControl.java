@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import br.com.caelum.integracao.CommandToExecute;
+import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 public class SvnControl implements ScmControl {

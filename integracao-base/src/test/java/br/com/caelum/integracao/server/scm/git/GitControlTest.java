@@ -37,7 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.com.caelum.integracao.AtDirectoryTest;
-import br.com.caelum.integracao.CommandToExecute;
+import br.com.caelum.integracao.command.CommandToExecute;
 
 public class GitControlTest extends AtDirectoryTest {
 	

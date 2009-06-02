@@ -31,7 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import br.com.caelum.integracao.CommandToExecute;
+import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
 
