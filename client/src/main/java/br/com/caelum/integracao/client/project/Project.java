@@ -73,7 +73,7 @@ public class Project {
 
 	public ScmControl getControl(File baseDirectory) throws InstantiationException, IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException {
-		logger.debug("Creating scm control " + scmType.getName() + " for project " + getName());
+		logger.debug("Creating scm control " + scmType + " for project " + getName());
 		return (ScmControl) scmType.getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
 				baseDirectory, name);
 	}

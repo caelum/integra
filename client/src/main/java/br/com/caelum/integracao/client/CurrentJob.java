@@ -108,6 +108,7 @@ public class CurrentJob {
 			result = project.run(point.getBaseDir(), revision, command, outputFile);
 			success = result.getResult() == 0;
 		} catch (Exception e) {
+			logger.debug("Something wrong happened during the checkout/build", e);
 			StringWriter writer = new StringWriter();
 			e.printStackTrace(new PrintWriter(writer, true));
 			result = new ProjectRunResult(writer.toString(), -1);
