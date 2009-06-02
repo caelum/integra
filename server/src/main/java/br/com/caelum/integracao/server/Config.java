@@ -33,13 +33,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-
-import org.hibernate.annotations.CollectionOfElements;
-
-import br.com.caelum.integracao.server.plugin.PluginInformation;
-import br.com.caelum.integracao.server.plugin.build.RemoveOldBuildsInformation;
-import br.com.caelum.integracao.server.plugin.copy.CopyFilesInformation;
-import br.com.caelum.integracao.server.plugin.mail.SendMailInformation;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Config {
@@ -54,8 +48,8 @@ public class Config {
 	
 	private int checkInterval = 60;
 
-	@CollectionOfElements
-	private List<Class<? extends PluginInformation>> plugins;
+	@OneToMany(mappedBy="config")
+	private List<RegisteredPlugin> plugins= new ArrayList<RegisteredPlugin>();
 
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
@@ -77,16 +71,7 @@ public class Config {
 		return getHostname() + ":" + getPort();
 	}
 	
-	public void registerBasicPlugins() {
-		getAvailablePlugins().add(CopyFilesInformation.class);
-		getAvailablePlugins().add(SendMailInformation.class);
-		getAvailablePlugins().add(RemoveOldBuildsInformation.class);
-	}
-	
-	public List<Class<? extends PluginInformation>> getAvailablePlugins() {
-		if(plugins==null) {
-			plugins = new ArrayList<Class<? extends PluginInformation>>();
-		}
+	public List<RegisteredPlugin> getAvailablePlugins() {
 		return plugins;
 	}
 

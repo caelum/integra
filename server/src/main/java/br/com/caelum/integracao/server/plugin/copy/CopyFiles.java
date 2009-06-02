@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server.plugin.copy;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.CommandToExecute;
 import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.http.Method;
 import br.com.caelum.integracao.server.Build;
@@ -67,12 +69,25 @@ public class CopyFiles implements Plugin {
 			String uri = client.getClient().getBaseUri();
 			logger.debug("Copying from server " + uri);
 			Method post = http.post(uri + "/plugin/CopyFiles/" + projectName);
-			for(int i =0;i<dirs.length;i++) {
+			for (int i = 0; i < dirs.length; i++) {
 				post.with("directory[" + i + "]", dirs[i]);
 			}
 			try {
 				post.send();
-				if (post.getResult() != 200) {
+				if (post.getResult() == 201) {
+					File tmp = File.createTempFile("integracao-copy-file-server-", ".zip");
+					post.saveContentToDisk(tmp);
+
+					File commandDirectory = build.getFile(phase.getName() + "/"
+							+ client.getExecutedCommand().getPosition());
+					commandDirectory.mkdirs();
+					File unzipResult = new File(commandDirectory, "copy-files-unzip.txt");
+					int result =  new CommandToExecute("unzip", "-qo", tmp.getAbsolutePath()).at(commandDirectory).logTo(unzipResult).run();
+					if(result!=0) {
+						success = false;
+						logger.error("Unable to copy from server " + uri + " due to unzip returning " + result);
+					}
+				} else {
 					success = false;
 					logger.error("Unable to copy from server " + uri + " due to " + post.getResult());
 				}

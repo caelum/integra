@@ -68,7 +68,7 @@ public class BuildController {
 		} else {
 			filename = filename.replace('$', '/');
 			File base = build.getFile(filename);
-			result.include("currentPath", base.getName() + "$");
+			result.include("currentPath", filename + "$");
 			result.include("content", base.listFiles());
 		}
 	}

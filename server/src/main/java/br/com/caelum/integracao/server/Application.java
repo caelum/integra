@@ -30,6 +30,8 @@ package br.com.caelum.integracao.server;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.vraptor.ioc.Component;
@@ -38,6 +40,9 @@ import br.com.caelum.vraptor.ioc.RequestScoped;
 @RequestScoped
 @Component
 public class Application {
+	
+	
+	private final Logger logger = LoggerFactory.getLogger(Application.class);
 
 	private final Session session;
 	
@@ -49,10 +54,8 @@ public class Application {
 	public Config getConfig() {
 		List<Config> list = session.createQuery("from Config").list();
 		if(list.isEmpty()) {
-			Config cfg = new Config();
-			cfg.registerBasicPlugins();
-			session.save(cfg);
-			return cfg;
+			logger.debug("No config found in the server.");
+			return null;
 		}
 		return list.get(0);
 	}
@@ -62,6 +65,10 @@ public class Application {
 		result.setHostname(config.getHostname());
 		result.setPort(config.getPort());
 		result.setCheckInterval(config.getCheckInterval());
+	}
+
+	public void register(UsedClient client) {
+		session.save(client);
 	}
 
 }

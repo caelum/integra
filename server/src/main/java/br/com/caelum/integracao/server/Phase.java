@@ -111,6 +111,7 @@ public class Phase {
 				}
 				return;
 			}
+			app.register(new UsedClient(client, build, command));
 			command.executeAt(client, build, control, File.createTempFile("connection", "txt"), app.getConfig()
 					.getUrl());
 		}

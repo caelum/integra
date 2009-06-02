@@ -1,0 +1,9 @@
+<config>
+	<context-values>
+		<resource path="src/main/webapp/WEB-INF/jsp/build/show.ftl">
+			<value key="build" object-class="br.com.caelum.integracao.server.Build"/>
+		</resource>
+	</context-values>
+	<macro-library>
+	</macro-library>
+</config>

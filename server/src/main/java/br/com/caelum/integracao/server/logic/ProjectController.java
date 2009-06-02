@@ -109,31 +109,11 @@ public class ProjectController {
 		validator.validate();
 		Runnable execution = new Runnable() {
 			public void run() {
-				runProject(found.getName());
+				new ProjectStart(new Database(factory)).runProject(found.getName());
 			}
 		};
 		Thread thread = new Thread(execution);
 		thread.start();
-	}
-
-	private void runProject(String name) {
-		logger.debug("Starting building project id=" + name);
-		Database db = new Database(factory);
-		db.beginTransaction();
-		try {
-			Project toBuild = new Projects(db).get(name);
-			Build build = toBuild.build();
-			new Projects(db).register(build);
-			build.start(new Clients(db), new Application(db), db);
-			db.commit();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (db.hasTransaction()) {
-				db.rollback();
-			}
-			db.close();
-		}
 	}
 
 	@Post

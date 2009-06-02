@@ -25,51 +25,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.logic;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Stores the information of a specific client used to execute a command in a
- * client machine.
- * 
- * @author guilherme silveira
- * 
- */
-@Entity
-public class UsedClient {
+import br.com.caelum.integracao.server.Application;
+import br.com.caelum.integracao.server.Build;
+import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.Projects;
+import br.com.caelum.integracao.server.dao.Database;
 
-	public UsedClient(Client client, Build build, ExecuteCommandLine command) {
-		this.client = client;
-		this.build = build;
-		this.command = command;
+public class ProjectStart {
+
+	private final Logger logger = LoggerFactory.getLogger(ProjectStart.class);
+	private final Database database;
+
+	public ProjectStart(Database database) {
+		this.database = database;
 	}
 
-	public UsedClient() {
-	}
-
-	@Id
-	@GeneratedValue
-	private Long id;
-
-	@ManyToOne
-	private ExecuteCommandLine command;
-
-	@ManyToOne
-	private Build build;
-
-	@ManyToOne
-	private Client client;
-
-	public ExecuteCommandLine getExecutedCommand() {
-		return command;
-	}
-
-	public Client getClient() {
-		return client;
+	void runProject(String name) {
+		logger.debug("Starting building project id=" + name);
+		database.beginTransaction();
+		try {
+			Project toBuild = new Projects(database).get(name);
+			Build build = toBuild.build();
+			new Projects(database).register(build);
+			build.start(new Clients(database), new Application(database), database);
+			database.commit();
+		} catch (Exception e) {
+			logger.error("Unable to start project build", e);
+		} finally {
+			if (database.hasTransaction()) {
+				database.rollback();
+			}
+			database.close();
+		}
 	}
 
 }

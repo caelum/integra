@@ -57,8 +57,8 @@ public class CopyFilesTest extends BaseTest {
 		final Build build = mockery.mock(Build.class);
 		final Phase phase = mockery.mock(Phase.class);
 		final ArrayList<UsedClient> clients = new ArrayList<UsedClient>();
-		clients.add(new UsedClient(createClient("uri")));
-		clients.add(new UsedClient(createClient("second uri")));
+		clients.add(new UsedClient(createClient("uri"), null, null));
+		clients.add(new UsedClient(createClient("second uri"), null, null));
 		final Project caelumweb = mockery.mock(Project.class);
 		mockery.checking(new Expectations() {
 			{
