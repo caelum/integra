@@ -42,6 +42,8 @@ import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
+import br.com.caelum.integracao.server.plugin.PluginInformation;
+import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
@@ -121,7 +123,7 @@ public class ProjectController {
 			Project toBuild = new Projects(db).get(name);
 			Build build = toBuild.build();
 			new Projects(db).register(build);
-			build.start(new Clients(db), new Application(db));
+			build.start(new Clients(db), new Application(db), db);
 			db.commit();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -155,7 +157,7 @@ public class ProjectController {
 					+ " command " + commandId);
 			project = new Projects(db).get(project.getName());
 			Build build = project.getBuild(buildId);
-			build.finish(phasePosition, commandId, result, success, new Clients(db), new Application(db));
+			build.finish(phasePosition, commandId, result, success, new Clients(db), new Application(db), db);
 			db.commit();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -169,6 +171,17 @@ public class ProjectController {
 
 	private void showList() {
 		result.use(Results.logic()).redirectTo(ProjectController.class).list();
+	}
+
+
+	@SuppressWarnings("unchecked")
+	@Post
+	@Path("/project/plugin")
+	public void addPlugin(Project project, String pluginType) throws ClassNotFoundException {
+		project = projects.get(project.getName());
+		PluginToRun plugin = new PluginToRun((Class<? extends PluginInformation>) Class.forName(pluginType));
+		project.add(plugin);
+		showList();
 	}
 
 }

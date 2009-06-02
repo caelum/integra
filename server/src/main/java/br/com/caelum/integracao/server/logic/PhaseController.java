@@ -95,7 +95,7 @@ public class PhaseController {
 
 	@SuppressWarnings("unchecked")
 	@Post
-	@Path("/project/plugin")
+	@Path("/project/phase/plugin")
 	public void addPlugin(Phase phase, String pluginType) throws ClassNotFoundException {
 		phase = projects.load(phase);
 		PluginToRun plugin = new PluginToRun((Class<? extends PluginInformation>) Class.forName(pluginType));

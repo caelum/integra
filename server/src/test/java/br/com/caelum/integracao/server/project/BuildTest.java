@@ -122,7 +122,7 @@ public class BuildTest extends BaseTest {
 			}
 		});
 		Build build = new Build(project);
-		build.start(clients, app);
+		build.start(clients, app, database);
 		assertThat(build.getRevision(), is(equalTo("my-revision")));
 		File checkout = new File(baseDir, "build-3/checkout.txt");
 		assertThat(checkout.exists(), is(equalTo(true)));
@@ -152,14 +152,14 @@ public class BuildTest extends BaseTest {
 		final Build build = new Build(project);
 		mockery.checking(new Expectations() {
 			{
-				one(first).execute(control, build, clients, app);
-				one(first).runAfter(build);
+				one(first).execute(control, build, clients, app, database);
+				one(first).runAfter(build, database);
 				will(returnValue(true));
 			}
 		});
-		build.start(clients, app);
+		build.start(clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", false, clients, app);
+		build.finish(0, 0, "no-result", false, clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -187,14 +187,14 @@ public class BuildTest extends BaseTest {
 		final Build build = new Build(project);
 		mockery.checking(new Expectations() {
 			{
-				one(first).execute(control, build, clients, app);
-				one(first).runAfter(build);
+				one(first).execute(control, build, clients, app, database);
+				one(first).runAfter(build, database);
 				will(returnValue(false));
 			}
 		});
-		build.start(clients, app);
+		build.start(clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", false, clients, app);
+		build.finish(0, 0, "no-result", false, clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -222,12 +222,12 @@ public class BuildTest extends BaseTest {
 		final Build build = new Build(project);
 		mockery.checking(new Expectations() {
 			{
-				one(first).execute(control, build, clients, app);
+				one(first).execute(control, build, clients, app, database);
 			}
 		});
-		build.start(clients, app);
+		build.start(clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", true, clients, app);
+		build.finish(0, 0, "no-result", true, clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -255,15 +255,15 @@ public class BuildTest extends BaseTest {
 		final Build build = new Build(project);
 		mockery.checking(new Expectations() {
 			{
-				one(first).execute(control, build, clients, app);
-				one(second).execute(control, build, clients, app);
-				one(first).runAfter(build);
+				one(first).execute(control, build, clients, app, database);
+				one(second).execute(control, build, clients, app, database);
+				one(first).runAfter(build, database);
 				will(returnValue(true));
 			}
 		});
-		build.start(clients, app);
-		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", true, clients, app);
+		build.start(clients, app, database);
+	assertThat(build.getCurrentPhase(), is(equalTo(0)));
+		build.finish(0, 0, "no-result", true, clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(1)));
 		mockery.assertIsSatisfied();
 	}
@@ -311,7 +311,7 @@ public class BuildTest extends BaseTest {
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
-				one(firstPlugin).getPlugin();
+				one(firstPlugin).getPlugin(database);
 				will(returnValue(firstImplementation));
 			}
 		});
@@ -320,10 +320,10 @@ public class BuildTest extends BaseTest {
 		mockery.checking(new Expectations() {
 			{
 				one(firstImplementation).before(build); will(returnValue(true));
-				one(first).execute(control, build, clients, app);
+				one(first).execute(control, build, clients, app, database);
 			}
 		});
-		build.start(clients, app);
+		build.start(clients, app, database);
 		mockery.assertIsSatisfied();
 	}
 
@@ -347,7 +347,7 @@ public class BuildTest extends BaseTest {
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
-				one(firstPlugin).getPlugin();
+				one(firstPlugin).getPlugin(database);
 				will(returnValue(firstImplementation));
 				allowing(firstPlugin).getType();will(returnValue(BuildTest.class));
 			}
@@ -358,7 +358,7 @@ public class BuildTest extends BaseTest {
 				one(firstImplementation).before(build); will(returnValue(false));
 			}
 		});
-		build.start(clients, app);
+		build.start(clients, app, database);
 		assertThat(build.isFinished(), is(equalTo(true)));
 		assertThat(build.isSuccessSoFar(), is(equalTo(false)));
 		mockery.assertIsSatisfied();

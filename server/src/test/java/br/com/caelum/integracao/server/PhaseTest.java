@@ -83,7 +83,7 @@ public class PhaseTest extends BaseTest {
 				one(build).getFile("5"); will(returnValue(dir));
 			}
 		});
-		compile.execute(null, build, null, null);
+		compile.execute(null, build, null, null, database);
 		assertThat(dir.exists(), is(equalTo(true)));
 		mockery.assertIsSatisfied();
 	}
@@ -98,14 +98,14 @@ public class PhaseTest extends BaseTest {
 			{
 				one(run).setPosition(1);
 				one(second).setPosition(2);
-				one(run).getPlugin(); will(returnValue(plugin));
-				one(second).getPlugin(); will(returnValue(plugin));
+				one(run).getPlugin(database); will(returnValue(plugin));
+				one(second).getPlugin(database); will(returnValue(plugin));
 				exactly(2).of(plugin).after(build, test); will(returnValue(true));
 			}
 		});
 		test.add(run);
 		test.add(second);
-		assertThat(test.runAfter(build), is(equalTo(true)));
+		assertThat(test.runAfter(build,database), is(equalTo(true)));
 		mockery.assertIsSatisfied();
 	}
 	
@@ -118,12 +118,12 @@ public class PhaseTest extends BaseTest {
 			{
 				one(run).setPosition(1);
 				one(second).setPosition(2);
-				one(run).getPlugin(); will(returnValue(null));
+				one(run).getPlugin(database); will(returnValue(null));
 			}
 		});
 		test.add(run);
 		test.add(second);
-		assertThat(test.runAfter(build), is(equalTo(false)));
+		assertThat(test.runAfter(build,database), is(equalTo(false)));
 		mockery.assertIsSatisfied();
 	}
 
@@ -137,13 +137,13 @@ public class PhaseTest extends BaseTest {
 			{
 				one(run).setPosition(1);
 				one(second).setPosition(2);
-				one(run).getPlugin(); will(returnValue(plugin));
+				one(run).getPlugin(database); will(returnValue(plugin));
 				one(plugin).after(build, test); will(returnValue(false));
 			}
 		});
 		test.add(run);
 		test.add(second);
-		assertThat(test.runAfter(build), is(equalTo(false)));
+		assertThat(test.runAfter(build,database), is(equalTo(false)));
 		mockery.assertIsSatisfied();
 	}
 

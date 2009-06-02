@@ -39,14 +39,14 @@ public abstract class AtDirectoryTest {
 	protected File baseDir;
 
 	@Before
-	public void setup() {
+	public void setupDir() {
 		this.baseDir = new File(".tmp");
 		clear(baseDir);
 		this.baseDir.mkdirs();
 	}
 
 	@After
-	public void remove() {
+	public void removeDir() {
 		clear(baseDir);
 	}
 

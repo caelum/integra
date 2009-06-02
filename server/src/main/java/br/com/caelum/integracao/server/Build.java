@@ -50,6 +50,7 @@ import org.hibernate.validator.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
@@ -119,7 +120,7 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
-	public void start(Clients clients, Application app) throws IllegalArgumentException, SecurityException,
+	public void start(Clients clients, Application app, Database db) throws IllegalArgumentException, SecurityException,
 			InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException,
 			IOException {
 		this.currentPhase = 0;
@@ -129,7 +130,7 @@ public class Build {
 		int result = update(control);
 		if (result == 0) {
 			for (PluginToRun plugin : project.getPlugins()) {
-				if(!plugin.getPlugin().before(this)) {
+				if(!plugin.getPlugin(db).before(this)) {
 					logger.debug("Plugin " + plugin.getType().getName() + " told us to stop the build");
 					finish(false);
 					return;
@@ -138,7 +139,7 @@ public class Build {
 			List<Phase> phases = project.getPhases();
 			if (!phases.isEmpty()) {
 				Phase phase = phases.get(0);
-				phase.execute(control, this, clients, app);
+				phase.execute(control, this, clients, app, db);
 			}
 		} else {
 			finish(false);
@@ -170,7 +171,7 @@ public class Build {
 	}
 
 	public synchronized void finish(int phasePosition, int commandId, String result, boolean success, Clients clients,
-			Application app) throws IOException, InstantiationException, IllegalAccessException,
+			Application app, Database database) throws IOException, InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		successSoFar &= success;
 		executedCommandsFromThisPhase.add(commandId);
@@ -184,12 +185,12 @@ public class Build {
 		if (executedAllCommands) {
 			logger.debug("Preparing to execute plugins for " + getProject().getName() + " with success = "
 					+ successSoFar);
-			successSoFar &= actualPhase.runAfter(this);
+			successSoFar &= actualPhase.runAfter(this, database);
 			if (successSoFar) {
 				currentPhase++;
 				executedCommandsFromThisPhase.clear();
 				if (project.getPhases().size() != currentPhase) {
-					project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients, app);
+					project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients, app, database);
 				} else {
 					finish(true);
 				}

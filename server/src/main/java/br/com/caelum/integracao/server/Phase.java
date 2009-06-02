@@ -45,6 +45,7 @@ import org.hibernate.annotations.CascadeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
@@ -91,7 +92,7 @@ public class Phase {
 	public Phase() {
 	}
 
-	public void execute(ScmControl control, Build build, Clients clients, Application app) throws IOException {
+	public void execute(ScmControl control, Build build, Clients clients, Application app, Database database) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Starting phase " + name + " for project " + build.getProject().getName() + " containing "
 					+ commands.size() + " parallel commands.");
@@ -104,7 +105,7 @@ public class Phase {
 			} catch (IllegalStateException e) {
 				// there is no client available
 				try {
-					build.finish((int) position, command.getPosition(), "NOT ENOUGHT CLIENTS", false, clients, app);
+					build.finish((int) position, command.getPosition(), "NOT ENOUGHT CLIENTS", false, clients, app, database);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -185,9 +186,9 @@ public class Phase {
 	 * with a sucess or not. Plugins are run in order and if one tells the
 	 * system to stop, no other plugins are run.
 	 */
-	public boolean runAfter(Build build) {
+	public boolean runAfter(Build build, Database database) {
 		for (PluginToRun toRun : getPlugins()) {
-			Plugin plugin = toRun.getPlugin();
+			Plugin plugin = toRun.getPlugin(database);
 			if (plugin == null) {
 				return false;
 			} else {

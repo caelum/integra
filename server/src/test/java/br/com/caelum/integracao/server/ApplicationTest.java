@@ -51,6 +51,7 @@ public class ApplicationTest extends BaseTest {
 		result.setHostname("custom");
 		result.setPort(2030);
 		app.update(result);
+		database.getSession().flush();
 		database.getSession().clear();
 		result = app.getConfig();
 		assertThat(result.getHostname(), is(equalTo("custom")));

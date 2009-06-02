@@ -43,6 +43,8 @@ import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.dao.Database;
+
 @Entity
 public class PluginToRun {
 
@@ -80,9 +82,9 @@ public class PluginToRun {
 		this.position = position;
 	}
 
-	public Plugin getPlugin() {
+	public Plugin getPlugin(Database db) {
 		try {
-			PluginInformation plugin = type.getDeclaredConstructor().newInstance();
+			PluginInformation plugin = type.getDeclaredConstructor(Database.class).newInstance(db);
 			return plugin.getPlugin(createParameters());
 		} catch (Exception e) {
 			logger.error("Unable to instantiate the plugin " + type.getName(), e);

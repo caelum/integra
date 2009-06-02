@@ -7,7 +7,7 @@
 	<br />
 	Last build: ${project.lastBuild.time?datetime }<br />
 	<table>
-		<#list phase.plugins as plugin>
+		<#list project.plugins as plugin>
 			<tr>
 				<td>${plugin.type.simpleName }
 				<div id="plugin_${plugin.id }"></div>
@@ -19,7 +19,7 @@
 		<tr>
 			<td>
 			<form action="plugin" method="post"><input type="hidden"
-				name="phase.id" value="${phase.id }" /> <select
+				name="project.name" value="${project.name }" /> <select
 				name="pluginType">
 				<#list plugins as plugin>
 					<option value="${plugin.name }">${plugin.simpleName }</option>
@@ -71,7 +71,7 @@
 					</#list>
 					<tr>
 						<td>
-						<form action="plugin" method="post"><input type="hidden"
+						<form action="phase/plugin" method="post"><input type="hidden"
 							name="phase.id" value="${phase.id }" /> <select
 							name="pluginType">
 							<#list plugins as plugin>

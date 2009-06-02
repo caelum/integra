@@ -34,14 +34,16 @@ import static org.hamcrest.Matchers.is;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ClientsTest {
+import br.com.caelum.integracao.server.project.BaseTest;
+
+public class ClientsTest extends BaseTest{
 
 	private Clients clients;
 	private Client bebado;
 
 	@Before
-	public void setup() {
-		this.clients = new Clients(null);
+	public void configClients() {
+		this.clients = new Clients(database);
 		this.bebado = new Client();
 		clients.register(bebado);
 	}
