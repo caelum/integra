@@ -84,8 +84,8 @@ public class PluginToRun {
 
 	public Plugin getPlugin(Database db) {
 		try {
-			PluginInformation plugin = type.getDeclaredConstructor(Database.class).newInstance(db);
-			return plugin.getPlugin(createParameters());
+			PluginInformation plugin = type.getDeclaredConstructor().newInstance();
+			return plugin.getPlugin(db, createParameters());
 		} catch (Exception e) {
 			logger.error("Unable to instantiate the plugin " + type.getName(), e);
 			return null;

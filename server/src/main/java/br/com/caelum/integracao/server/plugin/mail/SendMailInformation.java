@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
 
 /**
@@ -49,7 +50,7 @@ public class SendMailInformation implements PluginInformation {
 		return false;
 	}
 
-	public SendMail getPlugin(Map<String, String> parameters) {
+	public SendMail getPlugin(Database database, Map<String, String> parameters) {
 		String value = parameters.get("recipients");
 		String[] recipients = value == null ? new String[0] : value.split(",");
 		return new SendMail(parameters.get("host"), recipients, parameters.get("from.name"), parameters.get("from.mail"));

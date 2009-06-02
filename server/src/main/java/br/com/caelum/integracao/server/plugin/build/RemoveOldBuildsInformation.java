@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
 
@@ -44,8 +45,8 @@ public class RemoveOldBuildsInformation implements PluginInformation {
 		return Arrays.asList("keep");
 	}
 
-	public Plugin getPlugin(Map<String, String> parameters) {
-		return new RemoveOldBuilds(Integer.parseInt(parameters.get("keep")));
+	public Plugin getPlugin(Database db, Map<String, String> parameters) {
+		return new RemoveOldBuilds(db, Integer.parseInt(parameters.get("keep")));
 	}
 
 }

@@ -33,6 +33,8 @@ import java.util.Map;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 
+import br.com.caelum.integracao.server.dao.Database;
+
 /**
  * Basic plugin info is saved somewhere else
  * 
@@ -43,6 +45,6 @@ public interface PluginInformation {
 	
 	List<String> getParameters();
 	
-	Plugin getPlugin(Map<String, String> parameters);
+	Plugin getPlugin(Database database, Map<String, String> parameters);
 
 }

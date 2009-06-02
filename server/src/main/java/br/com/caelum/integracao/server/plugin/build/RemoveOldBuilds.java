@@ -31,6 +31,7 @@ import java.util.List;
 
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.Plugin;
 
 /**
@@ -41,8 +42,10 @@ import br.com.caelum.integracao.server.plugin.Plugin;
 public class RemoveOldBuilds implements Plugin {
  
 	private final int keep;
+	private final Database database;
 
-	public RemoveOldBuilds(int keep) {
+	public RemoveOldBuilds(Database database, int keep) {
+		this.database = database;
 		this.keep = keep;
 	}
 
@@ -53,7 +56,8 @@ public class RemoveOldBuilds implements Plugin {
 	public boolean before(Build build) {
 		List<Build> builds = build.getProject().getBuilds();
 		for(int i = keep; i<builds.size();i++) {
-			builds.get(i).remove();
+			Build b = builds.get(i);
+			b.remove(database);
 		}
 		return true;
 	}

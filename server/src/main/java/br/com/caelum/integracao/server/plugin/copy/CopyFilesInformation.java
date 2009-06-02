@@ -33,6 +33,7 @@ import java.util.Map;
 
 import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
 
 /**
@@ -50,7 +51,7 @@ public class CopyFilesInformation implements PluginInformation {
 		return false;
 	}
 
-	public CopyFiles getPlugin(Map<String, String> parameters) {
+	public CopyFiles getPlugin(Database db, Map<String, String> parameters) {
 		String value = parameters.get("artifactDirectories");
 		String[] dirs = value == null ? new String[0] : value.split(",");
 		return new CopyFiles(new DefaultHttp(), dirs);

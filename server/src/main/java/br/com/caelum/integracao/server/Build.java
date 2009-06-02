@@ -255,7 +255,8 @@ public class Build {
 		return clients;
 	}
 
-	public void remove() {
+	public void remove(Database database) {
+		database.getSession().delete(this);
 		remove(getBaseDirectory());
 	}
 

@@ -51,12 +51,12 @@ public class RemoveOldBuildsTest extends BaseTest {
 		all.add(first);
 		mockery.checking(new Expectations() {
 			{
-				one(first).remove();
+				one(first).remove(database);
 				one(current).getProject(); will(returnValue(project));
 				one(project).getBuilds(); will(returnValue(all));
 			}
 		});
-		RemoveOldBuilds builds = new RemoveOldBuilds(2);
+		RemoveOldBuilds builds = new RemoveOldBuilds(database, 2);
 		builds.before(current);
 		mockery.assertIsSatisfied();
 	}
