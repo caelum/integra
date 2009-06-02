@@ -83,7 +83,7 @@ public class Project {
 	private Long buildCount = 0L;
 	
 	@OneToMany(mappedBy="project")
-	@OrderBy("buildCount")
+	@OrderBy("buildCount desc")
 	private final List<Build> builds = new ArrayList<Build>();
 	@NotNull
 	private Calendar lastBuild = new GregorianCalendar();
@@ -106,7 +106,7 @@ public class Project {
 
 	public Build build() {
 		Build build = new Build(this);
-		this.builds.add(build);
+		this.builds.add(0, build);
 		return build;
 	}
 

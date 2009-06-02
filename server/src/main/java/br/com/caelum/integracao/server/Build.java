@@ -244,4 +244,7 @@ public class Build {
 		}
 		return clients;
 	}
+
+	public void remove() {
+	}
 }

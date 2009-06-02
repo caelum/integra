@@ -89,15 +89,16 @@ public class CommandToExecute {
 			outputThread.start();
 			waitThread.join();
 			outputThread.join();
-			if (closeWriter) {
-				this.outputWriter.close();
-			}
 			return process.exitValue();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (InterruptedException e) {
 			// someone told me to STOP this job, ok ,please stop it now!!!
 			throw new RuntimeException(e);
+		} finally {
+			if (closeWriter) {
+				this.outputWriter.close();
+			}
 		}
 	}
 

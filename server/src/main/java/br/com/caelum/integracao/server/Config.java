@@ -37,6 +37,7 @@ import javax.persistence.Id;
 import org.hibernate.annotations.CollectionOfElements;
 
 import br.com.caelum.integracao.server.plugin.PluginInformation;
+import br.com.caelum.integracao.server.plugin.build.RemoveOldBuildsInformation;
 import br.com.caelum.integracao.server.plugin.copy.CopyFilesInformation;
 import br.com.caelum.integracao.server.plugin.mail.SendMailInformation;
 
@@ -77,6 +78,7 @@ public class Config {
 	public void registerBasicPlugins() {
 		getAvailablePlugins().add(CopyFilesInformation.class);
 		getAvailablePlugins().add(SendMailInformation.class);
+		getAvailablePlugins().add(RemoveOldBuildsInformation.class);
 	}
 	
 	public List<Class<? extends PluginInformation>> getAvailablePlugins() {
