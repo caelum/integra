@@ -61,6 +61,7 @@ public class Application {
 		Config result=getConfig();
 		result.setHostname(config.getHostname());
 		result.setPort(config.getPort());
+		result.setCheckInterval(config.getCheckInterval());
 	}
 
 }

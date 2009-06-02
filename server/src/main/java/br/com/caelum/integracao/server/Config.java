@@ -51,6 +51,8 @@ public class Config {
 	private String hostname = "localhost";
 	
 	private Integer port = 9091;
+	
+	private int checkInterval = 30;
 
 	@CollectionOfElements
 	private List<Class<? extends PluginInformation>> plugins;
@@ -86,6 +88,14 @@ public class Config {
 			plugins = new ArrayList<Class<? extends PluginInformation>>();
 		}
 		return plugins;
+	}
+
+	public void setCheckInterval(int checkInterval) {
+		this.checkInterval = checkInterval;
+	}
+
+	public int getCheckInterval() {
+		return checkInterval;
 	}
 
 }
