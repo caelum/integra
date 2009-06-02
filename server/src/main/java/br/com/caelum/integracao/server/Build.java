@@ -170,12 +170,12 @@ public class Build {
 		return currentPhase;
 	}
 
-	public synchronized void finish(int phasePosition, int commandId, String result, boolean success, Clients clients,
+	public synchronized void finish(String phaseName, int phasePosition, int commandId, String result, boolean success, Clients clients,
 			Application app, Database database) throws IOException, InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		successSoFar &= success;
 		executedCommandsFromThisPhase.add(commandId);
-		File file = getFile(phasePosition + "/" + commandId + ".txt");
+		File file = getFile(phaseName + "/" + commandId + ".txt");
 		file.getParentFile().mkdirs();
 		PrintWriter writer = new PrintWriter(new FileWriter(file), true);
 		writer.print(result);

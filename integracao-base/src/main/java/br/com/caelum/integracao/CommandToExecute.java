@@ -36,7 +36,12 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CommandToExecute {
+	
+	private final Logger logger = LoggerFactory.getLogger(CommandToExecute.class);
 
 	private final String[] cmd;
 	private File baseDir;
@@ -114,12 +119,15 @@ public class CommandToExecute {
 
 	public void stop() {
 		if (this.waitThread != null) {
-			this.waitThread.stop();
+			logger.debug("Interrupting wait thread");
+			this.waitThread.interrupt();
 		}
 		if (this.outputThread != null) {
-			this.outputThread.stop();
+			logger.debug("Interrupting output thread");
+			this.outputThread.interrupt();
 		}
 		if (this.process != null) {
+			logger.debug("Destroying process " + process);
 			this.process.destroy();
 		}
 	}

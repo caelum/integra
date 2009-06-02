@@ -231,4 +231,13 @@ public class Project {
 		return plugins;
 	}
 
+	public Phase getPhase(long phasePosition) {
+		for(Phase p : getPhases()) {
+			if(p.getPosition()==phasePosition) {
+				return p;
+			}
+		}
+		return null;
+	}
+
 }

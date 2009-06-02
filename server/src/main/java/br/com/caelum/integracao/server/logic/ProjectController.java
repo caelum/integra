@@ -38,6 +38,7 @@ import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
@@ -157,7 +158,8 @@ public class ProjectController {
 					+ " command " + commandId);
 			project = new Projects(db).get(project.getName());
 			Build build = project.getBuild(buildId);
-			build.finish(phasePosition, commandId, result, success, new Clients(db), new Application(db), db);
+			Phase currentPhase = project.getPhase(phasePosition);
+			build.finish(currentPhase.getName(), phasePosition, commandId, result, success, new Clients(db), new Application(db), db);
 			db.commit();
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -160,7 +160,7 @@ public class BuildTest extends BaseTest {
 		});
 		build.start(clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", false, clients, app, database);
+		build.finish("",0, 0, "no-result", false, clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -195,7 +195,7 @@ public class BuildTest extends BaseTest {
 		});
 		build.start(clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", false, clients, app, database);
+		build.finish("",0, 0, "no-result", false, clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -228,7 +228,7 @@ public class BuildTest extends BaseTest {
 		});
 		build.start(clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", true, clients, app, database);
+		build.finish("",0, 0, "no-result", true, clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -264,7 +264,7 @@ public class BuildTest extends BaseTest {
 		});
 		build.start(clients, app, database);
 	assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish(0, 0, "no-result", true, clients, app, database);
+		build.finish("",0, 0, "no-result", true, clients, app, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(1)));
 		mockery.assertIsSatisfied();
 	}

@@ -97,7 +97,7 @@ public class Phase {
 			logger.debug("Starting phase " + name + " for project " + build.getProject().getName() + " containing "
 					+ commands.size() + " parallel commands.");
 		}
-		build.getFile(position + "").mkdirs();
+		build.getFile(name).mkdirs();
 		for (ExecuteCommandLine command : commands) {
 			Client client;
 			try {
@@ -105,7 +105,7 @@ public class Phase {
 			} catch (IllegalStateException e) {
 				// there is no client available
 				try {
-					build.finish((int) position, command.getPosition(), "NOT ENOUGHT CLIENTS", false, clients, app, database);
+					build.finish(name, (int) position, command.getPosition(), "NOT ENOUGHT CLIENTS", false, clients, app, database);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
