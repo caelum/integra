@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.CommandToExecute;
 import br.com.caelum.integracao.server.scm.ScmControl;
+import br.com.caelum.integracao.server.scm.ScmException;
 
 public class Project {
 
@@ -71,28 +72,31 @@ public class Project {
 		this.scmType = Class.forName(scmControl);
 	}
 
-	public ScmControl getControl(File baseDirectory) throws InstantiationException, IllegalAccessException, InvocationTargetException,
-			NoSuchMethodException {
+	public ScmControl getControl(File baseDirectory) throws InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException {
 		logger.debug("Creating scm control " + scmType + " for project " + getName());
 		return (ScmControl) scmType.getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
 				baseDirectory, name);
 	}
 
-	public ProjectRunResult run(File baseDirectory, String revision, List<String> command, File output) throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public ProjectRunResult run(File baseDirectory, String revision, List<String> command, File output)
+			throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException,
+			NoSuchMethodException {
 		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDirectory + "/" + name);
 		File checkoutLog = File.createTempFile("checkout-client-", ".txt");
 		ScmControl control = getControl(baseDirectory);
-		int result = control.checkoutOrUpdate(checkoutLog);
-		if(result!=0) {
-			return new ProjectRunResult(content(checkoutLog), result);
+		try {
+			control.checkoutOrUpdate(checkoutLog);
+		} catch (ScmException ex) {
+			return new ProjectRunResult(content(checkoutLog), -1);
 		}
-		
+
 		File workDir = new File(baseDirectory, name);
 		String[] commands = command.toArray(new String[command.size()]);
-		logger.debug("Ready to execute " + Arrays.toString(commands) + " @ " + workDir.getAbsolutePath() + " using log="
-				+ output.getAbsolutePath());
+		logger.debug("Ready to execute " + Arrays.toString(commands) + " @ " + workDir.getAbsolutePath()
+				+ " using log=" + output.getAbsolutePath());
 		this.executing = new CommandToExecute(commands).at(workDir).logTo(output);
-		result = this.executing.run();
+		int result = this.executing.run();
 		return new ProjectRunResult(content(output), result);
 
 	}

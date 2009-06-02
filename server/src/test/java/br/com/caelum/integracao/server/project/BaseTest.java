@@ -27,6 +27,9 @@
  */
 package br.com.caelum.integracao.server.project;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
@@ -66,5 +69,11 @@ public class BaseTest extends AtDirectoryTest {
 	public void removeMockery() {
 		mockery = null;
 		this.database.close();
+	}
+	
+	public File tmpFile() throws IOException {
+		File f = File.createTempFile("base-test-", ".txt");
+		f.deleteOnExit();
+		return f;
 	}
 }

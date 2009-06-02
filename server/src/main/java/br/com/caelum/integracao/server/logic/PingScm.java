@@ -27,6 +27,8 @@
  */
 package br.com.caelum.integracao.server.logic;
 
+import java.io.File;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -83,26 +85,7 @@ public class PingScm {
 		try {
 			Projects projects = new Projects(db);
 			for(Project project : projects.all()) {
-				Build lastBuild = project.getBuild(project.getBuildCount());
-				logger.debug("Project " + project.getName() + " last build finished=" + lastBuild.isFinished());
-				if(lastBuild.isFinished()) {
-					String lastRevision = lastBuild.getRevision();
-					String revision = project.getControl().getCurrentRevision();
-					if(!lastRevision.equals(revision)) {
-						try {
-							db.beginTransaction();
-							logger.debug("Project " + project.getName() + " has a new revision, therefore we will start the build");
-							Build build = project.build();
-							build.start(new Clients(db), new Application(db), db);
-							db.commit();
-						} catch (Exception e) {
-							if(db.hasTransaction()) {
-								db.rollback();
-							}
-							logger.debug("Unable to build project " + project.getName(), e);
-						}
-					}
-				}
+				tryToBuild(db, project);
 			}
 			Config config = new Application(db).getConfig();
 			Thread.sleep(config.getCheckInterval() * 1000);
@@ -110,6 +93,34 @@ public class PingScm {
 			e.printStackTrace();
 		} finally {
 			db.close();
+		}
+	}
+
+	private void tryToBuild(Database db, Project project) {
+		Build lastBuild = project.getBuild(project.getBuildCount());
+		logger.debug("Project " + project.getName() + " last build finished=" + lastBuild.isFinished());
+		if(lastBuild.isFinished()) {
+			String lastRevision = lastBuild.getRevision();
+			try {
+				File log = File.createTempFile("integra-revision-", ".txt");
+				String revision = project.getControl().getRevision(log);
+				if(!lastRevision.equals(revision)) {
+					try {
+						db.beginTransaction();
+						logger.debug("Project " + project.getName() + " has a new revision, therefore we will start the build");
+						Build build = project.build();
+						build.start(new Clients(db), new Application(db), db);
+						db.commit();
+					} catch (Exception e) {
+						if(db.hasTransaction()) {
+							db.rollback();
+						}
+						logger.debug("Unable to build project " + project.getName(), e);
+					}
+				}
+			} catch (Exception e) {
+				logger.debug("Unable to build project " + project.getName(), e);
+			}
 		}
 	}
 

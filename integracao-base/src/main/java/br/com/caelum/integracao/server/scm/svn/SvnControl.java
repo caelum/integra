@@ -1,7 +1,9 @@
 package br.com.caelum.integracao.server.scm.svn;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import br.com.caelum.integracao.CommandToExecute;
@@ -53,10 +55,14 @@ public class SvnControl implements ScmControl {
 		return prepare("svn", "remove", file.getAbsolutePath()).at(file.getParentFile()).run();
 	}
 
-	public String getRevision() {
+	public String getRevision(File log) throws IOException {
 		StringWriter writer = new StringWriter();
-		prepare("svn", "info").logTo(writer).at(getDir()).run();
+		prepare("svn", "info", uri).logTo(writer).at(getDir()).run();
 		String content = writer.getBuffer().toString();
+
+		PrintWriter file = new PrintWriter(new FileWriter(log), true);
+		file.println(content);
+		file.close();
 		int pos = content.indexOf("Last Changed Rev: ");
 		return content.substring(pos+ "Last Changed Rev: ".length(), content.indexOf("\n", pos));
 	}

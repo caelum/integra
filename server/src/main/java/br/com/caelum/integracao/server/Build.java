@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
+import br.com.caelum.integracao.server.scm.ScmException;
 
 /**
  * Represents an build either in process or already processed.
@@ -120,29 +121,30 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
-	public void start(Clients clients, Application app, Database db) throws IllegalArgumentException, SecurityException,
-			InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException,
-			IOException {
+	public void start(Clients clients, Application app, Database db) throws IllegalArgumentException,
+			SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException,
+			NoSuchMethodException, IOException {
 		this.currentPhase = 0;
 		logger.debug("Starting executing process for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
 		ScmControl control = project.getControl();
-		int result = update(control);
-		if (result == 0) {
-			for (PluginToRun plugin : project.getPlugins()) {
-				if(!plugin.getPlugin(db).before(this)) {
-					logger.debug("Plugin " + plugin.getType().getName() + " told us to stop the build");
-					finish(false);
-					return;
-				}
-			}
-			List<Phase> phases = project.getPhases();
-			if (!phases.isEmpty()) {
-				Phase phase = phases.get(0);
-				phase.execute(control, this, clients, app, db);
-			}
-		} else {
+		try {
+			update(control);
+		} catch (ScmException ex) {
+			logger.error("Unable to retrieve revision for " + project.getName(), ex);
 			finish(false);
+		}
+		for (PluginToRun plugin : project.getPlugins()) {
+			if (!plugin.getPlugin(db).before(this)) {
+				logger.debug("Plugin " + plugin.getType().getName() + " told us to stop the build");
+				finish(false);
+				return;
+			}
+		}
+		List<Phase> phases = project.getPhases();
+		if (!phases.isEmpty()) {
+			Phase phase = phases.get(0);
+			phase.execute(control, this, clients, app, db);
 		}
 	}
 
@@ -152,14 +154,12 @@ public class Build {
 		this.finishTime = new GregorianCalendar();
 	}
 
-	private int update(ScmControl control) throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException, IOException {
+	private void update(ScmControl control) throws InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException, IOException, ScmException {
 		File tmpFile = File.createTempFile("loading-checkout", ".log");
-		int result = control.checkoutOrUpdate(tmpFile);
-		this.revision = control.getRevision();
+		this.revision = control.getRevision(tmpFile);
 		tmpFile.renameTo(getFile("checkout.txt"));
-		logger.debug("Checking out " + project.getName() + ", build = " + buildCount + " resulted in " + result);
-		return result;
+		logger.debug("Checking out " + project.getName() + ", build = " + buildCount);
 	}
 
 	public Project getProject() {
@@ -190,7 +190,8 @@ public class Build {
 				currentPhase++;
 				executedCommandsFromThisPhase.clear();
 				if (project.getPhases().size() != currentPhase) {
-					project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients, app, database);
+					project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients, app,
+							database);
 				} else {
 					finish(true);
 				}
@@ -272,5 +273,5 @@ public class Build {
 		}
 		dir.delete();
 	}
-	
+
 }

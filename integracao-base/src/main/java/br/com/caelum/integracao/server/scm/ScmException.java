@@ -27,20 +27,15 @@
  */
 package br.com.caelum.integracao.server.scm;
 
-import java.io.File;
-import java.io.IOException;
+public class ScmException extends Exception {
 
-/**
- * An scm implementation.
- * 
- * @author guilherme silveira
- */
-public interface ScmControl {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 9831550585691039L;
 
-	public File getDir();
-
-	int checkoutOrUpdate(File log) throws IOException, ScmException;
-
-	String getRevision(File log) throws IOException, ScmException;
+	public ScmException(String msg) {
+		super(msg);
+	}
 
 }

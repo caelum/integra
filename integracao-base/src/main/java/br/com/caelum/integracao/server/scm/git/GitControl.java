@@ -33,6 +33,7 @@ import java.io.StringWriter;
 
 import br.com.caelum.integracao.CommandToExecute;
 import br.com.caelum.integracao.server.scm.ScmControl;
+import br.com.caelum.integracao.server.scm.ScmException;
 
 public class GitControl implements ScmControl {
 
@@ -83,7 +84,11 @@ public class GitControl implements ScmControl {
 		return prepare("git", "rm", file.getAbsolutePath()).at(file.getParentFile()).run();
 	}
 
-	public String getRevision() {
+	public String getRevision(File log) throws IOException, ScmException {
+		int result = update(log);
+		if(result!=0) {
+			throw new ScmException("Unable to load data and revision information.");
+		}
 		StringWriter writer = new StringWriter();
 		prepare("git", "log").logTo(writer).at(getDir()).run();
 		String content = writer.getBuffer().toString();

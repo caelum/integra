@@ -50,6 +50,7 @@ import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
+import br.com.caelum.integracao.server.scm.ScmException;
 
 public class BuildTest extends BaseTest {
 
@@ -107,7 +108,7 @@ public class BuildTest extends BaseTest {
 	@Test
 	public void createsABuildWithCorrectCheckoutInfo() throws IllegalArgumentException, SecurityException,
 			InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException,
-			IOException {
+			IOException, ScmException {
 		mockery.checking(new Expectations() {
 			{
 				one(project).nextBuild();
@@ -115,7 +116,7 @@ public class BuildTest extends BaseTest {
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision();
+				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
@@ -131,7 +132,7 @@ public class BuildTest extends BaseTest {
 
 	@Test
 	public void keepsTheCurrentPhaseAndInvokesRunAfterOnPluginsIfNoSuccess() throws InstantiationException,
-			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
+			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException, ScmException {
 		phases.add(first);
 		phases.add(second);
 		mockery.checking(new Expectations() {
@@ -141,7 +142,7 @@ public class BuildTest extends BaseTest {
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision();
+				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
@@ -166,7 +167,7 @@ public class BuildTest extends BaseTest {
 
 	@Test
 	public void keepsTheCurrentPhaseIfSuccessButPluginsFail() throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException, IOException {
+			InvocationTargetException, NoSuchMethodException, IOException, ScmException {
 		phases.add(first);
 		phases.add(second);
 		mockery.checking(new Expectations() {
@@ -176,7 +177,7 @@ public class BuildTest extends BaseTest {
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision();
+				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
@@ -201,7 +202,7 @@ public class BuildTest extends BaseTest {
 
 	@Test
 	public void keepsTheCurrentPhaseIfThereAreStillCommandsToDo() throws InstantiationException,
-			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
+			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException, ScmException {
 		phases.add(first);
 		phases.add(second);
 		mockery.checking(new Expectations() {
@@ -211,7 +212,7 @@ public class BuildTest extends BaseTest {
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision();
+				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
@@ -234,7 +235,7 @@ public class BuildTest extends BaseTest {
 
 	@Test
 	public void changesThePhaseWhenAllCommandsWereExecuted() throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException, IOException {
+			InvocationTargetException, NoSuchMethodException, IOException, ScmException {
 		phases.add(first);
 		phases.add(second);
 		mockery.checking(new Expectations() {
@@ -244,7 +245,7 @@ public class BuildTest extends BaseTest {
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision();
+				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
@@ -296,7 +297,7 @@ public class BuildTest extends BaseTest {
 
 	@Test
 	public void invokesTheBeforeMethodOfAPlugin() throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException, IOException {
+			InvocationTargetException, NoSuchMethodException, IOException, ScmException {
 		phases.add(first);
 		final PluginToRun firstPlugin = mockery.mock(PluginToRun.class, "firstPlugin");
 		final Plugin firstImplementation = mockery.mock(Plugin.class, "firstImplementation");
@@ -307,7 +308,7 @@ public class BuildTest extends BaseTest {
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision();
+				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
@@ -329,7 +330,7 @@ public class BuildTest extends BaseTest {
 
 	@Test
 	public void doesntContinueTheStartProcessIfAPluginTellsItToStop() throws InstantiationException,
-			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException {
+			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException, ScmException {
 		phases.add(first);
 		final PluginToRun firstPlugin = mockery.mock(PluginToRun.class, "firstPlugin");
 		final Plugin firstImplementation = mockery.mock(Plugin.class, "firstImplementation");
@@ -343,7 +344,7 @@ public class BuildTest extends BaseTest {
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision();
+				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
 				allowing(project).getBuildsDirectory();
 				will(returnValue(baseDir));
