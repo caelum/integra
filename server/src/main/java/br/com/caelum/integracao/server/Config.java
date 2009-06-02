@@ -52,7 +52,7 @@ public class Config {
 	
 	private Integer port = 9091;
 	
-	private int checkInterval = 30;
+	private int checkInterval = 60;
 
 	@CollectionOfElements
 	private List<Class<? extends PluginInformation>> plugins;
