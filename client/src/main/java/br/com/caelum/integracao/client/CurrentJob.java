@@ -31,7 +31,6 @@ package br.com.caelum.integracao.client;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Calendar;
@@ -108,7 +107,7 @@ public class CurrentJob {
 			outputFile.deleteOnExit();
 			result = project.run(point.getBaseDir(), revision, command, outputFile);
 			success = result.getResult() == 0;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			StringWriter writer = new StringWriter();
 			e.printStackTrace(new PrintWriter(writer, true));
 			result = new ProjectRunResult(writer.toString(), -1);

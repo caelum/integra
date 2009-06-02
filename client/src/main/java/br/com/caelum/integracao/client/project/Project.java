@@ -29,8 +29,9 @@ package br.com.caelum.integracao.client.project;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -39,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.CommandToExecute;
+import br.com.caelum.integracao.server.scm.ScmControl;
 
 public class Project {
 
@@ -46,6 +48,7 @@ public class Project {
 	private String name;
 
 	private String uri;
+	private Class<?> scmType;
 	private CommandToExecute executing;
 
 	public void setName(String name) {
@@ -64,26 +67,45 @@ public class Project {
 		return uri;
 	}
 
-	public ProjectRunResult run(File baseDir, String revision, List<String> command, File tmp) throws IOException {
-		File dir = new File(baseDir, name);
-		FileWriter tmpOutput = new FileWriter(tmp);
-		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDir + "/" + name);
-		this.executing = new CommandToExecute("svn", "checkout", "-r", revision, uri, name).at(baseDir);
-		this.executing.run();
+	public void setScmType(String scmControl) throws ClassNotFoundException {
+		this.scmType = Class.forName(scmControl);
+	}
 
+	public ScmControl getControl(File baseDirectory) throws InstantiationException, IllegalAccessException, InvocationTargetException,
+			NoSuchMethodException {
+		logger.debug("Creating scm control " + scmType.getName() + " for project " + getName());
+		return (ScmControl) scmType.getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
+				baseDirectory, name);
+	}
+
+	public ProjectRunResult run(File baseDirectory, String revision, List<String> command, File output) throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDirectory + "/" + name);
+		File checkoutLog = File.createTempFile("checkout-client-", ".txt");
+		ScmControl control = getControl(baseDirectory);
+		int result = control.checkoutOrUpdate(checkoutLog);
+		if(result!=0) {
+			return new ProjectRunResult(content(checkoutLog), result);
+		}
+		
+		File workDir = new File(baseDirectory, name);
 		String[] commands = command.toArray(new String[command.size()]);
-		logger.debug("Ready to execute " + Arrays.toString(commands) + " @ " + dir.getAbsolutePath() + " using log=" + tmp.getAbsolutePath());
-		this.executing = new CommandToExecute(commands).at(dir).logTo(tmpOutput);
-		int result = this.executing.run();
+		logger.debug("Ready to execute " + Arrays.toString(commands) + " @ " + workDir.getAbsolutePath() + " using log="
+				+ output.getAbsolutePath());
+		this.executing = new CommandToExecute(commands).at(workDir).logTo(output);
+		result = this.executing.run();
+		return new ProjectRunResult(content(output), result);
+
+	}
+
+	private String content(File tmp) throws FileNotFoundException {
 		Scanner sc = new Scanner(new FileInputStream(tmp)).useDelimiter("117473826478234211");
 		String content;
-		if(!sc.hasNext()) {
+		if (!sc.hasNext()) {
 			content = "";
 		} else {
 			content = sc.next();
 		}
-		return new ProjectRunResult(content, result);
-
+		return content;
 	}
 
 	public void stop() {

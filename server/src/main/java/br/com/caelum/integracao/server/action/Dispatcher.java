@@ -63,6 +63,7 @@ public class Dispatcher {
 		PostMethod post = new PostMethod(this.client.getBaseUri() + "/project/register");
 		post.addParameter("project.name", project.getName());
 		post.addParameter("project.uri", project.getUri());
+		post.addParameter("project.scmType", project.getControlType().getName());
 		try {
 			int result = client.executeMethod(post);
 			if (result != 200) {
