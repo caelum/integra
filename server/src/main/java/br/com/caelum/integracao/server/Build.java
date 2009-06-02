@@ -85,9 +85,9 @@ public class Build {
 
 	private Calendar startTime = new GregorianCalendar();
 	private Calendar finishTime;
-	
-	@OneToMany(mappedBy="build")
-	private List<UsedClient> usedClients = new ArrayList<UsedClient>(); 
+
+	@OneToMany(mappedBy = "build")
+	private List<UsedClient> usedClients = new ArrayList<UsedClient>();
 
 	protected Build() {
 	}
@@ -174,7 +174,8 @@ public class Build {
 		Phase actualPhase = project.getPhases().get(phasePosition);
 		boolean executedAllCommands = executedCommandsFromThisPhase.size() == actualPhase.getCommandCount();
 		if (executedAllCommands) {
-			logger.debug("Preparing to execute plugins for " + getProject().getName() + " with success = " + successSoFar);
+			logger.debug("Preparing to execute plugins for " + getProject().getName() + " with success = "
+					+ successSoFar);
 			successSoFar &= actualPhase.runAfter(this);
 			if (successSoFar) {
 				currentPhase++;
@@ -237,8 +238,8 @@ public class Build {
 
 	public List<UsedClient> getClientsFor(Phase phase) {
 		List<UsedClient> clients = new ArrayList<UsedClient>();
-		for(UsedClient client : usedClients) {
-			if(phase.getCommands().contains(client.getExecutedCommand())) {
+		for (UsedClient client : usedClients) {
+			if (phase.getCommands().contains(client.getExecutedCommand())) {
 				clients.add(client);
 			}
 		}
@@ -246,5 +247,19 @@ public class Build {
 	}
 
 	public void remove() {
+		remove(getBaseDirectory());
+	}
+
+	private void remove(File dir) {
+		if (dir.exists()) {
+			for (File found : dir.listFiles()) {
+				if (found.isDirectory()) {
+					remove(found);
+				} else {
+					found.delete();
+				}
+			}
+		}
+		dir.delete();
 	}
 }

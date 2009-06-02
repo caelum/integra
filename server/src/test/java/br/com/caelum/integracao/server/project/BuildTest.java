@@ -70,6 +70,8 @@ public class BuildTest extends BaseTest {
 		this.second = mockery.mock(Phase.class, "second");
 		mockery.checking(new Expectations() {
 			{
+				allowing(project).getBaseDir();
+				will(returnValue(baseDir));
 				allowing(project).getControl();
 				will(returnValue(control));
 				allowing(project).getPhases();
@@ -116,13 +118,13 @@ public class BuildTest extends BaseTest {
 		Build build = new Build(project);
 		build.start(clients, app);
 		assertThat(build.getRevision(), is(equalTo("my-revision")));
-		File checkout = new File(baseDir, "build-3/checkout");
+		File checkout = new File(baseDir, "build-3/checkout.txt");
 		assertThat(checkout.exists(), is(equalTo(true)));
 		mockery.assertIsSatisfied();
 	}
 
 	@Test
-	public void keepsTheCurrentPhaseIfNoSuccess() throws InstantiationException, IllegalAccessException,
+	public void keepsTheCurrentPhaseAndInvokesRunAfterOnPluginsIfNoSuccess() throws InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException, IOException {
 		phases.add(first);
 		phases.add(second);
@@ -144,6 +146,39 @@ public class BuildTest extends BaseTest {
 		mockery.checking(new Expectations() {
 			{
 				one(first).execute(control, build, clients, app);
+				one(first).runAfter(build); will(returnValue(true));
+			}
+		});
+		build.start(clients, app);
+		assertThat(build.getCurrentPhase(), is(equalTo(0)));
+		build.finish(0, 0, "no-result", false, clients, app);
+		assertThat(build.getCurrentPhase(), is(equalTo(0)));
+		mockery.assertIsSatisfied();
+	}
+	@Test
+	public void keepsTheCurrentPhaseIfSuccessButPluginsFail() throws InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException, IOException {
+		phases.add(first);
+		phases.add(second);
+		mockery.checking(new Expectations() {
+			{
+				one(project).nextBuild();
+				will(returnValue(3L));
+				allowing(project).getName();
+				will(returnValue("my-horses"));
+				one(control).checkoutOrUpdate((File) with(an(File.class)));
+				one(control).getRevision();
+				will(returnValue("my-revision"));
+				allowing(project).getBuildsDirectory();
+				will(returnValue(baseDir));
+				one(first).getCommandCount(); will(returnValue(1));
+			}
+		});
+		final Build build = new Build(project);
+		mockery.checking(new Expectations() {
+			{
+				one(first).execute(control, build, clients, app);
+				one(first).runAfter(build); will(returnValue(false));
 			}
 		});
 		build.start(clients, app);
@@ -209,6 +244,7 @@ public class BuildTest extends BaseTest {
 			{
 				one(first).execute(control, build, clients, app);
 				one(second).execute(control, build, clients, app);
+				one(first).runAfter(build); will(returnValue(true));
 			}
 		});
 		build.start(clients, app);
@@ -221,6 +257,27 @@ public class BuildTest extends BaseTest {
 	@Test
 	public void shouldNotStartPhaseIfResultIsZero() {
 		Assert.fail("not yet implemented");
+	}
+	
+	@Test
+	public void removeShouldEmptyItsDirectory() throws IOException {
+		mockery.checking(new Expectations() {
+			{
+				one(project).nextBuild();
+				will(returnValue(3L));
+				allowing(project).getBuildsDirectory();
+				will(returnValue(baseDir));
+			}
+		});
+		File buildDir = new File(baseDir, "build-3");
+		buildDir.mkdirs();
+		File file = new File(buildDir, "custom");
+		givenA(file, "custom-file-content");
+		Build build = new Build(project);
+		build.remove();
+		assertThat(file.exists(),is(equalTo(false)));
+		assertThat(buildDir.exists(),is(equalTo(false)));
+		mockery.assertIsSatisfied();
 	}
 
 }
