@@ -25,12 +25,13 @@ Commands finished so far:
 ${cmd },
 </#list>
 <br />
+Commands running or already run:<br/>
 <#list build.project.phases as phase>
 	${phase.name}
 	<table>
 	<#assign clients=build.getClientsFor(phase)>
 	<#list clients as client>
-		<tr><td>${client.executedCommand.name} @ ${client.client.baseUri}</td></tr>
+		<tr><td>${client.executedCommand.position}</td><td>${client.executedCommand.name}</td><td>${client.client.baseUri}</td></tr>
 	</#list>
 	</table>
 </#list>
@@ -39,11 +40,11 @@ ${cmd },
 	<#list content as file>
 		<#if file.directory>
 			<li>(<a
-				href="${contextPath }/project/${project.name}/build/${build.buildCount}?filename=${currentPath}${file.name }">view
+				href="${contextPath }/project/${project.name}/build/${build.buildCount}/view/${currentPath}${file.name }">view
 			</a>) ${file.name }</li>
 		<#else>
 			<li>(<a
-				href="${contextPath }/download/project/${project.name}/build/${build.buildCount}?filename=${currentPath}${file.name }">view
+				href="${contextPath }/download/project/${project.name}/build/${build.buildCount}/view/${currentPath}${file.name }">view
 			</a>) ${file.name }</li>
 		</#if>
 	</#list>

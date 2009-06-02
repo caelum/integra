@@ -90,7 +90,7 @@
 		<#list project.builds as build>
 			<tr>
 				<td><a
-					href="${project.name}/build/${build.buildCount}?filename=">results</a>
+					href="${project.name}/build/${build.buildCount}/view/">results</a>
 				</td>
 				<td>build-${build.buildCount}</td>
 				<td>revision '${build.revision!'unknown' }'</td>

@@ -9,7 +9,7 @@
 		<property name="hibernate.connection.url">jdbc:hsqldb:hsql://localhost:9999/integracao</property>
 		<property name="hibernate.connection.username">sa</property>
 		<property name="hibernate.connection.password"></property>
-		<property name="hibernate.connection.pool_size">2</property>
+		<property name="hibernate.connection.pool_size">4</property>
 
 		<property name="show_sql">false</property>
 		<property name="format_sql">true</property>

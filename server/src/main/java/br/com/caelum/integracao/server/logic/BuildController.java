@@ -55,7 +55,7 @@ public class BuildController {
 
 
 	@Get
-	@Path("/project/{project.name}/build/{buildId}")
+	@Path("/project/{project.name}/build/{buildId}/view/{filename}")
 	public void show(Project project, Long buildId, String filename) {
 		logger.debug("Displaying build result for " + project.getName() + "@build-" + buildId + "@" + filename);
 		project = projects.get(project.getName());
@@ -66,15 +66,15 @@ public class BuildController {
 			result.include("currentPath", "");
 			result.include("content", build.getContent());
 		} else {
-			filename = filename.replace('$', '/');
+			// filename = filename.replace('$', '/');
 			File base = build.getFile(filename);
-			result.include("currentPath", filename + "$");
+			result.include("currentPath", filename + "/");
 			result.include("content", base.listFiles());
 		}
 	}
 
 	@Get
-	@Path("/download/project/{project.name}/build/{buildId}")
+	@Path("/download/project/{project.name}/build/{buildId}/view/{filename}")
 	public File showFile(Project project, Long buildId, String filename) {
 		logger.debug("Displaying file for " + project.getName() + "@" + buildId + ", file=" + filename);
 		project = projects.get(project.getName());
