@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Build;
-import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
@@ -110,19 +109,9 @@ public class PingScm {
 				File log = File.createTempFile("integra-revision-", ".txt");
 				String revision = project.getControl().getRevision(log);
 				if (!lastRevision.equals(revision)) {
-					try {
-						db.beginTransaction();
-						logger.debug("Project " + project.getName()
-								+ " has a new revision, therefore we will start the build");
-						Build build = project.build();
-						build.start(new Clients(db), new Application(db), db);
-						db.commit();
-					} catch (Exception e) {
-						if (db.hasTransaction()) {
-							db.rollback();
-						}
-						logger.debug("Unable to build project " + project.getName(), e);
-					}
+					logger.debug("Project " + project.getName()
+							+ " has a new revision, therefore we will start the build");
+					new ProjectStart(db).runProject(project.getName());
 				}
 			} catch (Exception e) {
 				logger.debug("Unable to build project " + project.getName(), e);

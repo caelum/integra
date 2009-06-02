@@ -34,13 +34,14 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CommandToExecute {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(CommandToExecute.class);
 
 	private final String[] cmd;
@@ -50,6 +51,8 @@ public class CommandToExecute {
 	private Thread waitThread;
 	private Thread outputThread;
 	private Process process;
+
+	private Status status = Status.RUN;
 
 	public CommandToExecute(String... cmd) {
 		this.cmd = cmd;
@@ -61,10 +64,12 @@ public class CommandToExecute {
 	}
 
 	public int run() {
+		List<String> commands = Arrays.asList(cmd);
+		logger.debug("Ready to execute " + commands);
 		ProcessBuilder builder = new ProcessBuilder();
 		baseDir.mkdirs();
 		builder.directory(baseDir);
-		builder.command(Arrays.asList(cmd));
+		builder.command(commands);
 		builder.redirectErrorStream(true);
 		try {
 			this.process = builder.start();
@@ -73,12 +78,14 @@ public class CommandToExecute {
 					try {
 						process.waitFor();
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						logger.debug("Stopped the process during the run", e);
 					}
 				}
 			};
 			this.waitThread = new Thread(waitRun);
-			waitThread.start();
+			if (status == Status.RUN) {
+				waitThread.start();
+			}
 			Runnable outputRun = new Runnable() {
 				public void run() {
 					InputStream is = process.getInputStream();
@@ -91,10 +98,21 @@ public class CommandToExecute {
 				}
 			};
 			this.outputThread = new Thread(outputRun);
-			outputThread.start();
-			waitThread.join();
-			outputThread.join();
-			return process.exitValue();
+			if (status == Status.RUN) {
+				outputThread.start();
+			}
+			if (status == Status.RUN) {
+				waitThread.join();
+			}
+			if (status == Status.RUN) {
+				outputThread.join();
+			}
+			if(status==Status.RUN) {
+				return process.exitValue();
+			} else {
+				// stopped by hand!
+				return -1;
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (InterruptedException e) {
@@ -118,6 +136,7 @@ public class CommandToExecute {
 	}
 
 	public void stop() {
+		this.status = Status.STOP;
 		if (this.waitThread != null) {
 			logger.debug("Interrupting wait thread");
 			this.waitThread.interrupt();
@@ -130,5 +149,9 @@ public class CommandToExecute {
 			logger.debug("Destroying process " + process);
 			this.process.destroy();
 		}
+	}
+
+	enum Status {
+		RUN, STOP
 	}
 }

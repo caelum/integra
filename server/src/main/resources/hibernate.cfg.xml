@@ -17,7 +17,7 @@
 		<property name="hibernate.hbm2ddl.auto">update</property>
 		<property name="hibernate.generate_statistics">true</property>
 		<property name="hibernate.cache.use_structured_entries">true</property>
-		<property name="hibernate.cache.use_second_level_cache">true</property>
+		<property name="hibernate.cache.use_second_level_cache">false</property>
 		<property name="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property>
 
 		<mapping class="br.com.caelum.integracao.server.Client"/>

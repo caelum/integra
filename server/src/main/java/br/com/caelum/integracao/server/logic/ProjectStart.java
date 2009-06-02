@@ -48,13 +48,13 @@ public class ProjectStart {
 
 	void runProject(String name) {
 		logger.debug("Starting building project id=" + name);
-		database.beginTransaction();
 		try {
+			database.beginTransaction();
 			Project toBuild = new Projects(database).get(name);
 			Build build = toBuild.build();
 			new Projects(database).register(build);
-			build.start(new Clients(database), new Application(database), database);
 			database.commit();
+			build.start(new Clients(database), new Application(database), database);
 		} catch (Exception e) {
 			logger.error("Unable to start project build", e);
 		} finally {

@@ -111,7 +111,9 @@ public class Phase {
 				}
 				return;
 			}
+			database.beginTransaction();
 			app.register(new UsedClient(client, build, command));
+			database.commit();
 			command.executeAt(client, build, control, File.createTempFile("connection", "txt"), app.getConfig()
 					.getUrl());
 		}

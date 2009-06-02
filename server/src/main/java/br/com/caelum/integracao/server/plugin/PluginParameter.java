@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server.plugin;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -42,6 +43,7 @@ public class PluginParameter {
 	@ManyToOne
 	private PluginToRun plugin;
 	
+	@Column(name="parameterKey")
 	private String key;
 	private String value;
 	

@@ -27,14 +27,99 @@
  */
 package br.com.caelum.integracao;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CommandToExecuteTest {
-	
+public class CommandToExecuteTest extends AtDirectoryTest {
+
 	@Test
-	public void a() {
-		Assert.fail("implement tests");
+	public void stopShouldStopProcessAndNotProceedWithIt() throws IOException, InterruptedException {
+		final AtomicBoolean fail = new AtomicBoolean(false);
+		givenA(new File(baseDir, "myScript.sh"), "sleep 15\ntouch customFile");
+		final CommandToExecute cmd = new CommandToExecute("sh", "myScript.sh").at(baseDir);
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				try {
+					if (cmd.run() == 0) {
+						fail.set(true);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					fail.set(true);
+				}
+			}
+		});
+		t.start();
+		giveItSomeTimeToRun();
+		cmd.stop();
+		giveItAsMuchTimeAsItWants(t);
+		Assert.assertFalse(new File(baseDir, "customFile").exists());
+		Assert.assertFalse(fail.get());
+	}
+
+	private void giveItSomeTimeToRun() throws InterruptedException {
+		Thread.sleep(1000);
+	}
+
+	@Test
+	public void stopShouldStopProcessAndNotProceedWithSpawnedProcesses() throws IOException, InterruptedException {
+		final AtomicBoolean fail = new AtomicBoolean(false);
+		givenA(new File(baseDir, "sleepAndTouch.sh"), "sleep 15\ntouch customFile");
+		givenA(new File(baseDir, "myScript.sh"), "sh sleepAndTouch &\n sleep 15");
+		final CommandToExecute cmd = new CommandToExecute("sh", "myScript.sh").at(baseDir);
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				try {
+					if (cmd.run() == 0) {
+						fail.set(true);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					fail.set(true);
+				}
+			}
+		});
+		t.start();
+		giveItSomeTimeToRun();
+		cmd.stop();
+		giveItAsMuchTimeAsItWants(t);
+		Assert.assertFalse(new File(baseDir, "customFile").exists());
+		Assert.assertFalse(fail.get());
+	}
+
+	@Test
+	public void stopTooLateShouldNotModifyAnything() throws IOException, InterruptedException {
+		final AtomicBoolean success = new AtomicBoolean(false);
+		givenA(new File(baseDir, "myScript.sh"), "touch customFile");
+		final CommandToExecute cmd = new CommandToExecute("sh", "myScript.sh").at(baseDir);
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				try {
+					if (cmd.run() == 0) {
+						success.set(true);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					success.set(false);
+				}
+			}
+		});
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
+		giveItAsMuchTimeAsItWants(t);
+		cmd.stop();
+		Assert.assertTrue(new File(baseDir, "customFile").exists());
+		Assert.assertTrue(success.get());
+	}
+
+	private void giveItAsMuchTimeAsItWants(Thread t) throws InterruptedException {
+		if (t.isAlive()) {
+			t.join();
+		}
 	}
 
 }

@@ -138,6 +138,10 @@ public class ProjectController {
 					+ " command " + commandId);
 			project = new Projects(db).get(project.getName());
 			Build build = project.getBuild(buildId);
+			if(build==null) {
+				logger.error("The finishing command was weird, build " + buildId+ " does not exist. It was probably created, executed and rolled back!");
+				return;
+			}
 			Phase currentPhase = project.getPhase(phasePosition);
 			build.finish(currentPhase.getName(), phasePosition, commandId, result, success, new Clients(db), new Application(db), db);
 			db.commit();
