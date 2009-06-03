@@ -31,22 +31,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import br.com.caelum.integracao.AtDirectoryTest;
 
 public class ProjectTest extends AtDirectoryTest{
-	
-	@Test
-	public void listBuildsFromEachBuildDirectory() {
-		Assert.fail("not yet implemented");
-	}
-	
-	@Test
-	public void retrievesAnSpecificBuild() {
-		Assert.fail("not yet implemented");
-	}
 	
 	@Test
 	public void newlyCreatedProjectsHaveBuildCountZero() {
