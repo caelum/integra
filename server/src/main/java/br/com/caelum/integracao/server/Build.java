@@ -28,15 +28,11 @@
 package br.com.caelum.integracao.server;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -44,7 +40,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.validator.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,9 +75,6 @@ public class Build {
 
 	@Min(0)
 	private int currentPhase = 0;
-
-	@CollectionOfElements
-	private Set<Integer> executedCommandsFromThisPhase = new HashSet<Integer>();
 
 	private boolean successSoFar = true;
 	private boolean finished = false;
@@ -168,39 +160,6 @@ public class Build {
 		return currentPhase;
 	}
 
-	public synchronized void finish(String phaseName, int phasePosition, int commandId, String result, boolean success,
-			Application app, Database database, Jobs jobs) throws IOException  {
-		successSoFar &= success;
-		executedCommandsFromThisPhase.add(commandId);
-		File file = getFile(phaseName + "/" + commandId + ".txt");
-		file.getParentFile().mkdirs();
-		PrintWriter writer = new PrintWriter(new FileWriter(file), true);
-		writer.print(result);
-		writer.close();
-		Phase actualPhase = project.getPhases().get(phasePosition);
-		boolean executedAllCommands = executedCommandsFromThisPhase.size() == actualPhase.getCommandCount();
-		if (executedAllCommands) {
-			logger.debug("Preparing to execute plugins for " + getProject().getName() + " with success = "
-					+ successSoFar);
-			successSoFar &= actualPhase.runAfter(this, database);
-			if (successSoFar) {
-				currentPhase++;
-				executedCommandsFromThisPhase.clear();
-				if (project.getPhases().size() != currentPhase) {
-					project.getPhases().get(phasePosition + 1).execute(this, jobs);
-				} else {
-					finish(true);
-				}
-			} else {
-				finish(false);
-			}
-		}
-	}
-
-	public Set<Integer> getExecutedCommandsFromThisPhase() {
-		return executedCommandsFromThisPhase;
-	}
-
 	public boolean isSuccessSoFar() {
 		return successSoFar;
 	}
@@ -268,6 +227,29 @@ public class Build {
 			}
 		}
 		dir.delete();
+	}
+
+	public void failed() {
+		this.successSoFar = false;
+	}
+
+	public void proceed(Phase actualPhase, Database database) {
+		boolean executedAllCommands = executedCommandsFromThisPhase.size() == actualPhase.getCommandCount();
+		if (executedAllCommands) {
+			logger.debug("Preparing to execute plugins for " + getProject().getName() + " with success = "
+					+ successSoFar);
+			successSoFar &= actualPhase.runAfter(this, database);
+			if (successSoFar) {
+				currentPhase++;
+				if (project.getPhases().size() != currentPhase) {
+					project.getPhases().get(currentPhase).execute(this, new Jobs(database));
+				} else {
+					finish(true);
+				}
+			} else {
+				finish(false);
+			}
+		}
 	}
 
 }

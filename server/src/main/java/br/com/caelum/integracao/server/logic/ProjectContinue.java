@@ -25,44 +25,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.logic;
 
-import java.util.List;
-
-import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.RequestScoped;
+import br.com.caelum.integracao.server.queue.Job;
+import br.com.caelum.integracao.server.queue.Jobs;
 
-@RequestScoped
-@SuppressWarnings("unchecked")
-public class Clients {
+public class ProjectContinue {
+	
+	private final Logger logger = LoggerFactory.getLogger(ProjectContinue.class);
 
-	private final Session session;
+	private final Database database;
 
-	public Clients(Database database) {
-		this.session = database.getSession();
+	public ProjectContinue(Database database) {
+		this.database = database;
 	}
 
-	public void register(Client client) {
-		client.activate();
-		this.session.save(client);
-	}
-
-	public List<Client> freeClients() {
-		return this.session.createQuery("from Client as c where c.busy = false and c.active = true").list();
-	}
-
-	public List<Client> lockedClients() {
-		return this.session.createQuery("from Client as c where c.busy = true and c.active = true").list();
-	}
-
-	public List<Client> inactiveClients() {
-		return this.session.createQuery("from Client as c where c.active = false").list();
-	}
-
-	public Client get(Client client) {
-		return (Client) session.load(Client.class, client.getId());
+	void nextPhase(Long jobId, String result, boolean success) {
+		try {
+			logger.debug("Will try to do next phase for job.id=" + jobId);
+			database.beginTransaction();
+			Jobs jobs = new Jobs(database);
+			Job job = jobs.load(jobId);
+			job.finish(result, success, database);
+			database.commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (database.hasTransaction()) {
+				database.rollback();
+			}
+			database.close();
+		}
 	}
 
 }

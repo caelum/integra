@@ -44,14 +44,6 @@ public class ExecuteCommandLineTest {
 	}
 	
 	@Test
-	public void shouldUseTheCommandCountPlusOneFromThePhase() {
-		ExecuteCommandLine line = new ExecuteCommandLine(phase, "hello");
-		assertThat(line.getPosition(), is(equalTo(0)));
-		ExecuteCommandLine second = new ExecuteCommandLine(phase, "hello");
-		assertThat(second.getPosition(), is(equalTo(1)));
-	}
-
-	@Test
 	public void shouldHaveTheNameAsTheCommand() {
 		ExecuteCommandLine line = new ExecuteCommandLine(phase, "hello world");
 		assertThat(line.getName(), is(equalTo("hello world ")));

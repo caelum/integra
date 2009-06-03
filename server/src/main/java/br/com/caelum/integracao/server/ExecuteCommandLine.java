@@ -84,5 +84,12 @@ public class ExecuteCommandLine {
 	public List<Command> getCommands() {
 		return commands;
 	}
+	
+	public Long getId() {
+		return id;
+	}
 
+	public Phase getPhase() {
+		return phase;
+	}
 }

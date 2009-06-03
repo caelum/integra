@@ -82,7 +82,7 @@ public class CopyFiles implements Plugin {
 					post.saveContentToDisk(tmp);
 
 					File commandDirectory = build.getFile(phase.getName() + "/"
-							+ job.getCommand().getPosition());
+							+ job.getCommand().getId());
 					commandDirectory.mkdirs();
 					File unzipResult = new File(commandDirectory, "copy-files-unzip.txt");
 					int result =  new CommandToExecute("unzip", "-qo", tmp.getAbsolutePath()).at(commandDirectory).logTo(unzipResult).run();

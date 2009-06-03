@@ -159,4 +159,8 @@ public class Client {
 		return true;
 	}
 
+	public void leaveJob() {
+		this.currentJob = null;
+	}
+
 }

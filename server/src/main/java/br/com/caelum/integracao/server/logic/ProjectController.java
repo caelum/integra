@@ -28,23 +28,20 @@
 package br.com.caelum.integracao.server.logic;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Application;
-import br.com.caelum.integracao.server.Build;
-import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Clients;
-import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
+import br.com.caelum.integracao.server.queue.Job;
+import br.com.caelum.integracao.server.queue.Jobs;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
@@ -59,7 +56,6 @@ public class ProjectController {
 
 	private final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
-	private final Clients clients;
 	private final Projects projects;
 	private final Validator validator;
 	private final Result result;
@@ -68,14 +64,16 @@ public class ProjectController {
 
 	private final Application app;
 
-	public ProjectController(Clients clients, Projects projects, Validator validator, Result result,
-			DatabaseFactory factory, Application app) {
-		this.clients = clients;
+	private final Jobs jobs;
+
+	public ProjectController(Projects projects, Validator validator, Result result, DatabaseFactory factory,
+			Application app, Jobs jobs) {
 		this.projects = projects;
 		this.validator = validator;
 		this.result = result;
 		this.factory = factory;
 		this.app = app;
+		this.jobs = jobs;
 	}
 
 	public void addAll() {
@@ -117,48 +115,21 @@ public class ProjectController {
 	}
 
 	@Post
-	@Path("/finish/project/{project.name}/{buildId}/{phasePosition}/{commandId}")
-	public void finish(final Project project, final Long buildId, final int phasePosition, final int commandId, final String result, final boolean success,
-			Client client) throws IOException, InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException {
-		clients.release(client.getId());
+	@Path("/finish/project/job/{job.id}")
+	public void finish(final Job job, final String result, final boolean success)  {
+		Job loaded = jobs.load(job.getId());
+		loaded.getClient().leaveJob();
 		new Thread(new Runnable() {
 			public void run() {
-				nextPhase(project, buildId, phasePosition, commandId, result, success);
+				new ProjectContinue(new Database(factory)).nextPhase(job.getId(), result, success);
 			}
 		}).start();
 		this.result.use(Results.nothing());
-	}
-	
-	private void nextPhase(Project project, Long buildId, int phasePosition, int commandId, String result, boolean success) {
-		Database db = new Database(factory);
-		db.beginTransaction();
-		try {
-			logger.debug("Finishing " + project.getName() + " build " + buildId + " phase " + phasePosition
-					+ " command " + commandId);
-			project = new Projects(db).get(project.getName());
-			Build build = project.getBuild(buildId);
-			if(build==null) {
-				logger.error("The finishing command was weird, build " + buildId+ " does not exist. It was probably created, executed and rolled back!");
-				return;
-			}
-			Phase currentPhase = project.getPhase(phasePosition);
-			build.finish(currentPhase.getName(), phasePosition, commandId, result, success, new Clients(db), new Application(db), db);
-			db.commit();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (db.hasTransaction()) {
-				db.rollback();
-			}
-			db.close();
-		}
 	}
 
 	private void showList() {
 		result.use(Results.logic()).redirectTo(ProjectController.class).list();
 	}
-
 
 	@SuppressWarnings("unchecked")
 	@Post

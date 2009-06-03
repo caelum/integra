@@ -28,6 +28,9 @@
 package br.com.caelum.integracao.server.queue;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -44,7 +47,10 @@ import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.ExecuteCommandLine;
+import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.action.Dispatcher;
+import br.com.caelum.integracao.server.dao.Database;
 
 @Entity
 public class Job {
@@ -73,6 +79,8 @@ public class Job {
 
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar startTime;
+
+	private Calendar finishTime;
 
 	public ExecuteCommandLine getCommand() {
 		return command;
@@ -104,6 +112,29 @@ public class Job {
 
 	public boolean isFinished() {
 		return finished;
+	}
+
+	public void finish(String result, boolean success, Database database) throws IOException {
+		
+		Project project = build.getProject();
+		logger.debug("Finishing " + project.getName() + " build " + build.getBuildCount() + " phase "
+				+ command.getPhase().getName() + " command " + command.getId());
+		
+		if(!success) {
+			build.failed();
+		}
+		finished = true;
+		this.finishTime = Calendar.getInstance();
+		
+		Phase phase = command.getPhase();
+		File file = build.getFile(phase.getName() + "/" + command.getName() + ".txt");
+		file.getParentFile().mkdirs();
+		PrintWriter writer = new PrintWriter(new FileWriter(file), true);
+		writer.print(result);
+		writer.close();
+		
+		build.proceed(phase, database);
+		
 	}
 
 }

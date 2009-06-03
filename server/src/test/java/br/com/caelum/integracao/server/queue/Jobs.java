@@ -52,4 +52,8 @@ public class Jobs {
 		session.save(job);
 	}
 
+	public Job load(Long jobId) {
+		return (Job) session.load(Job.class, jobId);
+	}
+
 }
