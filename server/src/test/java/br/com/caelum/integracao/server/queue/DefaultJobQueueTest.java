@@ -87,6 +87,7 @@ public class DefaultJobQueueTest extends BaseTest{
 			one(jobs).todo(); will(returnValue(Arrays.asList(first)));
 			one(clients).freeClients(); will(returnValue(Arrays.asList(firstClient)));
 			one(firstClient).work(first, config); will(returnValue(true));
+			one(firstClient).isAlive(); will(returnValue(true));
 		}});
 		assertThat(queue.iterate(), is(equalTo(1)));
 	}
@@ -97,6 +98,7 @@ public class DefaultJobQueueTest extends BaseTest{
 			one(jobs).todo(); will(returnValue(Arrays.asList(first)));
 			one(clients).freeClients(); will(returnValue(Arrays.asList(firstClient)));
 			one(firstClient).work(first, config); will(returnValue(false));
+			one(firstClient).isAlive(); will(returnValue(true));
 		}});
 		assertThat(queue.iterate(), is(equalTo(0)));
 	}
