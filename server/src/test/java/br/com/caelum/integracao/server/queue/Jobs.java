@@ -25,49 +25,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.queue;
 
 import java.util.List;
 
 import org.hibernate.Session;
 
 import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.RequestScoped;
+import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
-@RequestScoped
-@SuppressWarnings("unchecked")
-public class Clients {
-
+@ApplicationScoped
+public class Jobs {
+	
 	private final Session session;
 
-	public Clients(Database database) {
-		this.session = database.getSession();
+	public Jobs(Database db) {
+		this.session = db.getSession();
 	}
 
-	public void register(Client client) {
-		client.activate();
-		this.session.save(client);
-	}
-
-	public List<Client> freeClients() {
-		return this.session.createQuery("from Client as c where c.busy = false and c.active = true").list();
-	}
-
-	public List<Client> lockedClients() {
-		return this.session.createQuery("from Client as c where c.busy = true and c.active = true").list();
-	}
-
-	public List<Client> inactiveClients() {
-		return this.session.createQuery("from Client as c where c.active = false").list();
-	}
-
-	public void release(Long id) {
-		Client client = (Client) session.load(Client.class, id);
-		client.leaveJob();
-	}
-
-	public Client get(Client client) {
-		return (Client) session.load(Client.class, client.getId());
+	@SuppressWarnings("unchecked")
+	public List<Job> todo() {
+		return session.createQuery("from Jobs as j").list();
 	}
 
 }

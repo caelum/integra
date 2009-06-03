@@ -34,12 +34,16 @@ import java.net.UnknownHostException;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 import org.apache.commons.httpclient.HttpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.http.Method;
 import br.com.caelum.integracao.server.action.Dispatcher;
+import br.com.caelum.integracao.server.queue.Job;
 
 /**
  * Represents a client machine.
@@ -48,6 +52,9 @@ import br.com.caelum.integracao.server.action.Dispatcher;
  */
 @Entity
 public class Client {
+	
+	
+	private final Logger logger = LoggerFactory.getLogger(Client.class);
 
 	@Id
 	@GeneratedValue
@@ -60,8 +67,8 @@ public class Client {
 	private String host;
 
 	private String reason;
-	
-	private boolean busy;
+	@ManyToOne
+	private Job currentJob;
 
 	private boolean active;
 
@@ -113,22 +120,9 @@ public class Client {
 		this.port = port;
 	}
 
-	public void setBusy(boolean busy) {
-		this.busy = busy;
-	}
-
-	public boolean isBusy() {
-		return busy;
-	}
-
-	public void work(String job) {
-		this.busy = true;
-		this.reason = job;
-	}
-
-	public void leaveJob() {
-		this.busy = false;
-		this.reason = "";
+	public boolean work(Job job) {
+		this.currentJob = job;
+		return true;
 	}
 
 	public void deactivate() {
@@ -149,7 +143,8 @@ public class Client {
 			return false;
 		}
 		if(post.getResult()==410) {
-			leaveJob();
+			logger.warn("Leaving the job because the server just told me there is nothing running there... did the client break or was it sending me the info right now?");
+			currentJob = null;
 			return true;
 		}
 		if(post.getResult()!=200) {

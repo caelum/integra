@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
+import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.scm.ScmControl;
 
 /**
@@ -99,6 +100,8 @@ public class Phase {
 		}
 		build.getFile(name).mkdirs();
 		for (ExecuteCommandLine command : commands) {
+			Job job = new Job(build, command);
+			queue.add(build, command);
 			Client client;
 			try {
 				client = clients.getFreeClient(getName() + "/" + command.getName());

@@ -25,49 +25,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.project;
 
-import java.util.List;
-
-import org.hibernate.Session;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 
 import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.RequestScoped;
+import br.com.caelum.integracao.server.dao.DatabaseFactory;
 
-@RequestScoped
-@SuppressWarnings("unchecked")
-public class Clients {
+public class DatabaseBasedTest extends BaseTest{
+	private static DatabaseFactory databaseFactory;
 
-	private final Session session;
-
-	public Clients(Database database) {
-		this.session = database.getSession();
+	protected Database database;
+	
+	@BeforeClass
+	public static void configDatabase() {
+		databaseFactory = new DatabaseFactory();
+		databaseFactory.startup();
+	}
+	
+	@AfterClass
+	public static void stopDatabase() {
+		databaseFactory.destroy();
 	}
 
-	public void register(Client client) {
-		client.activate();
-		this.session.save(client);
+	@Before
+	public void configData() {
+		this.database = new Database(databaseFactory);
 	}
 
-	public List<Client> freeClients() {
-		return this.session.createQuery("from Client as c where c.busy = false and c.active = true").list();
+	@After
+	public void removeData() {
+		this.database.close();
 	}
-
-	public List<Client> lockedClients() {
-		return this.session.createQuery("from Client as c where c.busy = true and c.active = true").list();
-	}
-
-	public List<Client> inactiveClients() {
-		return this.session.createQuery("from Client as c where c.active = false").list();
-	}
-
-	public void release(Long id) {
-		Client client = (Client) session.load(Client.class, id);
-		client.leaveJob();
-	}
-
-	public Client get(Client client) {
-		return (Client) session.load(Client.class, client.getId());
-	}
+	
 
 }
