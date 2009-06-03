@@ -33,7 +33,6 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.jmock.Expectations;
 import org.junit.Before;
@@ -42,36 +41,19 @@ import org.junit.Test;
 import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.project.DatabaseBasedTest;
+import br.com.caelum.integracao.server.queue.Jobs;
 
 public class PhaseTest extends DatabaseBasedTest {
 	
 	private Build build;
+	private Jobs jobs;
 
 	@Before
 	public void mockData() {
 		this.build = mockery.mock(Build.class);
+		this.jobs = mockery.mock(Jobs.class);
 	}
-	@Test
-	public void commandRemovalShouldUpdateOtherIndexes() {
-		final ExecuteCommandLine test = new ExecuteCommandLine();
-		test.setPosition(1);
-		ExecuteCommandLine deploy = new ExecuteCommandLine();
-		deploy.setPosition(2);
-		final Projects projects = mockery.mock(Projects.class);
 
-		Phase compile = new Phase();
-		compile.setCommands(new ArrayList<ExecuteCommandLine>());
-		compile.getCommands().add(test);
-		compile.getCommands().add(deploy);
-		mockery.checking(new Expectations() {
-			{
-				one(projects).remove(test);
-			}
-		});
-		compile.remove(projects, test);
-		assertThat(deploy.getPosition(), is(equalTo(1)));
-		mockery.assertIsSatisfied();
-	}
 	
 	@Test
 	public void shouldOnlyCreateADirIfThereAreNoCommands() throws IOException {
@@ -83,7 +65,7 @@ public class PhaseTest extends DatabaseBasedTest {
 				one(build).getFile("5"); will(returnValue(dir));
 			}
 		});
-		compile.execute(null, build, null, null, database);
+		compile.execute(build, jobs);
 		assertThat(dir.exists(), is(equalTo(true)));
 		mockery.assertIsSatisfied();
 	}

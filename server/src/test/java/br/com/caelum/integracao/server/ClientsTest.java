@@ -39,32 +39,41 @@ import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 public class ClientsTest extends DatabaseBasedTest{
 
 	private Clients clients;
-	private Client bebado;
+	private Client busy;
+	private Client free;
+	private Client inactive;
 
 	@Before
 	public void configClients() {
 		this.clients = new Clients(database);
-		this.bebado = new Client();
-		clients.register(bebado);
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void shouldComplainIfRequestAClientWhenAllLocked() {
-		clients.getFreeClient("");
-		clients.getFreeClient("");
-	}
-
-	@Test
-	public void shouldReturnAFreeClientWhenAvailable() {
-		assertThat(clients.getFreeClient(""), is(equalTo(bebado)));
-		assertThat(clients.lockedClients().contains(bebado), is(equalTo(true)));
+		this.busy = new Client();
+		clients.register(busy);
+		this.free = new Client();
+		clients.register(free);
+		this.inactive = new Client();
+		this.inactive.deactivate();
+		clients.register(inactive);
 	}
 
 	@Test
-	public void allowsAClientToBeReturned() {
-		clients.getFreeClient("");
-		clients.release(bebado.getId());
-		assertThat(clients.getFreeClient(""), is(equalTo(bebado)));
+	public void shouldReturnOnlyFreeClients() {
+		assertThat(clients.freeClients().contains(free), is(equalTo(true)));
+		assertThat(clients.freeClients().contains(inactive), is(equalTo(false)));
+		assertThat(clients.freeClients().contains(busy), is(equalTo(false)));
+	}
+
+	@Test
+	public void shouldReturnOnlyInactiveClients() {
+		assertThat(clients.inactiveClients().contains(free), is(equalTo(false)));
+		assertThat(clients.inactiveClients().contains(inactive), is(equalTo(true)));
+		assertThat(clients.inactiveClients().contains(busy), is(equalTo(false)));
+	}
+
+	@Test
+	public void shouldReturnOnlyBusyClients() {
+		assertThat(clients.lockedClients().contains(free), is(equalTo(false)));
+		assertThat(clients.lockedClients().contains(inactive), is(equalTo(false)));
+		assertThat(clients.lockedClients().contains(busy), is(equalTo(true)));
 	}
 
 }

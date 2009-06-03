@@ -37,6 +37,7 @@ import java.util.GregorianCalendar;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -55,12 +56,15 @@ import br.com.caelum.integracao.server.dao.Database;
 @Entity
 public class Job {
 
-	private final Logger logger = LoggerFactory.getLogger(Job.class);
+	private static final Logger logger = LoggerFactory.getLogger(Job.class);
 
+	@ManyToOne
 	private Build build;
 
+	@ManyToOne
 	private ExecuteCommandLine command;
 
+	@ManyToOne
 	private Client client;
 
 	public Job(Build build, ExecuteCommandLine command) {
@@ -86,7 +90,7 @@ public class Job {
 		return command;
 	}
 
-	public void executeAt(Client at, File logFile, Config config) {
+	public void executeAt(Client at, File logFile, Config config) throws IOException {
 		logger.debug("Trying to execute " + command.getName() + " @ " + at.getHost() + ":" + at.getPort());
 		Dispatcher connection = client.getConnection(logFile, config.getUrl());
 		try {

@@ -233,8 +233,15 @@ public class Build {
 		this.successSoFar = false;
 	}
 
-	public void proceed(Phase actualPhase, Database database) {
-		boolean executedAllCommands = executedCommandsFromThisPhase.size() == actualPhase.getCommandCount();
+	public void proceed(Phase actualPhase, Database database) throws IOException {
+		List<Job> jobs = getJobsFor(actualPhase);
+		int finished = 0;
+		for(Job j : jobs) {
+			if(j.isFinished()) {
+				finished++;
+			}
+		}
+		boolean executedAllCommands = finished == actualPhase.getCommandCount();
 		if (executedAllCommands) {
 			logger.debug("Preparing to execute plugins for " + getProject().getName() + " with success = "
 					+ successSoFar);

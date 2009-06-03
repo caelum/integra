@@ -50,11 +50,11 @@ public class Clients {
 	}
 
 	public List<Client> freeClients() {
-		return this.session.createQuery("from Client as c where c.busy = false and c.active = true").list();
+		return this.session.createQuery("from Client as c where c.active = true and c.currentJob is null").list();
 	}
 
 	public List<Client> lockedClients() {
-		return this.session.createQuery("from Client as c where c.busy = true and c.active = true").list();
+		return this.session.createQuery("from Client as c where c.currentJob is not null and c.active = true").list();
 	}
 
 	public List<Client> inactiveClients() {

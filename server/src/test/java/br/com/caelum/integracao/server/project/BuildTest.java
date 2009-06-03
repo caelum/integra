@@ -44,7 +44,6 @@ import org.junit.Test;
 
 import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Build;
-import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.plugin.Plugin;
@@ -56,7 +55,6 @@ import br.com.caelum.integracao.server.scm.ScmException;
 public class BuildTest extends DatabaseBasedTest {
 
 	private Project project;
-	private Clients clients;
 	private List<Phase> phases;
 	private ScmControl control;
 	private Phase first;
@@ -69,7 +67,6 @@ public class BuildTest extends DatabaseBasedTest {
 	public void configProject() throws ScmException {
 		this.jobs = mockery.mock(Jobs.class);
 		this.project = mockery.mock(Project.class);
-		this.clients = mockery.mock(Clients.class);
 		this.phases = new ArrayList<Phase>();
 		this.control = mockery.mock(ScmControl.class, "control");
 		this.first = mockery.mock(Phase.class, "first");
@@ -162,7 +159,7 @@ public class BuildTest extends DatabaseBasedTest {
 		});
 		build.start(jobs, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish("",0, 0, "no-result", false, app, database,jobs);
+		build.proceed("",0, 0, "no-result", false, app, database,jobs);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -197,7 +194,7 @@ public class BuildTest extends DatabaseBasedTest {
 		});
 		build.start(jobs, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish("",0, 0, "no-result", false, app, database, jobs);
+		build.proceed("",0, 0, "no-result", false, app, database, jobs);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -230,7 +227,7 @@ public class BuildTest extends DatabaseBasedTest {
 		});
 		build.start(jobs, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish("",0, 0, "no-result", true, app, database, jobs);
+		build.proceed("",0, 0, "no-result", true, app, database, jobs);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -266,7 +263,7 @@ public class BuildTest extends DatabaseBasedTest {
 		});
 		build.start(jobs, database);
 	assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.finish("",0, 0, "no-result", true, app, database, jobs);
+		build.proceed("",0, 0, "no-result", true, app, database, jobs);
 		assertThat(build.getCurrentPhase(), is(equalTo(1)));
 		mockery.assertIsSatisfied();
 	}

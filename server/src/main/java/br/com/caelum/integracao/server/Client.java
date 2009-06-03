@@ -53,7 +53,7 @@ import br.com.caelum.integracao.server.queue.Job;
 @Entity
 public class Client {
 
-	private final Logger logger = LoggerFactory.getLogger(Client.class);
+	private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
 	@Id
 	@GeneratedValue
@@ -65,7 +65,6 @@ public class Client {
 
 	private String host;
 
-	private String reason;
 	@ManyToOne
 	private Job currentJob;
 
@@ -83,10 +82,6 @@ public class Client {
 		return context;
 	}
 
-	public String getCurrentJob() {
-		return reason;
-	}
-
 	public String getHost() {
 		return host;
 	}
@@ -101,10 +96,6 @@ public class Client {
 
 	public void setContext(String context) {
 		this.context = context;
-	}
-
-	public void setCurrentJob(String reason) {
-		this.reason = reason;
 	}
 
 	public void setHost(String host) {

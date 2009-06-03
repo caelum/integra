@@ -77,7 +77,7 @@ public class Dispatcher {
 		return this;
 	}
 
-	public int execute(ExecuteCommandLine command, Job job) throws IOException {
+	public Dispatcher execute(ExecuteCommandLine command, Job job) throws IOException {
 		Method post = new DefaultHttp().post(this.client.getBaseUri() + "/job/execute");
 		post.with("revision",  job.getBuild().getRevision());
 		post.with("project.name", job.getBuild().getProject().getName());
@@ -93,7 +93,7 @@ public class Dispatcher {
 				throw new RuntimeException("Unable to continue with result " + result);
 			}
 		} catch (IOException e) {
-			throw new RuntimeException("Unable to continue. ", e);
+			throw new RuntimeException("Unable to run the job at the server.", e);
 		}
 		return this;
 	}
