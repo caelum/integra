@@ -82,6 +82,10 @@ public class BuildTest extends DatabaseBasedTest {
 				will(returnValue(phases));
 				allowing(project).getPlugins();
 				will(returnValue(plugins));
+				allowing(project).nextBuild(); will(returnValue(3L));
+				allowing(project).nextBuild(); will(returnValue(2L));
+				allowing(project).getBuildsDirectory();
+				will(returnValue(baseDir));
 			}
 		});
 		this.app = mockery.mock(Application.class);
@@ -89,14 +93,6 @@ public class BuildTest extends DatabaseBasedTest {
 
 	@Test
 	public void createsABuildWithCorrectBuildCount() {
-		mockery.checking(new Expectations() {
-			{
-				one(project).nextBuild();
-				will(returnValue(3L));
-				one(project).getBuildsDirectory();
-				will(returnValue(baseDir));
-			}
-		});
 		Build build = new Build(project);
 		assertThat(build.getBuildCount(), is(equalTo(3L)));
 		File dir = new File(baseDir, "build-3");
@@ -110,15 +106,11 @@ public class BuildTest extends DatabaseBasedTest {
 			IOException, ScmException {
 		mockery.checking(new Expectations() {
 			{
-				one(project).nextBuild();
-				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
-				allowing(project).getBuildsDirectory();
-				will(returnValue(baseDir));
 			}
 		});
 		Build build = new Build(project);
@@ -136,15 +128,11 @@ public class BuildTest extends DatabaseBasedTest {
 		phases.add(second);
 		mockery.checking(new Expectations() {
 			{
-				one(project).nextBuild();
-				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
-				allowing(project).getBuildsDirectory();
-				will(returnValue(baseDir));
 				one(first).getCommandCount();
 				will(returnValue(1));
 			}
@@ -172,15 +160,11 @@ public class BuildTest extends DatabaseBasedTest {
 		phases.add(second);
 		mockery.checking(new Expectations() {
 			{
-				one(project).nextBuild();
-				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
-				allowing(project).getBuildsDirectory();
-				will(returnValue(baseDir));
 				one(first).getCommandCount();
 				will(returnValue(1));
 			}
@@ -207,15 +191,11 @@ public class BuildTest extends DatabaseBasedTest {
 		phases.add(second);
 		mockery.checking(new Expectations() {
 			{
-				one(project).nextBuild();
-				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
-				allowing(project).getBuildsDirectory();
-				will(returnValue(baseDir));
 				one(first).getCommandCount();
 				will(returnValue(2));
 			}
@@ -240,15 +220,11 @@ public class BuildTest extends DatabaseBasedTest {
 		phases.add(second);
 		mockery.checking(new Expectations() {
 			{
-				one(project).nextBuild();
-				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
-				allowing(project).getBuildsDirectory();
-				will(returnValue(baseDir));
 				one(first).getCommandCount();
 				will(returnValue(1));
 			}
@@ -276,14 +252,6 @@ public class BuildTest extends DatabaseBasedTest {
 
 	@Test
 	public void removeShouldEmptyItsDirectory() throws IOException {
-		mockery.checking(new Expectations() {
-			{
-				one(project).nextBuild();
-				will(returnValue(3L));
-				allowing(project).getBuildsDirectory();
-				will(returnValue(baseDir));
-			}
-		});
 		File buildDir = new File(baseDir, "build-3");
 		buildDir.mkdirs();
 		File file = new File(buildDir, "custom");
@@ -303,15 +271,11 @@ public class BuildTest extends DatabaseBasedTest {
 		final Plugin firstImplementation = mockery.mock(Plugin.class, "firstImplementation");
 		mockery.checking(new Expectations() {
 			{
-				one(project).nextBuild();
-				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
-				allowing(project).getBuildsDirectory();
-				will(returnValue(baseDir));
 				one(firstPlugin).getPlugin(database);
 				will(returnValue(firstImplementation));
 			}
@@ -339,15 +303,11 @@ public class BuildTest extends DatabaseBasedTest {
 		this.plugins.add(secondPlugin);
 		mockery.checking(new Expectations() {
 			{
-				one(project).nextBuild();
-				will(returnValue(3L));
 				allowing(project).getName();
 				will(returnValue("my-horses"));
 				one(control).checkoutOrUpdate((File) with(an(File.class)));
 				one(control).getRevision(tmpFile());
 				will(returnValue("my-revision"));
-				allowing(project).getBuildsDirectory();
-				will(returnValue(baseDir));
 				one(firstPlugin).getPlugin(database);
 				will(returnValue(firstImplementation));
 				allowing(firstPlugin).getType();will(returnValue(BuildTest.class));
@@ -365,4 +325,42 @@ public class BuildTest extends DatabaseBasedTest {
 		mockery.assertIsSatisfied();
 	}
 
+	@Test
+	public void shouldDetectWhenStatusHasChangedFromLastBuild() {
+		Build build = new Build(project);
+		final Build previous = new Build(project);
+		previous.failed();
+		mockery.checking(new Expectations() {
+			{
+				allowing(project).getBuild(2L); will(returnValue(previous));
+			}
+		});
+		assertThat(build.buildStatusChangedFromLastBuild(), is(equalTo(true)));
+	}
+	@Test
+	public void shouldDetectWhenStatusHasNotChangedFromLastBuild() {
+		Build build = new Build(project);
+		final Build previous = new Build(project);
+		mockery.checking(new Expectations() {
+			{
+				allowing(project).getBuild(2L); will(returnValue(previous));
+			}
+		});
+		assertThat(build.buildStatusChangedFromLastBuild(), is(equalTo(false)));
+	}
+	@Test
+	public void shouldDetectWhenStatusHasNotChangedFromLastBuildBecauseItsTheFirstBuild() {
+		Build build = new Build(project);
+		mockery.checking(new Expectations() {
+			{
+				allowing(project).getBuild(2L); will(returnValue(null));
+			}
+		});
+		assertThat(build.buildStatusChangedFromLastBuild(), is(equalTo(true)));
+	}
+	
+	// start
+	// getJobsFor
+	// remove
+	// proceed
 }
