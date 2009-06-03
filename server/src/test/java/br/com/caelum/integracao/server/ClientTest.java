@@ -27,72 +27,53 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
+import java.io.File;
+import java.io.IOException;
 
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
-import org.hibernate.validator.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jmock.Expectations;
+import org.junit.Before;
+import org.junit.Test;
 
-@Entity
-public class ExecuteCommandLine {
+import br.com.caelum.integracao.server.project.BaseTest;
+import br.com.caelum.integracao.server.queue.Job;
 
-	@Id
-	@GeneratedValue
-	private Long id;
+public class ClientTest extends BaseTest{
+	
+	private Job job;
+	private Config config;
 
-	private static final Logger logger = LoggerFactory.getLogger(ExecuteCommandLine.class);
-
-	@OneToMany
-	@OrderBy("id")
-	@Cascade(value = { CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE })
-	private List<Command> commands;
-
-	@NotNull
-	@ManyToOne
-	private Phase phase;
-
-	protected ExecuteCommandLine() {
-	}
-
-	public ExecuteCommandLine(Phase phase, String... cmds) {
-		this.phase = phase;
-		this.commands = new ArrayList<Command>();
-		for (String command : cmds) {
-			this.commands.add(new Command(command));
-		}
-		phase.getCommands().add(this);
-	}
-
-	public String getName() {
-		String name = "";
-		for (Command cmd : commands) {
-			name += cmd.getValue() + " ";
-		}
-		return name;
-	}
-
-	public List<Command> getCommands() {
-		return commands;
+	@Before
+	public void configJob() {
+		this.job = mockery.mock(Job.class);
+		this.config = mockery.mock(Config.class);
 	}
 	
-	public Long getId() {
-		return id;
+	@Test
+	public void shouldMakeItselfAsBusyWhenExecutingSomething() throws IOException {
+		final Client c = new Client();
+		mockery.checking(new Expectations() {
+			{
+				one(job).executeAt(c, (File) with(an(File.class)), config);
+			}
+		});
+		assertThat(c.work(job, config), is(equalTo(true)));
+		assertThat(c.getCurrentJob(), is(equalTo(job)));
 	}
 
-	public Phase getPhase() {
-		return phase;
+	@Test
+	public void shouldNotMakeItselfAsBusyWhenExecutingSomethingWithAnError() throws IOException {
+		final Client c = new Client();
+		mockery.checking(new Expectations() {
+			{
+				one(job).executeAt(c, (File) with(an(File.class)), config); will(throwException(new RuntimeException()));
+			}
+		});
+		assertThat(c.work(job, config), is(equalTo(true)));
+		assertThat(c.getCurrentJob(), is(equalTo(job)));
 	}
-	public void setId(Long id) {
-		this.id = id;
-	}
+
 }

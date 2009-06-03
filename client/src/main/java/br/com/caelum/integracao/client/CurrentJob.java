@@ -126,6 +126,7 @@ public class CurrentJob {
 						post.with("result", "unable-to-read-result");
 					}
 					post.with("success", "" + success);
+					post.send();
 					if (post.getResult() != 200) {
 						logger.error(post.getContent());
 						throw new RuntimeException("The server returned a problematic answer: " + post.getResult());

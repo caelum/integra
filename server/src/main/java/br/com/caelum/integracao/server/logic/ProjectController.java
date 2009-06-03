@@ -116,7 +116,7 @@ public class ProjectController {
 	}
 
 	@Post
-	@Path("/finish/project/job/{job.id}")
+	@Path("/finish/job/{job.id}")
 	public void finish(final Job job, final String result, final boolean success)  {
 		Job loaded = jobs.load(job.getId());
 		loaded.getClient().leaveJob();

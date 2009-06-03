@@ -156,5 +156,8 @@ public class Client {
 	public void leaveJob() {
 		this.currentJob = null;
 	}
+	public Job getCurrentJob() {
+		return currentJob;
+	}
 
 }

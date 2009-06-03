@@ -20,18 +20,32 @@ Started at: ${build.startTime.time?datetime } <br />
 	Finished at: ${build.finishTime.time?datetime} <br />
 </#if>
 <br />
-Commands finished so far:
-<#list build.executedCommandsFromThisPhase as cmd>
-${cmd },
-</#list>
-<br />
 Commands running or already run:<br/>
 <#list build.project.phases as phase>
-	${phase.name}
+	<h2>${phase.name}</h2>
 	<table>
-	<#assign clients=build.getClientsFor(phase)>
-	<#list clients as client>
-		<tr><td>${client.executedCommand.position}</td><td>${client.executedCommand.name}</td><td>${client.client.baseUri}</td></tr>
+		<tr>
+			<td>command</td>
+			<td>scheduled</td>
+			<td>client</td>
+			<td>started</td>
+		</tr>
+	<#assign jobs=build.getJobsFor(phase)>
+	<#list jobs as job>
+		<tr>
+			<td>${job.command.name}</td>
+			<td>${job.schedulingTime.time?datetime}</td>
+			<td>
+			<#if job.client??>
+				${job.client.baseUri}
+			</#if>
+			</td>
+			<td>
+			<#if job.startTime??>
+				${job.startTime.time?datetime}
+			</#if>
+			</td>
+		</tr>
 	</#list>
 	</table>
 </#list>

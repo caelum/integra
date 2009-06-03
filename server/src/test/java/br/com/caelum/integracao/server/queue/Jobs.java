@@ -45,7 +45,7 @@ public class Jobs {
 
 	@SuppressWarnings("unchecked")
 	public List<Job> todo() {
-		return session.createQuery("from Job as j").list();
+		return session.createQuery("from Job as j where j.client is null").list();
 	}
 
 	public void add(Job job) {

@@ -68,6 +68,7 @@ public class QueueThread {
 						JobQueue queue = new DefaultJobQueue(new Jobs(db), new Clients(db), new Application(db)
 								.getConfig());
 						int result = queue.iterate();
+						db.commit();
 						logger.debug("Job queue started " + result + " jobs");
 					} catch (Exception ex) {
 						logger.error("Something really nasty ocurred while executing the job queue", ex);

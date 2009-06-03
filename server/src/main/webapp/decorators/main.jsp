@@ -17,8 +17,8 @@
 		<a href="${pageContext.request.contextPath }/client/list">list clients</a>
 		<a href="${pageContext.request.contextPath }/project/">list projects</a>
 		<a href="${pageContext.request.contextPath }/settings">settings</a>
+		<a href="${pageContext.request.contextPath }/project/jobs">jobs</a>
 		<br/>
-		<a href="${pageContext.request.contextPath }/project/addAll?myUrl=192.168.0.2:9100">add all @ 2:9100</a>
 		<a href="${pageContext.request.contextPath }/project/addAll?myUrl=localhost:9091">add all @ localhost:9091</a>
 		<a href="${pageContext.request.contextPath }/project/addAll?myUrl=192.168.0.159:9091">add all @ 159:9091</a>
 	</div>

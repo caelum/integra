@@ -90,7 +90,7 @@ public class Job {
 
 	public void executeAt(Client at, File logFile, Config config) throws IOException {
 		logger.debug("Trying to execute " + command.getName() + " @ " + at.getHost() + ":" + at.getPort());
-		Dispatcher connection = client.getConnection(logFile, config.getUrl());
+		Dispatcher connection = at.getConnection(logFile, config.getUrl());
 		try {
 			connection.register(build.getProject()).execute(command, this).close();
 			this.client = at;
@@ -141,6 +141,22 @@ public class Job {
 
 	public boolean isFinished() {
 		return finished;
+	}
+	
+	public void setId(Long id) {
+		this.id = id;
+	}
+	
+	public Calendar getSchedulingTime() {
+		return schedulingTime;
+	}
+	
+	public Calendar getStartTime() {
+		return startTime;
+	}
+	
+	public Calendar getFinishTime() {
+		return finishTime;
 	}
 
 }
