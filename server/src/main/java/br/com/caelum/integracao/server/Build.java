@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
+import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
@@ -90,7 +91,7 @@ public class Build {
 	private Calendar finishTime;
 
 	@OneToMany(mappedBy = "build")
-	private List<UsedClient> usedClients = new ArrayList<UsedClient>();
+	private List<Job> jobs = new ArrayList<Job>();
 
 	protected Build() {
 	}
@@ -241,10 +242,10 @@ public class Build {
 		return previous.isSuccessSoFar() != isSuccessSoFar();
 	}
 
-	public List<UsedClient> getClientsFor(Phase phase) {
-		List<UsedClient> clients = new ArrayList<UsedClient>();
-		for (UsedClient client : usedClients) {
-			if (phase.getCommands().contains(client.getExecutedCommand())) {
+	public List<Job> getJobsFor(Phase phase) {
+		List<Job> clients = new ArrayList<Job>();
+		for (Job client : jobs) {
+			if (phase.getCommands().contains(client.getCommand())) {
 				clients.add(client);
 			}
 		}

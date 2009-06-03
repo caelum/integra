@@ -67,8 +67,4 @@ public class Application {
 		result.setCheckInterval(config.getCheckInterval());
 	}
 
-	public void register(UsedClient client) {
-		session.save(client);
-	}
-
 }

@@ -90,24 +90,12 @@ public class ExecuteCommandLine {
 		return position;
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public void setPosition(int position) {
 		this.position = position;
 	}
 
-	public void setPhase(Phase phase) {
-		this.phase = phase;
-	}
-
-	public Phase getPhase() {
-		return phase;
+	public List<Command> getCommands() {
+		return commands;
 	}
 
 }

@@ -32,15 +32,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
-import java.util.List;
 
 import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.http.Method;
-import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Command;
-import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.ExecuteCommandLine;
 import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.queue.Job;
 
 /**
  * Dispatch commands to register a project or execute an specific command from a build an specific client.
@@ -79,15 +77,14 @@ public class Dispatcher {
 		return this;
 	}
 
-	public Dispatcher execute(Build build, Phase phase, int commandCount, List<Command> commands) throws IOException {
+	public int execute(ExecuteCommandLine command, Job job) throws IOException {
 		Method post = new DefaultHttp().post(this.client.getBaseUri() + "/job/execute");
-		post.with("revision", build.getRevision());
-		post.with("project.name", build.getProject().getName());
+		post.with("revision",  job.getBuild().getRevision());
+		post.with("project.name", job.getBuild().getProject().getName());
 		post.with("clientId", "" + this.client.getId());
-		post.with("resultUri", "http://" + myself + "/integracao/finish/project/" + build.getProject().getName()
-				+ "/" + build.getBuildCount() + "/" + phase.getPosition() + "/" + commandCount);
-		for (int i = 0; i < commands.size(); i++) {
-			post.with("command[" + i + "]", commands.get(i).getValue());
+		post.with("resultUri", "http://" + myself + "/integracao/finish/job/" + job.getId());
+		for (int i = 0; i < command.getCommands().size(); i++) {
+			post.with("command[" + i + "]", command.getCommands().get(i).getValue());
 		}
 		try {
 			post.send();

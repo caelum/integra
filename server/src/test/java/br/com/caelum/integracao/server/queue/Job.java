@@ -44,7 +44,6 @@ import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.ExecuteCommandLine;
-import br.com.caelum.integracao.server.UsedClient;
 import br.com.caelum.integracao.server.action.Dispatcher;
 
 @Entity
@@ -80,12 +79,19 @@ public class Job {
 		logger.debug("Trying to execute " + command.getName() + " @ " + at.getHost() + ":" + at.getPort());
 		Dispatcher connection = client.getConnection(logFile, config.getUrl());
 		try {
-			connection.register(build.getProject()).execute(build, phase, position, commands).close();
+			connection.register(build.getProject()).execute(command, this).close();
 			this.client = at;
 		} finally {
 			connection.close();
 		}
-		app.register(new UsedClient(this, job));
+	}
+	
+	public Long getId() {
+		return id;
+	}
+	
+	public Build getBuild() {
+		return build;
 	}
 
 }

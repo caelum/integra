@@ -119,8 +119,13 @@ public class Client {
 		this.port = port;
 	}
 
-	public boolean work(Job job, Config config) throws IOException {
-		job.executeAt(this, File.createTempFile(Files.SERVER_TO_CLIENT_PREFIX, "txt"), config);
+	public boolean work(Job job, Config config) {
+		try {
+			job.executeAt(this, File.createTempFile(Files.SERVER_TO_CLIENT_PREFIX, "txt"), config);
+		} catch (Exception e) {
+			logger.error("Unable to start the job at this client: "+ getId(), e);
+			return false;
+		}
 		this.currentJob = job;
 		return true;
 	}

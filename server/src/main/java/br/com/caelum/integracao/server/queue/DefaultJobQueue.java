@@ -32,15 +32,18 @@ import java.util.List;
 
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.Config;
 
 public class DefaultJobQueue implements JobQueue{
 
 	private final Jobs jobs;
 	private final Clients clients;
+	private final Config config;
 
-	public DefaultJobQueue(Jobs jobs, Clients clients) {
+	public DefaultJobQueue(Jobs jobs, Clients clients, Config config) {
 		this.jobs = jobs;
 		this.clients = clients;
+		this.config = config;
 	}
 
 	public int iterate() {
@@ -50,8 +53,7 @@ public class DefaultJobQueue implements JobQueue{
 		for(Job job : todo) {
 			for (Iterator iterator = freeFound.iterator(); iterator.hasNext();) {
 				Client client = (Client) iterator.next();
-				if(client.work(job)) {
-					// could work!!!
+				if(client.work(job, config)) {
 					completed++;
 					break;
 				}
