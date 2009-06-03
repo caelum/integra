@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Build;
+import br.com.caelum.integracao.server.Builds;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
@@ -53,7 +54,7 @@ public class ProjectStart {
 			database.beginTransaction();
 			Project toBuild = new Projects(database).get(name);
 			Build build = toBuild.build();
-			build.start(new Jobs(database), database);
+			build.start(new Jobs(database), database, new Builds(database));
 			new Projects(database).register(build);
 			database.commit();
 		} catch (Exception e) {

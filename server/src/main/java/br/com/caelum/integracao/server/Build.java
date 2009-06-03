@@ -117,13 +117,13 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
-	public void start(Jobs jobs, Database db) throws ScmException {
+	public void start(Jobs jobs, Database db, Builds builds) throws ScmException {
 		this.currentPhase = 0;
 		logger.debug("Starting executing process for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
 		try {
 			ScmControl control = project.getControl();
-			extractRevision(control);
+			extractRevision(builds, control);
 		} catch (Exception ex) {
 			logger.error("Unable to retrieve revision for " + project.getName(), ex);
 			finish(false);
@@ -149,11 +149,17 @@ public class Build {
 		this.finishTime = new GregorianCalendar();
 	}
 
-	private void extractRevision(ScmControl control) throws IOException, ScmException {
+	private void extractRevision(Builds builds, ScmControl control) throws IOException, ScmException {
 		File tmpFile = File.createTempFile("loading-checkout", ".log");
 		Build lastBuild = project.getBuild(buildCount - 1);
 		Revision lastRevision = lastBuild == null ? null : lastBuild.getRevision();
 		this.revision = control.getCurrentRevision(lastRevision, tmpFile);
+		Revision found = builds.contains(project, revision.getName());
+		if(found!=null) {
+			this.revision = found;
+		} else {
+			builds.register(this.revision);
+		}
 		tmpFile.renameTo(getFile("checkout.txt"));
 		logger.debug("Checking out " + project.getName() + ", build = " + buildCount);
 	}
@@ -264,5 +270,12 @@ public class Build {
 			}
 		}
 	}
-
+	
+	public String getRevisionName() {
+		if(revision==null) {
+			return "unknown";
+		}
+		return revision.getName();
+	}
+	
 }

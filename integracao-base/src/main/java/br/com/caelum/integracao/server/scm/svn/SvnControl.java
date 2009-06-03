@@ -70,15 +70,15 @@ public class SvnControl implements ScmControl {
 		int pos = content.indexOf("Last Changed Rev: ");
 		String name =content.substring(pos+ "Last Changed Rev: ".length(), content.indexOf("\n", pos));
 		
-		String revisionRange = (fromRevision==null? "" : fromRevision.getName()) + "HEAD";
-		String logContent = extract(log, "svn", "log", uri, revisionRange, "-v", "--non-interactive");
+		String revisionRange = (fromRevision==null? "" : fromRevision.getName() + ":") + "HEAD";
+		String logContent = extract(log, "svn", "log", uri, "-r", revisionRange, "-v", "--non-interactive");
 		return new Revision(name, logContent, "");
 	}
 
 	private String extract(File log, String ... cmd) throws ScmException {
 		try {
 			StringWriter writer = new StringWriter();
-			prepare("svn", "info", uri, "--non-interactive").logTo(writer).at(getDir()).run();
+			prepare(cmd).logTo(writer).at(getDir()).run();
 			String content = writer.getBuffer().toString();
 			FileWriter fw = new FileWriter(log);
 			PrintWriter file = new PrintWriter(fw, true);

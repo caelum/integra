@@ -42,8 +42,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Build;
+import br.com.caelum.integracao.server.Builds;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.plugin.Plugin;
@@ -59,12 +59,13 @@ public class BuildTest extends DatabaseBasedTest {
 	private ScmControl control;
 	private Phase first;
 	private Phase second;
-	private Application app;
 	private ArrayList<PluginToRun> plugins;
 	private Jobs jobs;
+	private Builds builds;
 
 	@Before
 	public void configProject() throws ScmException {
+		this.builds = mockery.mock(Builds.class);
 		this.jobs = mockery.mock(Jobs.class);
 		this.project = mockery.mock(Project.class);
 		this.phases = new ArrayList<Phase>();
@@ -88,7 +89,6 @@ public class BuildTest extends DatabaseBasedTest {
 				will(returnValue(baseDir));
 			}
 		});
-		this.app = mockery.mock(Application.class);
 	}
 
 	@Test
@@ -108,14 +108,14 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision(tmpFile());
+				one(control).checkoutOrUpdate(null, (File) with(an(File.class)));
+				one(control).getCurrentRevision(null,tmpFile());
 				will(returnValue("my-revision"));
 			}
 		});
 		Build build = new Build(project);
-		build.start(jobs, database);
-		assertThat(build.getRevision(), is(equalTo("my-revision")));
+		build.start(jobs, database, builds);
+		assertThat(build.getRevision().getName(), is(equalTo("my-revision")));
 		File checkout = new File(baseDir, "build-3/checkout.txt");
 		assertThat(checkout.exists(), is(equalTo(true)));
 		mockery.assertIsSatisfied();
@@ -130,8 +130,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision(tmpFile());
+				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
+				one(control).getCurrentRevision(null,tmpFile());
 				will(returnValue("my-revision"));
 				one(first).getCommandCount();
 				will(returnValue(1));
@@ -145,7 +145,7 @@ public class BuildTest extends DatabaseBasedTest {
 				will(returnValue(true));
 			}
 		});
-		build.start(jobs, database);
+		build.start(jobs, database, builds);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		build.failed();
 		build.proceed(first, database);
@@ -162,8 +162,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision(tmpFile());
+				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
+				one(control).getCurrentRevision(null,tmpFile());
 				will(returnValue("my-revision"));
 				one(first).getCommandCount();
 				will(returnValue(1));
@@ -177,7 +177,7 @@ public class BuildTest extends DatabaseBasedTest {
 				will(returnValue(false));
 			}
 		});
-		build.start(jobs, database);
+		build.start(jobs, database, builds);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		build.proceed(first, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
@@ -193,8 +193,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision(tmpFile());
+				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
+				one(control).getCurrentRevision(null,tmpFile());
 				will(returnValue("my-revision"));
 				one(first).getCommandCount();
 				will(returnValue(2));
@@ -206,7 +206,7 @@ public class BuildTest extends DatabaseBasedTest {
 				one(first).execute(build, jobs);
 			}
 		});
-		build.start(jobs, database);
+		build.start(jobs, database, builds);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		build.proceed(first, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
@@ -222,8 +222,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision(tmpFile());
+				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
+				one(control).getCurrentRevision(null,tmpFile());
 				will(returnValue("my-revision"));
 				one(first).getCommandCount();
 				will(returnValue(1));
@@ -238,7 +238,7 @@ public class BuildTest extends DatabaseBasedTest {
 				will(returnValue(true));
 			}
 		});
-		build.start(jobs, database);
+		build.start(jobs, database, builds);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		build.proceed(first, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(1)));
@@ -273,8 +273,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision(tmpFile());
+				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
+				one(control).getCurrentRevision(null,tmpFile());
 				will(returnValue("my-revision"));
 				one(firstPlugin).getPlugin(database);
 				will(returnValue(firstImplementation));
@@ -288,7 +288,7 @@ public class BuildTest extends DatabaseBasedTest {
 				one(first).execute(build, jobs);
 			}
 		});
-		build.start(jobs, database);
+		build.start(jobs, database, builds);
 		mockery.assertIsSatisfied();
 	}
 
@@ -305,8 +305,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate((File) with(an(File.class)));
-				one(control).getRevision(tmpFile());
+				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
+				one(control).getCurrentRevision(null,tmpFile());
 				will(returnValue("my-revision"));
 				one(firstPlugin).getPlugin(database);
 				will(returnValue(firstImplementation));
@@ -319,7 +319,7 @@ public class BuildTest extends DatabaseBasedTest {
 				one(firstImplementation).before(build); will(returnValue(false));
 			}
 		});
-		build.start(jobs, database);
+		build.start(jobs, database, builds);
 		assertThat(build.isFinished(), is(equalTo(true)));
 		assertThat(build.isSuccessSoFar(), is(equalTo(false)));
 		mockery.assertIsSatisfied();

@@ -45,6 +45,7 @@
 		<tr>
 			<#list project.phases as phase>
 				<td>
+				<div class="phase">
 				<table>
 					<#list phase.commands as cmd>
 						<tr>
@@ -81,6 +82,7 @@
 						</td>
 					</tr>
 				</table>
+				</div>
 				</td>
 				<td></td>
 			</#list>
@@ -93,7 +95,9 @@
 					href="${project.name}/build/${build.buildCount}/view/">results</a>
 				</td>
 				<td>build-${build.buildCount}</td>
-				<td>revision '${build.revision!'unknown' }'</td>
+				<td>
+					revision '${build.revisionName }'
+				</td>
 				<td>
 				<#if !build.finished>
 					<font color="orange">building... who knows?</font>

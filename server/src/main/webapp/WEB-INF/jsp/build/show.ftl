@@ -1,4 +1,5 @@
-<h2>build-${build.buildCount } - revision '${build.revision!'unknown so far'}'</h2>
+<#compress>
+<h2>build-${build.buildCount } - revision '${build.revisionName}'</h2>
 <h2>
 <#if !build.finished>
 	<font color="orange">building... who knows?</font>
@@ -10,6 +11,15 @@
 	</#if>
 </#if>
 </h2>
+
+<div class="box">
+	Log:
+	<#if build.revision??>
+		<pre>${build.revision.message?html}</pre>
+	<#else>
+		unknown
+	</#if>
+</div>
 
 Current phase: ${build.currentPhase } <br />
 Base directory: ${build.baseDirectory.absolutePath } <br />
@@ -74,3 +84,4 @@ Commands running or already run:<br/>
 		</#if>
 	</#list>
 </ul>
+</#compress>

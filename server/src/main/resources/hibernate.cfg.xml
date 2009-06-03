@@ -29,6 +29,8 @@
 		<mapping class="br.com.caelum.integracao.server.Config"/>
 		<mapping class="br.com.caelum.integracao.server.RegisteredPlugin"/>
 
+		<mapping class="br.com.caelum.integracao.server.scm.Revision"/>
+
 		<mapping class="br.com.caelum.integracao.server.queue.Job"/>
 
 		<mapping class="br.com.caelum.integracao.server.plugin.PluginParameter"/>

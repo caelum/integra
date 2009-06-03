@@ -25,45 +25,40 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.scm;
+package br.com.caelum.integracao.server;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import java.util.List;
 
-@Entity
-public class Revision {
+import org.hibernate.Query;
+import org.hibernate.Session;
 
-	@Id
-	@GeneratedValue
-	private Long id;
-	private String name;
+import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.scm.Revision;
+import br.com.caelum.vraptor.ioc.RequestScoped;
+
+@RequestScoped
+public class Builds {
 	
-	@Column(length=10000)
-	private String message;
-	private String author;
-	
-	public Revision(String name, String message, String author) {
-		this.name = name;
-		this.message = message;
-		this.author = author;
+	private final Session session;
+
+	public Builds(Database db) {
+		this.session = db.getSession();
 	}
 
-	protected Revision() {
+	@SuppressWarnings("unchecked")
+	public Revision contains(Project project, String name) {
+		Query query = session.createQuery("select b.revision from Build as b where b.project.id = :projectId and b.revision.name = :name");
+		query.setParameter("projectId", project.getId());
+		query.setParameter("name", name);
+		List<Revision> results = query.list();
+		if(results.isEmpty()) {
+			return null;
+		}
+		return results.get(0);
 	}
-	
-	public String getName() {
-		return name;
-	}
-	
 
-	public String getAuthor() {
-		return author;
-	}
-	
-	public String getMessage() {
-		return message;
+	public void register(Revision revision) {
+		session.save(revision);
 	}
 
 }

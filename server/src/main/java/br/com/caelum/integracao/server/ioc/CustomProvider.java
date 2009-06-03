@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server.ioc;
 
+import br.com.caelum.integracao.server.Builds;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
@@ -49,6 +50,7 @@ public class CustomProvider extends PicoProvider {
         container.register(br.com.caelum.vraptor.view.PathResolver.class, PathResolver.class);
         container.register(PingScm.class, PingScm.class);
         container.register(QueueThread.class, QueueThread.class);
+        container.register(Builds.class, Builds.class);
     }
 
 }
