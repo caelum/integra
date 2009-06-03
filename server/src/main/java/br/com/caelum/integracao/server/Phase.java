@@ -62,7 +62,7 @@ public class Phase {
 	private static final Logger logger = LoggerFactory.getLogger(Phase.class);
 
 	@OneToMany(mappedBy = "phase")
-	@OrderBy("position")
+	@OrderBy("id")
 	private List<ExecuteCommandLine> commands = new ArrayList<ExecuteCommandLine>();
 
 	@OneToMany
@@ -152,16 +152,6 @@ public class Phase {
 
 	public Project getProject() {
 		return project;
-	}
-
-	public void remove(Projects projects, ExecuteCommandLine command) {
-		for (ExecuteCommandLine cmd : getCommands()) {
-			if (cmd.getPosition() > command.getPosition()) {
-				cmd.setPosition(cmd.getPosition() - 1);
-			}
-		}
-		getCommands().remove(command);
-		projects.remove(command);
 	}
 
 	public List<PluginToRun> getPlugins() {

@@ -41,8 +41,8 @@ import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.http.Method;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Phase;
-import br.com.caelum.integracao.server.UsedClient;
 import br.com.caelum.integracao.server.plugin.Plugin;
+import br.com.caelum.integracao.server.queue.Job;
 
 /**
  * Copies files from another machine to the server.
@@ -63,10 +63,13 @@ public class CopyFiles implements Plugin {
 	public boolean after(Build build, Phase phase) {
 		String projectName = build.getProject().getName();
 		logger.debug("Copying for project " + projectName + " dirs " + Arrays.toString(dirs));
-		List<UsedClient> clients = build.getClientsFor(phase);
+		List<Job> jobs = build.getJobsFor(phase);
 		boolean success = true;
-		for (UsedClient client : clients) {
-			String uri = client.getClient().getBaseUri();
+		for (Job job : jobs) {
+			if(!job.isFinished()) {
+				continue;
+			}
+			String uri = job.getClient().getBaseUri();
 			logger.debug("Copying from server " + uri);
 			Method post = http.post(uri + "/plugin/CopyFiles/" + projectName);
 			for (int i = 0; i < dirs.length; i++) {
@@ -79,7 +82,7 @@ public class CopyFiles implements Plugin {
 					post.saveContentToDisk(tmp);
 
 					File commandDirectory = build.getFile(phase.getName() + "/"
-							+ client.getExecutedCommand().getPosition());
+							+ job.getCommand().getPosition());
 					commandDirectory.mkdirs();
 					File unzipResult = new File(commandDirectory, "copy-files-unzip.txt");
 					int result =  new CommandToExecute("unzip", "-qo", tmp.getAbsolutePath()).at(commandDirectory).logTo(unzipResult).run();

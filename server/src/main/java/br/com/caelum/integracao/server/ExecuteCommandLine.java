@@ -30,7 +30,6 @@ package br.com.caelum.integracao.server;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -58,9 +57,6 @@ public class ExecuteCommandLine {
 	@Cascade(value = { CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE })
 	private List<Command> commands;
 
-	@Column(name = "pos")
-	private int position;
-
 	@NotNull
 	@ManyToOne
 	private Phase phase;
@@ -70,7 +66,6 @@ public class ExecuteCommandLine {
 
 	public ExecuteCommandLine(Phase phase, String... cmds) {
 		this.phase = phase;
-		this.position = phase.getCommandCount();
 		this.commands = new ArrayList<Command>();
 		for (String command : cmds) {
 			this.commands.add(new Command(command));
@@ -84,14 +79,6 @@ public class ExecuteCommandLine {
 			name += cmd.getValue() + " ";
 		}
 		return name;
-	}
-
-	public int getPosition() {
-		return position;
-	}
-
-	public void setPosition(int position) {
-		this.position = position;
 	}
 
 	public List<Command> getCommands() {

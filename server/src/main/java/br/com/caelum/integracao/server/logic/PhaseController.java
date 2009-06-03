@@ -66,8 +66,7 @@ public class PhaseController {
 	@Path("/project/command/{command.id}")
 	public void removeCommand(ExecuteCommandLine command) {
 		command = projects.load(command);
-		Phase phase = command.getPhase();
-		phase.remove(projects, command);
+		projects.remove(command);
 		showList();
 	}
 

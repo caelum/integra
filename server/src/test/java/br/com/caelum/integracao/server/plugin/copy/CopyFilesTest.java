@@ -29,10 +29,12 @@ package br.com.caelum.integracao.server.plugin.copy;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.httpclient.HttpException;
 import org.jmock.Expectations;
+import org.junit.Before;
 import org.junit.Test;
 
 import br.com.caelum.integracao.http.Http;
@@ -41,10 +43,25 @@ import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
-import br.com.caelum.integracao.server.UsedClient;
 import br.com.caelum.integracao.server.project.BaseTest;
+import br.com.caelum.integracao.server.queue.Job;
 
 public class CopyFilesTest extends BaseTest {
+	
+	private Job first;
+	private Job second;
+
+	@Before
+	public void setupClients() {
+		this.first = mockery.mock(Job.class, "first");
+		this.second = mockery.mock(Job.class, "second");
+		mockery.checking(new Expectations() {
+			{
+				allowing(first).getClient(); will(returnValue(createClient("uri")));
+				allowing(second).getClient(); will(returnValue(createClient("second uri")));
+			}
+		});
+	}
 
 	@Test
 	public void shouldAskForTheZippedFilesForEachDirectory() throws IOException {
@@ -56,15 +73,13 @@ public class CopyFilesTest extends BaseTest {
 		CopyFiles copier = new CopyFiles(http, new String[] { reportPath, artifactPath });
 		final Build build = mockery.mock(Build.class);
 		final Phase phase = mockery.mock(Phase.class);
-		final ArrayList<UsedClient> clients = new ArrayList<UsedClient>();
-		clients.add(new UsedClient(createClient("uri"), null, null));
-		clients.add(new UsedClient(createClient("second uri"), null, null));
+		final List<Job> clients = Arrays.asList(first,second);
 		final Project caelumweb = mockery.mock(Project.class);
 		mockery.checking(new Expectations() {
 			{
 				expectHttpCall("uri");
 				expectHttpCall("second uri");
-				one(build).getClientsFor(phase);
+				one(build).getJobsFor(phase);
 				will(returnValue(clients));
 				allowing(caelumweb).getName(); will(returnValue("caelumweb"));
 				allowing(build).getProject(); will(returnValue(caelumweb));

@@ -48,13 +48,13 @@ import br.com.caelum.integracao.server.action.Dispatcher;
 
 @Entity
 public class Job {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(Job.class);
 
 	private Build build;
 
 	private ExecuteCommandLine command;
-	
+
 	private Client client;
 
 	public Job(Build build, ExecuteCommandLine command) {
@@ -68,9 +68,12 @@ public class Job {
 
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar schedulingTime = new GregorianCalendar();
-	
+
 	private boolean finished;
-	
+
+	@Temporal(TemporalType.TIMESTAMP)
+	private Calendar startTime;
+
 	public ExecuteCommandLine getCommand() {
 		return command;
 	}
@@ -81,17 +84,26 @@ public class Job {
 		try {
 			connection.register(build.getProject()).execute(command, this).close();
 			this.client = at;
+			this.startTime = Calendar.getInstance();
 		} finally {
 			connection.close();
 		}
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
-	
+
 	public Build getBuild() {
 		return build;
+	}
+
+	public Client getClient() {
+		return client;
+	}
+
+	public boolean isFinished() {
+		return finished;
 	}
 
 }
