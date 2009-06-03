@@ -159,7 +159,8 @@ public class BuildTest extends DatabaseBasedTest {
 		});
 		build.start(jobs, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.proceed("",0, 0, "no-result", false, app, database,jobs);
+		build.failed();
+		build.proceed(first, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -194,7 +195,7 @@ public class BuildTest extends DatabaseBasedTest {
 		});
 		build.start(jobs, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.proceed("",0, 0, "no-result", false, app, database, jobs);
+		build.proceed(first, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -227,7 +228,7 @@ public class BuildTest extends DatabaseBasedTest {
 		});
 		build.start(jobs, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.proceed("",0, 0, "no-result", true, app, database, jobs);
+		build.proceed(first, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		mockery.assertIsSatisfied();
 	}
@@ -262,8 +263,8 @@ public class BuildTest extends DatabaseBasedTest {
 			}
 		});
 		build.start(jobs, database);
-	assertThat(build.getCurrentPhase(), is(equalTo(0)));
-		build.proceed("",0, 0, "no-result", true, app, database, jobs);
+		assertThat(build.getCurrentPhase(), is(equalTo(0)));
+		build.proceed(first, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(1)));
 		mockery.assertIsSatisfied();
 	}
