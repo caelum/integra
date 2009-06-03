@@ -38,10 +38,12 @@ import org.slf4j.LoggerFactory;
 import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Config;
+import br.com.caelum.integracao.server.Files;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
+import br.com.caelum.integracao.server.scm.Revision;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 /**
@@ -104,13 +106,13 @@ public class PingScm {
 		}
 		logger.debug("Project " + project.getName() + " last build finished=" + lastBuild.isFinished());
 		if (lastBuild.isFinished()) {
-			String lastRevision = lastBuild.getRevision();
+			Revision lastRevision = lastBuild.getRevision();
 			try {
-				File log = File.createTempFile("integra-revision-", ".txt");
-				String revision = project.getControl().getRevision(log);
-				if (lastRevision == null || !lastRevision.equals(revision)) {
-					logger.debug("Project " + project.getName()
-							+ " has a new revision, therefore we will start the build");
+				File log = File.createTempFile(Files.CHECK_REVISION, ".txt");
+				Revision revision = project.getControl().getCurrentRevision(lastRevision, log);
+				if (lastRevision == null || !lastRevision.getName().equals(revision.getName())) {
+					logger.debug("Project " + project.getName() + " has a revision '" + revision.getName()
+							+ "', therefore we will start the build.");
 					new ProjectStart(db).runProject(project.getName());
 				}
 			} catch (Exception e) {

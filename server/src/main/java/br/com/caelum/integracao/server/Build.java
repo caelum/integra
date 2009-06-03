@@ -48,6 +48,7 @@ import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;
+import br.com.caelum.integracao.server.scm.Revision;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
 
@@ -71,7 +72,9 @@ public class Build {
 
 	@Min(0)
 	private Long buildCount;
-	private String revision;
+
+	@ManyToOne
+	private Revision revision;
 
 	@Min(0)
 	private int currentPhase = 0;
@@ -94,7 +97,7 @@ public class Build {
 		getBaseDirectory().mkdirs();
 	}
 
-	public String getRevision() {
+	public Revision getRevision() {
 		return revision;
 	}
 
@@ -114,13 +117,13 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
-	public void start(Jobs jobs, Database db) throws ScmException, IOException  {
+	public void start(Jobs jobs, Database db) throws ScmException {
 		this.currentPhase = 0;
 		logger.debug("Starting executing process for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
-		ScmControl control = project.getControl();
 		try {
-			update(control);
+			ScmControl control = project.getControl();
+			extractRevision(control);
 		} catch (Exception ex) {
 			logger.error("Unable to retrieve revision for " + project.getName(), ex);
 			finish(false);
@@ -146,9 +149,11 @@ public class Build {
 		this.finishTime = new GregorianCalendar();
 	}
 
-	private void update(ScmControl control) throws IOException, ScmException{
+	private void extractRevision(ScmControl control) throws IOException, ScmException {
 		File tmpFile = File.createTempFile("loading-checkout", ".log");
-		this.revision = control.getRevision(tmpFile);
+		Build lastBuild = project.getBuild(buildCount - 1);
+		Revision lastRevision = lastBuild == null ? null : lastBuild.getRevision();
+		this.revision = control.getCurrentRevision(lastRevision, tmpFile);
 		tmpFile.renameTo(getFile("checkout.txt"));
 		logger.debug("Checking out " + project.getName() + ", build = " + buildCount);
 	}
@@ -237,8 +242,8 @@ public class Build {
 	public void proceed(Phase actualPhase, Database database) throws IOException {
 		List<Job> jobs = getJobsFor(actualPhase);
 		int finished = 0;
-		for(Job j : jobs) {
-			if(j.isFinished()) {
+		for (Job j : jobs) {
+			if (j.isFinished()) {
 				finished++;
 			}
 		}

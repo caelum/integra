@@ -27,7 +27,6 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,7 +91,7 @@ public class Phase {
 	public Phase() {
 	}
 
-	public void execute(Build build, Jobs jobs) throws IOException {
+	public void execute(Build build, Jobs jobs) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Scheduling phase " + name + " for project " + build.getProject().getName() + " containing "
 					+ commands.size() + " parallel commands.");

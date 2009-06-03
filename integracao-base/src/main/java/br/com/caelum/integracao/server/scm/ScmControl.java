@@ -28,7 +28,6 @@
 package br.com.caelum.integracao.server.scm;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * An scm implementation.
@@ -39,8 +38,12 @@ public interface ScmControl {
 
 	public File getDir();
 
-	int checkoutOrUpdate(File log) throws IOException, ScmException;
+	/**
+	 * Returns the information between Revision and the current revision.<br/>
+	 * If fromRevision is null, returns the log message "first checkout".
+	 */
+	Revision getCurrentRevision(Revision fromRevision, File log) throws ScmException;
 
-	String getRevision(File log) throws IOException, ScmException;
+	int checkoutOrUpdate(String revision, File log) throws ScmException;
 
 }

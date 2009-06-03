@@ -79,14 +79,14 @@ public class Project {
 				baseDirectory, name);
 	}
 
-	public ProjectRunResult run(File baseDirectory, String revision, List<String> command, File output)
+	public ProjectRunResult run(File baseDirectory, String desiredRevision, List<String> command, File output)
 			throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException {
-		logger.debug("Checking out project @ " + uri + ", revision=" + revision + " to " + baseDirectory + "/" + name);
+		logger.debug("Checking out project @ " + uri + ", revision=" + desiredRevision + " to " + baseDirectory + "/" + name);
 		File checkoutLog = File.createTempFile("checkout-client-", ".txt");
 		ScmControl control = getControl(baseDirectory);
 		try {
-			control.checkoutOrUpdate(checkoutLog);
+			control.checkoutOrUpdate(desiredRevision, checkoutLog);
 		} catch (ScmException ex) {
 			return new ProjectRunResult(content(checkoutLog), -1);
 		}

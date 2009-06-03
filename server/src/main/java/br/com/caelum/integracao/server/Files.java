@@ -29,6 +29,11 @@ package br.com.caelum.integracao.server;
 
 public class Files {
 
-	public static final String SERVER_TO_CLIENT_PREFIX = "integracao-server-connection-to-client";
+	public static final String SERVER_TO_CLIENT_PREFIX = "integracao-server-connection-to-client-";
+	
+	/**
+	 * used when checking a revision from a svn controller.
+	 */
+	public static final String CHECK_REVISION = "integra-revision-";
 
 }

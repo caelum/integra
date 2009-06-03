@@ -25,44 +25,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.scm.svn;
+package br.com.caelum.integracao.server.scm;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
-import org.junit.Assert;
-import org.junit.Test;
+@Entity
+public class Revision {
 
-import br.com.caelum.integracao.AtDirectoryTest;
-
-public class SvnControlTest extends AtDirectoryTest {
-
-	@Test
-	public void shouldCommitAndReceiveUpdate() throws IOException {
-		File log = new File(this.baseDir, "control1-checkout");
-
-		SvnControl control1 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1");
-		Assert.assertEquals(0,control1.checkoutOrUpdate(null,log));
-		
-		SvnControl control2 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-2");
-		Assert.assertEquals(0,control2.checkoutOrUpdate(null,new File(this.baseDir, "control2-checkout")));
-		
-		File file = new File(control1.getDir(), "test-file");
-		givenA(file, "misc content");
-		
-		control1.add(file);
-		control1.commit("commiting test file");
-		control2.update(null,log);
-		File found = new File(control2.getDir(), "test-file");
-		Assert.assertTrue(found.exists());
-		String content = new BufferedReader(new FileReader(found)).readLine();
-		Assert.assertEquals("misc content", content);
-		control2.remove(found);
-		control2.commit("removed test file");
-		control1.update(null,log);
-		Assert.assertFalse(file.exists());
+	@Id
+	@GeneratedValue
+	private Long id;
+	private String name;
+	private String message;
+	private String author;
+	
+	public Revision(String name, String message, String author) {
+		this.name = name;
+		this.message = message;
+		this.author = author;
 	}
+
+	protected Revision() {
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	
 
 }

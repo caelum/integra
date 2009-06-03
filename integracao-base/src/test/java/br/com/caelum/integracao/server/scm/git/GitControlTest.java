@@ -38,6 +38,7 @@ import org.junit.Test;
 
 import br.com.caelum.integracao.AtDirectoryTest;
 import br.com.caelum.integracao.command.CommandToExecute;
+import br.com.caelum.integracao.server.scm.ScmException;
 
 public class GitControlTest extends AtDirectoryTest {
 	
@@ -59,28 +60,28 @@ public class GitControlTest extends AtDirectoryTest {
 	}
 
 	@Test
-	public void shouldCommitAndReceiveUpdate() throws IOException {
+	public void shouldCommitAndReceiveUpdate() throws IOException, ScmException {
 
 		File log = new File(this.baseDir, "my-checkout");
 
 		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "my-cloned-cruise");
-		Assert.assertEquals(0,control1.checkoutOrUpdate(log));
+		Assert.assertEquals(0,control1.checkoutOrUpdate(null,log));
 		File file = new File(control1.getDir(), "test-file");
 		givenA(file, "misc content");
 
 		GitControl control2 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "apostilas-2");
-		Assert.assertEquals(0,control2.checkoutOrUpdate(new File(this.baseDir, "my-second-checkout")));
+		Assert.assertEquals(0,control2.checkoutOrUpdate(null,new File(this.baseDir, "my-second-checkout")));
 		
 		Assert.assertEquals(0,control1.add(file));
 		Assert.assertEquals(0,control1.commit("commiting test file"));
-		control2.checkoutOrUpdate(log);
+		control2.checkoutOrUpdate(null,log);
 		File found = new File(control2.getDir(), "test-file");
 		Assert.assertTrue(found.exists());
 		String content = new BufferedReader(new FileReader(found)).readLine();
 		Assert.assertEquals("misc content", content);
 		control2.remove(found);
 		control2.commit("removed test file");
-		control1.checkoutOrUpdate(log);
+		control1.checkoutOrUpdate(null,log);
 		Assert.assertFalse(file.exists());
 	}
 

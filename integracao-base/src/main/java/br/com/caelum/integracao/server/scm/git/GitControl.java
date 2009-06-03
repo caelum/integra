@@ -35,12 +35,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.command.CommandToExecute;
+import br.com.caelum.integracao.server.scm.Revision;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
 
 public class GitControl implements ScmControl {
-	
-	
+
 	private final Logger logger = LoggerFactory.getLogger(GitControl.class);
 
 	private final String uri;
@@ -53,12 +53,17 @@ public class GitControl implements ScmControl {
 		this.baseName = name;
 	}
 
-	public int checkoutOrUpdate(File log) throws IOException {
-		if (new File(new File(baseDirectory, baseName), ".git").exists()) {
-			return prepare("git", "pull").at(getDir()).logTo(log).run();
-		} else {
-			logger.debug("Cloning the git for the first time at " + log.getAbsolutePath());
-			return prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
+	public int checkoutOrUpdate(String revision, File log) throws ScmException {
+		try {
+			if (new File(new File(baseDirectory, baseName), ".git").exists()) {
+				return prepare("git", "pull").at(getDir()).logTo(log).run();
+			} else {
+				logger.debug("Cloning the git for the first time at " + log.getAbsolutePath());
+				return prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
+			}
+		} catch (IOException ex) {
+			throw new ScmException("Unable to retrieve info from git " + uri + " but logged data to "
+					+ log.getAbsolutePath(), ex);
 		}
 	}
 
@@ -87,8 +92,8 @@ public class GitControl implements ScmControl {
 		return prepare("git", "rm", file.getAbsolutePath()).at(file.getParentFile()).run();
 	}
 
-	public String getRevision(File log) throws IOException, ScmException {
-		int result = checkoutOrUpdate(log);
+	public Revision getCurrentRevision(Revision fromRevision, File log) throws ScmException {
+		int result = checkoutOrUpdate(null, log);
 		if (result != 0) {
 			throw new ScmException("Unable to load data and revision information, log at " + log.getAbsolutePath());
 		}
@@ -96,7 +101,8 @@ public class GitControl implements ScmControl {
 		prepare("git", "--no-pager", "log").logTo(writer).at(getDir()).run();
 		String content = writer.getBuffer().toString();
 		int pos = content.indexOf("commit ");
-		return content.substring(pos + "commit ".length(), content.indexOf("\n", pos));
+		String name = content.substring(pos + "commit ".length(), content.indexOf("\n", pos));
+		return new Revision(name, "", "");
 	}
 
 }

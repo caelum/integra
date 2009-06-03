@@ -79,7 +79,7 @@ public class Dispatcher {
 
 	public Dispatcher execute(ExecuteCommandLine command, Job job) throws IOException {
 		Method post = new DefaultHttp().post(this.client.getBaseUri() + "/job/execute");
-		post.with("revision",  job.getBuild().getRevision());
+		post.with("revision",  job.getBuild().getRevision().getName());
 		post.with("project.name", job.getBuild().getProject().getName());
 		post.with("resultUri", "http://" + myself + "/integracao/finish/job/" + job.getId());
 		for (int i = 0; i < command.getCommands().size(); i++) {
