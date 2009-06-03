@@ -29,6 +29,7 @@ package br.com.caelum.integracao.server.logic;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,6 +140,12 @@ public class ProjectController {
 		PluginToRun plugin = new PluginToRun((Class<? extends PluginInformation>) Class.forName(pluginType));
 		project.add(plugin);
 		showList();
+	}
+	
+	@Get
+	@Path("/project/jobs")
+	public List<Job> showJobs() {
+		return jobs.todo();
 	}
 
 }

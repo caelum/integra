@@ -31,6 +31,7 @@ import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
 import br.com.caelum.integracao.server.logic.PingScm;
+import br.com.caelum.integracao.server.queue.QueueThread;
 import br.com.caelum.integracao.server.vraptor.PathResolver;
 import br.com.caelum.vraptor.ComponentRegistry;
 import br.com.caelum.vraptor.ioc.pico.PicoProvider;
@@ -45,6 +46,7 @@ public class CustomProvider extends PicoProvider {
         container.register(Projects.class, Projects.class);
         container.register(br.com.caelum.vraptor.view.PathResolver.class, PathResolver.class);
         container.register(PingScm.class, PingScm.class);
+        container.register(QueueThread.class, QueueThread.class);
     }
 
 }

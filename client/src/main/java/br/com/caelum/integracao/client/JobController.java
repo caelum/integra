@@ -46,6 +46,7 @@ import br.com.caelum.vraptor.view.Results;
 
 /**
  * Resource controlling the current job.
+ * 
  * @author guilherme silveira
  */
 @ApplicationScoped
@@ -70,9 +71,8 @@ public class JobController {
 	}
 
 	@Post
-	public synchronized void execute(Project project, String revision, List<String> command, String resultUri,
-			String clientId) {
-		job.start(projects.get(project.getName()), revision, command, resultUri, clientId);
+	public synchronized void execute(Project project, String revision, List<String> command, String resultUri) {
+		job.start(projects.get(project.getName()), revision, command, resultUri);
 	}
 
 	@Get

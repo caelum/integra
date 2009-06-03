@@ -32,9 +32,9 @@ import java.util.List;
 import org.hibernate.Session;
 
 import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.vraptor.ioc.ApplicationScoped;
+import br.com.caelum.vraptor.ioc.RequestScoped;
 
-@ApplicationScoped
+@RequestScoped
 public class Jobs {
 	
 	private final Session session;
@@ -45,7 +45,7 @@ public class Jobs {
 
 	@SuppressWarnings("unchecked")
 	public List<Job> todo() {
-		return session.createQuery("from Jobs as j").list();
+		return session.createQuery("from Job as j").list();
 	}
 
 	public void add(Job job) {

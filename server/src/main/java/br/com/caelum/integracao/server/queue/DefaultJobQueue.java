@@ -35,7 +35,8 @@ import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Config;
 
 public class DefaultJobQueue implements JobQueue{
-
+	
+	
 	private final Jobs jobs;
 	private final Clients clients;
 	private final Config config;

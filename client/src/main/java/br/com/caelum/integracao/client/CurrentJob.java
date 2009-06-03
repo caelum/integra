@@ -77,7 +77,7 @@ public class CurrentJob {
 	}
 
 	public synchronized void start(Project project, final String revision, final List<String> command,
-			final String resultUri, final String clientId) {
+			final String resultUri) {
 		if (isRunning()) {
 			throw new RuntimeException("Cannot take another job as im currently processing " + this.project.getName());
 		}
@@ -86,7 +86,7 @@ public class CurrentJob {
 		Runnable runnable = new Runnable() {
 			public void run() {
 				try {
-					executeBuildFor(revision, command, resultUri, clientId);
+					executeBuildFor(revision, command, resultUri);
 				} finally {
 					CurrentJob.this.project = null;
 					CurrentJob.this.thread = null;
@@ -99,7 +99,7 @@ public class CurrentJob {
 		thread.start();
 	}
 
-	private void executeBuildFor(String revision, List<String> command, String resultUri, String clientId) {
+	private void executeBuildFor(String revision, List<String> command, String resultUri) {
 		ProjectRunResult result = null;
 		boolean success = false;
 		try {
@@ -125,9 +125,7 @@ public class CurrentJob {
 					} else {
 						post.with("result", "unable-to-read-result");
 					}
-					post.with("project.name", project.getName());
-					post.with("revision", revision);
-					post.with("success", "" + success).with("client.id", clientId).send();
+					post.with("success", "" + success);
 					if (post.getResult() != 200) {
 						logger.error(post.getContent());
 						throw new RuntimeException("The server returned a problematic answer: " + post.getResult());

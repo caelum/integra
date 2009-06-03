@@ -25,72 +25,76 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.dao;
+package br.com.caelum.integracao.server.queue;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.AnnotationConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Application;
-import br.com.caelum.integracao.server.Config;
-import br.com.caelum.integracao.server.RegisteredPlugin;
-import br.com.caelum.integracao.server.plugin.build.RemoveOldBuildsInformation;
-import br.com.caelum.integracao.server.plugin.copy.CopyFilesInformation;
-import br.com.caelum.integracao.server.plugin.mail.SendMailInformation;
+import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.dao.DatabaseFactory;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 @ApplicationScoped
-public class DatabaseFactory {
+public class QueueThread {
 
-	private final Logger logger = LoggerFactory.getLogger(DatabaseFactory.class);
+	private final Logger logger = LoggerFactory.getLogger(QueueThread.class);
 
-	private SessionFactory factory;
+	private final DatabaseFactory factory;
+
+	private Thread thread;
+	
+	private Object waiter = new Object();
+	
+	private boolean shouldRun = true;
+
+	public QueueThread(DatabaseFactory factory) {
+		this.factory = factory;
+	}
 
 	@PostConstruct
 	public void startup() {
-		logger.debug("Starting up database");
-		this.factory = new AnnotationConfiguration().configure().buildSessionFactory();
-		Database db = new Database(this);
-		try {
-			if (new Application(db).getConfig() == null) {
-				Config cfg = new Config();
-				Session session = db.getSession();
-				try {
-					db.beginTransaction();
-					logger.debug("Creating database for the first time");
-					session.save(cfg);
-					session.save(new RegisteredPlugin(cfg, CopyFilesInformation.class));
-					session.save(new RegisteredPlugin(cfg, SendMailInformation.class));
-					session.save(new RegisteredPlugin(cfg, RemoveOldBuildsInformation.class));
-					db.commit();
-				} finally {
-					if (db.hasTransaction()) {
-						db.rollback();
-						logger
-								.error("Was unable to insert the basic data in the database. Something really nasty will happen");
+		logger.debug("Starting up queue thread");
+		this.thread = new Thread(new Runnable() {
+			public void run() {
+				while (shouldRun) {
+					Database db = new Database(factory);
+					try {
+						db.beginTransaction();
+						JobQueue queue = new DefaultJobQueue(new Jobs(db), new Clients(db), new Application(db)
+								.getConfig());
+						int result = queue.iterate();
+						logger.debug("Job queue started " + result + " jobs");
+					} catch (Exception ex) {
+						logger.error("Something really nasty ocurred while executing the job queue", ex);
+					} finally {
+						if (db.hasTransaction()) {
+							db.rollback();
+						}
+						db.close();
+					}
+					try {
+						waiter.wait(10000);
+					} catch (InterruptedException e) {
+						logger.debug("Was waiting but someone waked me up.");
 					}
 				}
 			}
-		} finally {
-			db.close();
-		}
+		});
+		thread.start();
 	}
 
 	@PreDestroy
 	public void destroy() {
-		if (factory != null) {
-			logger.debug("Shutting down database");
-			this.factory.close();
+		if (thread != null && thread.isAlive()) {
+			logger.debug("Shutting down queue thread");
+			shouldRun = false;
+			thread.stop();
 		}
-	}
-
-	public Session getSession() {
-		return this.factory.openSession();
 	}
 
 }

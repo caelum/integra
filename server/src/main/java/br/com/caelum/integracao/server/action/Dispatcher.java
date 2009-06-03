@@ -81,7 +81,6 @@ public class Dispatcher {
 		Method post = new DefaultHttp().post(this.client.getBaseUri() + "/job/execute");
 		post.with("revision",  job.getBuild().getRevision());
 		post.with("project.name", job.getBuild().getProject().getName());
-		post.with("clientId", "" + this.client.getId());
 		post.with("resultUri", "http://" + myself + "/integracao/finish/job/" + job.getId());
 		for (int i = 0; i < command.getCommands().size(); i++) {
 			post.with("command[" + i + "]", command.getCommands().get(i).getValue());
