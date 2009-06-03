@@ -29,6 +29,7 @@ Commands running or already run:<br/>
 			<td>scheduled</td>
 			<td>client</td>
 			<td>started</td>
+			<td>finished</td>
 		</tr>
 	<#assign jobs=build.getJobsFor(phase)>
 	<#list jobs as job>
@@ -43,6 +44,16 @@ Commands running or already run:<br/>
 			<td>
 			<#if job.startTime??>
 				${job.startTime.time?datetime}
+			</#if>
+			</td>
+			<td>
+			<#if job.finishTime??>
+				${job.finishTime.time?datetime}
+			</#if>
+			</td>
+			<td>
+			<#if job.finishTime??>
+				${job.runtime} seconds
 			</#if>
 			</td>
 		</tr>

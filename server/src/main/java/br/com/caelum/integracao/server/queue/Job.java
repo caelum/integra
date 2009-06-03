@@ -159,4 +159,12 @@ public class Job {
 		return finishTime;
 	}
 
+	public double getRuntime() {
+		Calendar f = Calendar.getInstance();
+		if (finishTime != null) {
+			f = finishTime;
+		}
+		return (f.getTimeInMillis() - startTime.getTimeInMillis()) / 1000.0;
+	}
+
 }
