@@ -122,6 +122,23 @@ public class Client {
 
 	public boolean work(Job job) {
 		this.currentJob = job;
+		Client client;
+		try {
+			client = clients.getFreeClient(getName() + "/" + command.getName());
+		} catch (IllegalStateException e) {
+			// there is no client available
+			try {
+				build.finish(name, (int) position, command.getPosition(), "NOT ENOUGHT CLIENTS", false, clients, app, database);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			return;
+		}
+		database.beginTransaction();
+		app.register(new UsedClient(client, build, command));
+		database.commit();
+		command.executeAt(client, build, control, File.createTempFile("connection", "txt"), app.getConfig()
+				.getUrl());
 		return true;
 	}
 

@@ -33,9 +33,9 @@ import static org.hamcrest.Matchers.is;
 
 import org.junit.Test;
 
-import br.com.caelum.integracao.server.project.BaseTest;
+import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 
-public class ApplicationTest extends BaseTest {
+public class ApplicationTest extends DatabaseBasedTest {
 
 	@Test
 	public void shouldReturnTheBasicConfigInstanceIfNoneFound() {

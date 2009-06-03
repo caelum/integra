@@ -38,4 +38,8 @@ public class ScmException extends Exception {
 		super(msg);
 	}
 
+	public ScmException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
+
 }

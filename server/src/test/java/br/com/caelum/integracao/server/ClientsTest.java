@@ -34,9 +34,9 @@ import static org.hamcrest.Matchers.is;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.com.caelum.integracao.server.project.BaseTest;
+import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 
-public class ClientsTest extends BaseTest{
+public class ClientsTest extends DatabaseBasedTest{
 
 	private Clients clients;
 	private Client bebado;

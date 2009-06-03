@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -52,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
+import br.com.caelum.integracao.server.queue.Jobs;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
 
@@ -121,16 +121,14 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
-	public void start(Clients clients, Application app, Database db) throws IllegalArgumentException,
-			SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException,
-			NoSuchMethodException, IOException {
+	public void start(Jobs jobs, Database db) throws ScmException, IOException  {
 		this.currentPhase = 0;
 		logger.debug("Starting executing process for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
 		ScmControl control = project.getControl();
 		try {
 			update(control);
-		} catch (ScmException ex) {
+		} catch (Exception ex) {
 			logger.error("Unable to retrieve revision for " + project.getName(), ex);
 			finish(false);
 		}
@@ -144,7 +142,7 @@ public class Build {
 		List<Phase> phases = project.getPhases();
 		if (!phases.isEmpty()) {
 			Phase phase = phases.get(0);
-			phase.execute(control, this, clients, app, db);
+			phase.execute(this, jobs);
 		}
 	}
 
@@ -154,8 +152,7 @@ public class Build {
 		this.finishTime = new GregorianCalendar();
 	}
 
-	private void update(ScmControl control) throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException, IOException, ScmException {
+	private void update(ScmControl control) throws IOException, ScmException{
 		File tmpFile = File.createTempFile("loading-checkout", ".log");
 		this.revision = control.getRevision(tmpFile);
 		tmpFile.renameTo(getFile("checkout.txt"));
@@ -170,9 +167,8 @@ public class Build {
 		return currentPhase;
 	}
 
-	public synchronized void finish(String phaseName, int phasePosition, int commandId, String result, boolean success, Clients clients,
-			Application app, Database database) throws IOException, InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException {
+	public synchronized void finish(String phaseName, int phasePosition, int commandId, String result, boolean success,
+			Application app, Database database, Jobs jobs) throws IOException  {
 		successSoFar &= success;
 		executedCommandsFromThisPhase.add(commandId);
 		File file = getFile(phaseName + "/" + commandId + ".txt");
@@ -190,8 +186,7 @@ public class Build {
 				currentPhase++;
 				executedCommandsFromThisPhase.clear();
 				if (project.getPhases().size() != currentPhase) {
-					project.getPhases().get(phasePosition + 1).execute(project.getControl(), this, clients, app,
-							database);
+					project.getPhases().get(phasePosition + 1).execute(this, jobs);
 				} else {
 					finish(true);
 				}
@@ -273,5 +268,5 @@ public class Build {
 		}
 		dir.delete();
 	}
-	
+
 }

@@ -48,4 +48,8 @@ public class Jobs {
 		return session.createQuery("from Jobs as j").list();
 	}
 
+	public void add(Job job) {
+		session.save(job);
+	}
+
 }

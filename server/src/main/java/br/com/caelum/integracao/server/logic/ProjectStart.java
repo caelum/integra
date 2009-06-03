@@ -30,12 +30,11 @@ package br.com.caelum.integracao.server.logic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Build;
-import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.queue.Jobs;
 
 public class ProjectStart {
 
@@ -47,14 +46,16 @@ public class ProjectStart {
 	}
 
 	void runProject(String name) {
+		// TODO we probably dont need a new database connection, we can probably
+		// work out with the original one
 		logger.debug("Starting building project id=" + name);
 		try {
 			database.beginTransaction();
 			Project toBuild = new Projects(database).get(name);
 			Build build = toBuild.build();
+			build.start(new Jobs(database), database);
 			new Projects(database).register(build);
 			database.commit();
-			build.start(new Clients(database), new Application(database), database);
 		} catch (Exception e) {
 			logger.error("Unable to start project build", e);
 		} finally {

@@ -52,7 +52,7 @@ import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
 
-public class BuildTest extends BaseTest {
+public class BuildTest extends DatabaseBasedTest {
 
 	private Project project;
 	private Clients clients;

@@ -35,9 +35,9 @@ import org.junit.Test;
 
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Project;
-import br.com.caelum.integracao.server.project.BaseTest;
+import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 
-public class RemoveOldBuildsTest extends BaseTest {
+public class RemoveOldBuildsTest extends DatabaseBasedTest {
 
 	@Test
 	public void shouldRemoveOldBuildsIfExceedingN() {

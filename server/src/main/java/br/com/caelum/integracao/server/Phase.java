@@ -27,7 +27,6 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +48,7 @@ import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.queue.Job;
-import br.com.caelum.integracao.server.scm.ScmControl;
+import br.com.caelum.integracao.server.queue.Jobs;
 
 /**
  * A build consists of many different phases. At each phase some targets are
@@ -93,32 +92,14 @@ public class Phase {
 	public Phase() {
 	}
 
-	public void execute(ScmControl control, Build build, Clients clients, Application app, Database database) throws IOException {
+	public void execute(Build build, Jobs jobs) throws IOException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Starting phase " + name + " for project " + build.getProject().getName() + " containing "
+			logger.debug("Scheduling phase " + name + " for project " + build.getProject().getName() + " containing "
 					+ commands.size() + " parallel commands.");
 		}
 		build.getFile(name).mkdirs();
 		for (ExecuteCommandLine command : commands) {
-			Job job = new Job(build, command);
-			queue.add(build, command);
-			Client client;
-			try {
-				client = clients.getFreeClient(getName() + "/" + command.getName());
-			} catch (IllegalStateException e) {
-				// there is no client available
-				try {
-					build.finish(name, (int) position, command.getPosition(), "NOT ENOUGHT CLIENTS", false, clients, app, database);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-				return;
-			}
-			database.beginTransaction();
-			app.register(new UsedClient(client, build, command));
-			database.commit();
-			command.executeAt(client, build, control, File.createTempFile("connection", "txt"), app.getConfig()
-					.getUrl());
+			jobs.add(new Job(build, command));
 		}
 	}
 

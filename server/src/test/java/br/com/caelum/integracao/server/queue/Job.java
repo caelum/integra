@@ -27,17 +27,40 @@
  */
 package br.com.caelum.integracao.server.queue;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import br.com.caelum.integracao.server.Build;
+import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.ExecuteCommandLine;
 
 @Entity
 public class Job {
+
+	private Build build;
+
+	private ExecuteCommandLine command;
 	
+	private Client client;
+
+	public Job(Build build, ExecuteCommandLine command) {
+		this.build = build;
+		this.command = command;
+	}
+
 	@Id
 	@GeneratedValue
 	private Long id;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	private Calendar schedulingTime = new GregorianCalendar();
 	
-	
+	private boolean finished;
 
 }

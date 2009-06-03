@@ -41,9 +41,9 @@ import org.junit.Test;
 
 import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
-import br.com.caelum.integracao.server.project.BaseTest;
+import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 
-public class PhaseTest extends BaseTest {
+public class PhaseTest extends DatabaseBasedTest {
 	
 	private Build build;
 

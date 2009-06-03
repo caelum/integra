@@ -28,7 +28,6 @@
 package br.com.caelum.integracao.server;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -52,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.ScmControl;
+import br.com.caelum.integracao.server.scm.ScmException;
 
 /**
  * Represents a project which should be built.
@@ -150,11 +150,14 @@ public class Project {
 		return checkInterval;
 	}
 
-	public ScmControl getControl() throws InstantiationException, IllegalAccessException, InvocationTargetException,
-			NoSuchMethodException {
+	public ScmControl getControl() throws ScmException {
 		logger.debug("Creating scm control " + getControlType().getName() + " for project " + getName());
-		return (ScmControl) getControlType().getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
-				baseDir, name);
+		try {
+			return (ScmControl) getControlType().getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
+					baseDir, name);
+		} catch (Exception e) {
+			throw new ScmException("Unable to instantiate scm controller", e);
+		}
 	}
 
 	public Calendar getLastBuild() {
