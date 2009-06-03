@@ -67,15 +67,9 @@ public class Job {
 	@ManyToOne
 	private Client client;
 
-	public Job(Build build, ExecuteCommandLine command) {
-		this.build = build;
-		this.command = command;
-	}
-
 	@Id
 	@GeneratedValue
 	private Long id;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar schedulingTime = new GregorianCalendar();
 
@@ -86,8 +80,12 @@ public class Job {
 
 	private Calendar finishTime;
 
-	public ExecuteCommandLine getCommand() {
-		return command;
+	protected Job() {
+	}
+
+	public Job(Build build, ExecuteCommandLine command) {
+		this.build = build;
+		this.command = command;
 	}
 
 	public void executeAt(Client at, File logFile, Config config) throws IOException {
@@ -100,22 +98,6 @@ public class Job {
 		} finally {
 			connection.close();
 		}
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public Build getBuild() {
-		return build;
-	}
-
-	public Client getClient() {
-		return client;
-	}
-
-	public boolean isFinished() {
-		return finished;
 	}
 
 	public void finish(String result, boolean success, Database database) throws IOException {
@@ -139,6 +121,26 @@ public class Job {
 		
 		build.proceed(phase, database);
 		
+	}
+
+	public Build getBuild() {
+		return build;
+	}
+
+	public Client getClient() {
+		return client;
+	}
+
+	public ExecuteCommandLine getCommand() {
+		return command;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public boolean isFinished() {
+		return finished;
 	}
 
 }

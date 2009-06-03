@@ -50,12 +50,14 @@ public class ApplicationTest extends DatabaseBasedTest {
 		Config result = app.getConfig();
 		result.setHostname("custom");
 		result.setPort(2030);
+		result.setCheckInterval(30);
 		app.update(result);
 		database.getSession().flush();
 		database.getSession().clear();
 		result = app.getConfig();
 		assertThat(result.getHostname(), is(equalTo("custom")));
 		assertThat(result.getPort(), is(equalTo(2030)));
+		assertThat(result.getCheckInterval(), is(equalTo(30)));
 	}
 
 }

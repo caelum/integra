@@ -52,9 +52,9 @@ public class DefaultJobQueue implements JobQueue{
 		int completed = 0;
 		List<Client> freeFound = clients.freeClients();
 		for(Job job : todo) {
-			for (Iterator iterator = freeFound.iterator(); iterator.hasNext();) {
-				Client client = (Client) iterator.next();
-				if(client.work(job, config)) {
+			for (Iterator<Client> iterator = freeFound.iterator(); iterator.hasNext();) {
+				Client client = iterator.next();
+				if(client.isAlive() && client.work(job, config)) {
 					completed++;
 					break;
 				}

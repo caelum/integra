@@ -114,7 +114,7 @@ public class Client {
 		try {
 			job.executeAt(this, File.createTempFile(Files.SERVER_TO_CLIENT_PREFIX, "txt"), config);
 		} catch (Exception e) {
-			logger.error("Unable to start the job at this client: "+ getId(), e);
+			logger.error("Unable to start the job at this client: " + getId(), e);
 			return false;
 		}
 		this.currentJob = job;
@@ -139,9 +139,12 @@ public class Client {
 			return false;
 		}
 		if (post.getResult() == 410) {
-			logger
-					.warn("Leaving the job because the server just told me there is nothing running there... did the client break or was it sending me the info right now?");
-			currentJob = null;
+			if (currentJob != null) {
+				logger
+						.warn("Leaving the job because the server just told me there is nothing running there..." +
+								"Did the client break or was it sending me the info right now?");
+				currentJob = null;
+			}
 			return true;
 		}
 		if (post.getResult() != 200) {

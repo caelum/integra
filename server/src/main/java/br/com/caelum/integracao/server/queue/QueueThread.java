@@ -47,9 +47,9 @@ public class QueueThread {
 	private final DatabaseFactory factory;
 
 	private Thread thread;
-	
+
 	private Object waiter = new Object();
-	
+
 	private boolean shouldRun = true;
 
 	public QueueThread(DatabaseFactory factory) {
@@ -78,7 +78,9 @@ public class QueueThread {
 						db.close();
 					}
 					try {
-						waiter.wait(10000);
+						synchronized (waiter) {
+							waiter.wait(10000);
+						}
 					} catch (InterruptedException e) {
 						logger.debug("Was waiting but someone waked me up.");
 					}
