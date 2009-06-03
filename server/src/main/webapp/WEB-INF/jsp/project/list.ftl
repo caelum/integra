@@ -46,32 +46,27 @@
 			<#list project.phases as phase>
 				<td>
 				<div class="phase">
-				<table>
 					<#list phase.commands as cmd>
-						<tr>
-							<td>${cmd.name }</td>
-							<td>(<a href="command/${cmd.id}?_method=DELETE">remove</a>)</td>
-						</tr>
+					<div class="command">
+						${cmd.name }
+						(<a href="command/${cmd.id}?_method=DELETE">remove</a>)
+					</div>
 					</#list>
-					<tr>
-						<td>
+					<div class="command formulario">
 						<form action="command" method="post"><input type="hidden"
 							name="phase.id" value="${phase.id }" /> <input type="text"
 							name="command" value="" size="5" /> <input type="submit"
 							value="new command" /></form>
-						</td>
-					</tr>
+					</div>
 					<#list phase.plugins as plugin>
-						<tr>
-							<td>${plugin.type.simpleName }
+					<div class="plugin">
+							${plugin.type.simpleName }
 							<div id="plugin_${plugin.id }"></div>
-							</td>
-							<td>(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)</td>
-							<td>(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)</td>
-						</tr>
+							(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
+							(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)
+					</div>
 					</#list>
-					<tr>
-						<td>
+					<div class="plugin, formulario">
 						<form action="phase/plugin" method="post"><input type="hidden"
 							name="phase.id" value="${phase.id }" /> <select
 							name="pluginType">
@@ -79,9 +74,7 @@
 								<option value="${plugin.type.name }">${plugin.type.simpleName }</option>
 							</#list>
 						</select> <input type="submit" value="add" /></form>
-						</td>
-					</tr>
-				</table>
+					</div>
 				</div>
 				</td>
 				<td></td>
@@ -114,7 +107,7 @@
 	</table>
 </#list>
 
-<form action="" method="post">
+<form action="" method="post" class="formulario">
 <table>
 	<tr>
 		<td>Scm: <select name="scmType">

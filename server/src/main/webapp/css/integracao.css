@@ -7,5 +7,20 @@
 	border: 2px solid gray;
 	margin: 5px;
 	padding: 5px;
-	width: 200px;
+	width: 250px;
 }
+.command {
+	font-size: small;
+}
+.plugin {
+	font-size: small;
+}
+
+.formulario input[type=text], .formulario input[type=submit], .formulario select {
+	font-size: 0.8em;
+}
+
+.formulario input[type=text]:focus, .formulario input[type=password]:focus, .formulario textarea:focus {
+	background-color: #fffff1;
+}
+
