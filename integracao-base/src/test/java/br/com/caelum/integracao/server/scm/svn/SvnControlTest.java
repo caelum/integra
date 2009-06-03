@@ -36,11 +36,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import br.com.caelum.integracao.AtDirectoryTest;
+import br.com.caelum.integracao.server.scm.ScmException;
 
 public class SvnControlTest extends AtDirectoryTest {
 
 	@Test
-	public void shouldCommitAndReceiveUpdate() throws IOException {
+	public void shouldCommitAndReceiveUpdate() throws IOException, ScmException {
 		File log = new File(this.baseDir, "control1-checkout");
 
 		SvnControl control1 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1");

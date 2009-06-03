@@ -56,10 +56,18 @@ public class GitControl implements ScmControl {
 	public int checkoutOrUpdate(String revision, File log) throws ScmException {
 		try {
 			if (new File(new File(baseDirectory, baseName), ".git").exists()) {
-				return prepare("git", "pull").at(getDir()).logTo(log).run();
+				int partial = prepare("git", "pull").at(getDir()).logTo(log).run();
+				if(partial!=0 || revision==null) {
+					return partial;
+				}
+				return prepare("git", "checkout", revision).at(getDir()).logTo(log).run();
 			} else {
 				logger.debug("Cloning the git for the first time at " + log.getAbsolutePath());
-				return prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
+				int partial = prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
+				if(partial!=0 || revision==null) {
+					return partial;
+				}
+				return prepare("git", "checkout", revision).at(getDir()).logTo(log).run();
 			}
 		} catch (IOException ex) {
 			throw new ScmException("Unable to retrieve info from git " + uri + " but logged data to "
