@@ -66,7 +66,6 @@ public class BuildController {
 			result.include("currentPath", "");
 			result.include("content", build.getContent());
 		} else {
-			// filename = filename.replace('$', '/');
 			File base = build.getFile(filename);
 			result.include("currentPath", filename + "/");
 			result.include("content", base.listFiles());
@@ -79,7 +78,7 @@ public class BuildController {
 		logger.debug("Displaying file for " + project.getName() + "@" + buildId + ", file=" + filename);
 		project = projects.get(project.getName());
 		Build build = project.getBuild(buildId);
-		return build.getFile(filename.replace('$', '/'));
+		return build.getFile(filename.replaceAll("%20", " "));
 	}
-
+	
 }
