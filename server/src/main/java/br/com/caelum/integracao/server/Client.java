@@ -52,8 +52,7 @@ import br.com.caelum.integracao.server.queue.Job;
  */
 @Entity
 public class Client {
-	
-	
+
 	private final Logger logger = LoggerFactory.getLogger(Client.class);
 
 	@Id
@@ -120,32 +119,16 @@ public class Client {
 		this.port = port;
 	}
 
-	public boolean work(Job job) {
+	public boolean work(Job job, Config config) throws IOException {
+		job.executeAt(this, File.createTempFile(Files.SERVER_TO_CLIENT_PREFIX, "txt"), config);
 		this.currentJob = job;
-		Client client;
-		try {
-			client = clients.getFreeClient(getName() + "/" + command.getName());
-		} catch (IllegalStateException e) {
-			// there is no client available
-			try {
-				build.finish(name, (int) position, command.getPosition(), "NOT ENOUGHT CLIENTS", false, clients, app, database);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-			return;
-		}
-		database.beginTransaction();
-		app.register(new UsedClient(client, build, command));
-		database.commit();
-		command.executeAt(client, build, control, File.createTempFile("connection", "txt"), app.getConfig()
-				.getUrl());
 		return true;
 	}
 
 	public void deactivate() {
 		this.active = false;
 	}
-	
+
 	public void activate() {
 		this.active = true;
 	}
@@ -159,12 +142,13 @@ public class Client {
 		} catch (IOException e) {
 			return false;
 		}
-		if(post.getResult()==410) {
-			logger.warn("Leaving the job because the server just told me there is nothing running there... did the client break or was it sending me the info right now?");
+		if (post.getResult() == 410) {
+			logger
+					.warn("Leaving the job because the server just told me there is nothing running there... did the client break or was it sending me the info right now?");
 			currentJob = null;
 			return true;
 		}
-		if(post.getResult()!=200) {
+		if (post.getResult() != 200) {
 			return false;
 		}
 		return true;

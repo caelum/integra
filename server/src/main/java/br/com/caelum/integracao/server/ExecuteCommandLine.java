@@ -27,8 +27,6 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,9 +43,6 @@ import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import br.com.caelum.integracao.server.action.Dispatcher;
-import br.com.caelum.integracao.server.scm.ScmControl;
 
 @Entity
 public class ExecuteCommandLine {
@@ -81,17 +76,6 @@ public class ExecuteCommandLine {
 			this.commands.add(new Command(command));
 		}
 		phase.getCommands().add(this);
-	}
-
-	public void executeAt(Client client, Build build, ScmControl control, File logFile, String myUrl)
-			throws IOException {
-		logger.debug("Trying to execute " + getName() + " @ " + client.getHost() + ":" + client.getPort());
-		Dispatcher connection = client.getConnection(logFile, myUrl);
-		try {
-			connection.register(build.getProject()).execute(build, phase, position, commands).close();
-		} finally {
-			connection.close();
-		}
 	}
 
 	public String getName() {

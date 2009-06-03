@@ -27,54 +27,8 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.util.Calendar;
+public class Files {
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import br.com.caelum.integracao.server.queue.Job;
-
-/**
- * Stores the information of a specific client used to execute a command in a
- * client machine.
- * 
- * @author guilherme silveira
- * 
- */
-@Entity
-public class UsedClient {
-
-	@ManyToOne
-	private Job job;
-
-	@Temporal(TemporalType.TIMESTAMP)
-	private Calendar startTime;
-
-	public UsedClient(Client client, Job job) {
-		this.client = client;
-		this.job = job;
-	}
-
-	public UsedClient() {
-	}
-
-	@Id
-	@GeneratedValue
-	private Long id;
-
-	@ManyToOne
-	private Client client;
-
-	public Client getClient() {
-		return client;
-	}
-	
-	public Job getJob() {
-		return job;
-	}
+	public static final String SERVER_TO_CLIENT_PREFIX = "integracao-server-connection-to-client";
 
 }

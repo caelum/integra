@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server.queue;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -36,12 +37,20 @@ import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.ExecuteCommandLine;
+import br.com.caelum.integracao.server.UsedClient;
+import br.com.caelum.integracao.server.action.Dispatcher;
 
 @Entity
 public class Job {
+	
+	private final Logger logger = LoggerFactory.getLogger(Job.class);
 
 	private Build build;
 
@@ -62,5 +71,21 @@ public class Job {
 	private Calendar schedulingTime = new GregorianCalendar();
 	
 	private boolean finished;
+	
+	public ExecuteCommandLine getCommand() {
+		return command;
+	}
+
+	public void executeAt(Client at, File logFile, Config config) {
+		logger.debug("Trying to execute " + command.getName() + " @ " + at.getHost() + ":" + at.getPort());
+		Dispatcher connection = client.getConnection(logFile, config.getUrl());
+		try {
+			connection.register(build.getProject()).execute(build, phase, position, commands).close();
+			this.client = at;
+		} finally {
+			connection.close();
+		}
+		app.register(new UsedClient(this, job));
+	}
 
 }
