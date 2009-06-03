@@ -28,7 +28,9 @@
 package br.com.caelum.integracao.client.copy;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,20 +62,33 @@ public class CopyFileController {
 	public File download(Project project, List<String> directory) throws IOException {
 		File result = File.createTempFile("integra-copy-files-", ".zip");
 		result.delete();
-		List<String> cmds = new ArrayList<String>();
-		cmds.add("zip");
-		cmds.add("-ro");
-		cmds.add(result.getAbsolutePath());
-		for (String dir : directory) {
-			cmds.add(dir);
-		}
-		
+
 		File baseDirectory = new File(settings.getBaseDir(), project.getName());
 
 		File output = File.createTempFile("integra-copy-files-output-", ".txt");
 		output.deleteOnExit();
-		int cmdResult = new CommandToExecute(cmds.toArray(new String[0])).at(baseDirectory).logTo(output).run();
-		if (cmdResult != 0) {
+		PrintWriter writer = new PrintWriter(new FileWriter(output));
+
+		boolean success = true;
+		for (String resourceToCopy : directory) {
+			List<String> cmds = new ArrayList<String>();
+			cmds.add("zip");
+			cmds.add("-q9ro");
+			cmds.add(result.getAbsolutePath());
+
+			File fileToCopy = new File(baseDirectory, resourceToCopy);
+			cmds.add(fileToCopy.getName());
+			
+			CommandToExecute command = new CommandToExecute(cmds.toArray(new String[0])).at(fileToCopy.getParentFile());
+
+			int cmdResult = command.logTo(writer).run();
+			if(cmdResult!=0) {
+				success= false;
+			}
+		}
+		writer.close();
+
+		if (!success) {
 			// response.setStatus(500) doesnt work!!!
 			response.setStatus(200);
 			return output;

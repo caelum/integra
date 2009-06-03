@@ -52,17 +52,22 @@ public class PhaseTest extends DatabaseBasedTest {
 	public void mockData() {
 		this.build = mockery.mock(Build.class);
 		this.jobs = mockery.mock(Jobs.class);
+		mockery.checking(new Expectations() {
+			{
+				allowing(build).getProject(); will(returnValue(project("custom")));
+				
+			}
+		});
 	}
 
 	
 	@Test
 	public void shouldOnlyCreateADirIfThereAreNoCommands() throws IOException {
-		Phase compile = new Phase();
-		compile.setPosition(5L);
+		Phase compile = new Phase("compile");
 		final File dir = new File(baseDir, "custom-dir");
 		mockery.checking(new Expectations() {
 			{
-				one(build).getFile("5"); will(returnValue(dir));
+				one(build).getFile("compile"); will(returnValue(dir));
 			}
 		});
 		compile.execute(build, jobs);
@@ -126,6 +131,26 @@ public class PhaseTest extends DatabaseBasedTest {
 		test.add(run);
 		test.add(second);
 		assertThat(test.runAfter(build,database), is(equalTo(false)));
+		mockery.assertIsSatisfied();
+	}
+	
+	
+	@Test
+	public void executionShouldCreateAJobForEachCommand() throws IOException {
+		final ExecuteCommandLine first = mockery.mock(ExecuteCommandLine.class, "firstJob");
+		final ExecuteCommandLine second = mockery.mock(ExecuteCommandLine.class, "secondJob");
+		
+		Phase compileTwice = new Phase("compile");
+		compileTwice.getCommands().add(first);
+		compileTwice.getCommands().add(second);
+		mockery.checking(new Expectations() {
+			{
+				one(jobs).add(with((IntegracaoMatchers.jobFor(build, first))));
+				one(jobs).add(with((IntegracaoMatchers.jobFor(build, second))));
+				one(build).getFile("compile"); will(returnValue(new File(baseDir, "compile")));
+			}
+		});
+		compileTwice.execute(build, jobs);
 		mockery.assertIsSatisfied();
 	}
 

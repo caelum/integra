@@ -31,11 +31,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
 
 public class GitControl implements ScmControl {
+	
+	
+	private final Logger logger = LoggerFactory.getLogger(GitControl.class);
 
 	private final String uri;
 	private final File baseDirectory;
@@ -48,9 +54,10 @@ public class GitControl implements ScmControl {
 	}
 
 	public int checkoutOrUpdate(File log) throws IOException {
-		if(new File(new File(baseDirectory, baseName),".git").exists()) {
-			return update(log);
+		if (new File(new File(baseDirectory, baseName), ".git").exists()) {
+			return prepare("git", "pull").at(getDir()).logTo(log).run();
 		} else {
+			logger.debug("Cloning the git for the first time at " + log.getAbsolutePath());
 			return prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
 		}
 	}
@@ -76,21 +83,17 @@ public class GitControl implements ScmControl {
 		return prepare("git", "push").at(getDir()).run();
 	}
 
-	public int update(File log) throws IOException {
-		return prepare("git", "pull").at(getDir()).logTo(log).run();
-	}
-
 	public int remove(File file) {
 		return prepare("git", "rm", file.getAbsolutePath()).at(file.getParentFile()).run();
 	}
 
 	public String getRevision(File log) throws IOException, ScmException {
-		int result = update(log);
-		if(result!=0) {
-			throw new ScmException("Unable to load data and revision information.");
+		int result = checkoutOrUpdate(log);
+		if (result != 0) {
+			throw new ScmException("Unable to load data and revision information, log at " + log.getAbsolutePath());
 		}
 		StringWriter writer = new StringWriter();
-		prepare("git", "log").logTo(writer).at(getDir()).run();
+		prepare("git", "--no-pager", "log").logTo(writer).at(getDir()).run();
 		String content = writer.getBuffer().toString();
 		int pos = content.indexOf("commit ");
 		return content.substring(pos + "commit ".length(), content.indexOf("\n", pos));

@@ -108,7 +108,7 @@ public class PingScm {
 			try {
 				File log = File.createTempFile("integra-revision-", ".txt");
 				String revision = project.getControl().getRevision(log);
-				if (!lastRevision.equals(revision)) {
+				if (lastRevision == null || !lastRevision.equals(revision)) {
 					logger.debug("Project " + project.getName()
 							+ " has a new revision, therefore we will start the build");
 					new ProjectStart(db).runProject(project.getName());

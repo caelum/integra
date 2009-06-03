@@ -25,47 +25,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.project;
+package br.com.caelum.integracao.server;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 
-import br.com.caelum.integracao.server.Project;
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.dao.DatabaseFactory;
-import br.com.caelum.integracao.server.scm.ScmControl;
+import br.com.caelum.integracao.server.queue.Job;
 
-public class DatabaseBasedTest extends BaseTest{
-	private static DatabaseFactory databaseFactory;
+public class IntegracaoMatchers {
 
-	protected Database database;
-	
-	@BeforeClass
-	public static void configDatabase() {
-		databaseFactory = new DatabaseFactory();
-		databaseFactory.startup();
-	}
-	
-	@AfterClass
-	public static void stopDatabase() {
-		databaseFactory.destroy();
-	}
+	public static TypeSafeMatcher<Job> jobFor(final Build build, final ExecuteCommandLine command) {
+		return new TypeSafeMatcher<Job>() {
 
-	@Before
-	public void configData() {
-		this.database = new Database(databaseFactory);
-	}
+			@Override
+			protected void describeMismatchSafely(Job item, Description mismatchDescription) {
+				mismatchDescription.appendText("job for " + item.getBuild() + " and " + item.getCommand());
+			}
 
-	@After
-	public void removeData() {
-		this.database.close();
-	}
+			@Override
+			protected boolean matchesSafely(Job item) {
+				return build.equals(item.getBuild()) && command.equals(item.getCommand());
+			}
 
-	public Project project(String name) {
-		Project project = new Project(ScmControl.class, name, baseDir, name);
-		return project;
+			public void describeTo(Description description) {
+				description.appendText("job for " + build + " and " + command);
+			}
+			
+		};
 	}
 
 }

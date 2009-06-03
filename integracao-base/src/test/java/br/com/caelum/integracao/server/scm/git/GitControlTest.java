@@ -73,14 +73,14 @@ public class GitControlTest extends AtDirectoryTest {
 		
 		Assert.assertEquals(0,control1.add(file));
 		Assert.assertEquals(0,control1.commit("commiting test file"));
-		control2.update(log);
+		control2.checkoutOrUpdate(log);
 		File found = new File(control2.getDir(), "test-file");
 		Assert.assertTrue(found.exists());
 		String content = new BufferedReader(new FileReader(found)).readLine();
 		Assert.assertEquals("misc content", content);
 		control2.remove(found);
 		control2.commit("removed test file");
-		control1.update(log);
+		control1.checkoutOrUpdate(log);
 		Assert.assertFalse(file.exists());
 	}
 

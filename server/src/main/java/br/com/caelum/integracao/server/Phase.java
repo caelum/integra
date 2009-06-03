@@ -81,8 +81,8 @@ public class Phase {
 	@ManyToOne
 	private Project project;
 
-	public Phase(String id, ExecuteCommandLine... cmds) {
-		this.name = id;
+	public Phase(String name, ExecuteCommandLine... cmds) {
+		this.name = name;
 		this.commands = new ArrayList<ExecuteCommandLine>();
 		for (ExecuteCommandLine cmd : cmds) {
 			commands.add(cmd);

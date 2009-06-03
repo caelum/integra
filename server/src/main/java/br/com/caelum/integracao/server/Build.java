@@ -124,6 +124,7 @@ public class Build {
 		} catch (Exception ex) {
 			logger.error("Unable to retrieve revision for " + project.getName(), ex);
 			finish(false);
+			return;
 		}
 		for (PluginToRun plugin : project.getPlugins()) {
 			if (!plugin.getPlugin(db).before(this)) {

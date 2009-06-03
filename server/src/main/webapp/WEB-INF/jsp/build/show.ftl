@@ -1,4 +1,4 @@
-<h2>build-${build.buildCount } - revision '${build.revision}'</h2>
+<h2>build-${build.buildCount } - revision '${build.revision!'unknown so far'}'</h2>
 <h2>
 <#if !build.finished>
 	<font color="orange">building... who knows?</font>
