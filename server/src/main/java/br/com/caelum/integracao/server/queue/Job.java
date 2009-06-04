@@ -80,6 +80,8 @@ public class Job {
 
 	private Calendar finishTime;
 
+	private boolean success;
+
 	protected Job() {
 	}
 
@@ -106,6 +108,7 @@ public class Job {
 		logger.debug("Finishing " + project.getName() + " build " + build.getBuildCount() + " phase "
 				+ command.getPhase().getName() + " command " + command.getId());
 		
+		this.success = success;
 		if(!success) {
 			build.failed();
 		}
@@ -165,6 +168,10 @@ public class Job {
 			f = finishTime;
 		}
 		return (f.getTimeInMillis() - startTime.getTimeInMillis()) / 1000.0;
+	}
+	
+	public boolean isSuccess() {
+		return success;
 	}
 
 }

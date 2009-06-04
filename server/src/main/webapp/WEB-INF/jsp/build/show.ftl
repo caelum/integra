@@ -35,6 +35,7 @@ Commands running or already run:<br/>
 	<h2>${phase.name}</h2>
 	<table>
 		<tr>
+			<td>status</td>
 			<td>command</td>
 			<td>scheduled</td>
 			<td>client</td>
@@ -44,6 +45,15 @@ Commands running or already run:<br/>
 	<#assign jobs=build.getJobsFor(phase)>
 	<#list jobs as job>
 		<tr>
+			<td>
+			<#if job.finishTime??>
+				<#if job.success>
+					<font color="green">success</font>
+				<#else>
+					<font color="red">fail</font>
+				</#if>
+			</#if>
+			</td>
 			<td>${job.command.name}</td>
 			<td>${job.schedulingTime.time?datetime}</td>
 			<td>

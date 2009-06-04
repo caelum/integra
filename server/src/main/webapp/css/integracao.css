@@ -20,7 +20,16 @@
 	font-size: 0.8em;
 }
 
+.formulario input[type=text], .formulario select {
+	width: 120px;
+}
+
 .formulario input[type=text]:focus, .formulario input[type=password]:focus, .formulario textarea:focus {
 	background-color: #fffff1;
 }
 
+.phase_title {
+	margin: 5px;
+	font-weight: bold;
+	text-align: center;
+}

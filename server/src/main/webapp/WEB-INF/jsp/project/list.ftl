@@ -32,20 +32,9 @@
 	<table>
 		<tr>
 			<#list project.phases as phase>
-				<td>${phase.name } (${phase.position })</td>
-				<td>--></td>
-			</#list>
-			<td>
-			<form action="phase" method="post"><input type="hidden"
-				name="project.name" value="${project.name }" /> <input size="5"
-				name="phase.name" value="unnamed" /> <input type="submit"
-				value="new phase" /></form>
-			</td>
-		</tr>
-		<tr>
-			<#list project.phases as phase>
 				<td>
 				<div class="phase">
+					<div class="phase_title">${phase.name } (${phase.position })</div>
 					<#list phase.commands as cmd>
 					<div class="command">
 						${cmd.name }
@@ -56,7 +45,7 @@
 						<form action="command" method="post"><input type="hidden"
 							name="phase.id" value="${phase.id }" /> <input type="text"
 							name="command" value="" size="5" /> <input type="submit"
-							value="new command" /></form>
+							value="add" /></form>
 					</div>
 					<#list phase.plugins as plugin>
 					<div class="plugin">
@@ -77,8 +66,14 @@
 					</div>
 				</div>
 				</td>
-				<td></td>
+				<td> --> </td>
 			</#list>
+			<td>
+			<form action="phase" method="post" class="formulario"><input type="hidden"
+				name="project.name" value="${project.name }" /> <input size="5"
+				name="phase.name" value="unnamed" /> <input type="submit"
+				value="new phase" /></form>
+			</td>
 		</tr>
 	</table>
 	<table>

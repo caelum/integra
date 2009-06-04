@@ -104,7 +104,9 @@ public class QueueThread {
 	}
 
 	public void wakeup() {
-		waiter.notify();
+		synchronized (waiter) {
+			waiter.notify();
+		}
 	}
 
 }
