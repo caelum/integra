@@ -58,7 +58,7 @@ public class QueueThread {
 
 	@PostConstruct
 	public void startup() {
-		logger.debug("Starting up queue thread");
+		logger.info("Starting QueueThread");
 		this.thread = new Thread(new Runnable() {
 			public void run() {
 				while (shouldRun) {
@@ -78,14 +78,17 @@ public class QueueThread {
 						}
 						db.close();
 					}
-					try {
-						synchronized (waiter) {
-							waiter.wait(10000);
+					if(shouldRun) {
+						try {
+							synchronized (waiter) {
+								waiter.wait(60000);
+							}
+						} catch (InterruptedException e) {
+							logger.debug("Was waiting but someone waked me up.");
 						}
-					} catch (InterruptedException e) {
-						logger.debug("Was waiting but someone waked me up.");
 					}
 				}
+				logger.info("QueueThread is stopping.");
 			}
 		});
 		thread.start();
@@ -96,8 +99,12 @@ public class QueueThread {
 		if (thread != null && thread.isAlive()) {
 			logger.debug("Shutting down queue thread");
 			shouldRun = false;
-			thread.stop();
+			thread.interrupt();
 		}
+	}
+
+	public void wakeup() {
+		waiter.notify();
 	}
 
 }

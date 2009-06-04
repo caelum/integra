@@ -43,6 +43,7 @@ import br.com.caelum.integracao.server.plugin.PluginInformation;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;
+import br.com.caelum.integracao.server.queue.QueueThread;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
@@ -67,14 +68,17 @@ public class ProjectController {
 
 	private final Jobs jobs;
 
+	private final QueueThread queue;
+
 	public ProjectController(Projects projects, Validator validator, Result result, DatabaseFactory factory,
-			Application app, Jobs jobs) {
+			Application app, Jobs jobs, QueueThread queue) {
 		this.projects = projects;
 		this.validator = validator;
 		this.result = result;
 		this.factory = factory;
 		this.app = app;
 		this.jobs = jobs;
+		this.queue = queue;
 	}
 
 	public void addAll() {
@@ -109,6 +113,7 @@ public class ProjectController {
 		Runnable execution = new Runnable() {
 			public void run() {
 				new ProjectStart(new Database(factory)).runProject(found.getName());
+				queue.wakeup();
 			}
 		};
 		Thread thread = new Thread(execution);
@@ -123,6 +128,7 @@ public class ProjectController {
 		new Thread(new Runnable() {
 			public void run() {
 				new ProjectContinue(new Database(factory)).nextPhase(job.getId(), result, success);
+				queue.wakeup();
 			}
 		}).start();
 		this.result.use(Results.nothing());
