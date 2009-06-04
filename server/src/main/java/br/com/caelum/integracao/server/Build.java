@@ -94,7 +94,11 @@ public class Build {
 	public Build(Project project) {
 		this.project = project;
 		this.buildCount = project.nextBuild();
-		getBaseDirectory().mkdirs();
+		
+		// clears the base directory before using it
+		File baseDirectory = getBaseDirectory();
+		remove(baseDirectory);
+		baseDirectory.mkdirs();
 	}
 
 	public Revision getRevision() {
@@ -155,7 +159,7 @@ public class Build {
 		Revision lastRevision = lastBuild == null ? null : lastBuild.getRevision();
 		this.revision = control.getCurrentRevision(lastRevision, tmpFile);
 		Revision found = builds.contains(project, revision.getName());
-		if(found!=null) {
+		if (found != null) {
 			this.revision = found;
 		} else {
 			builds.register(this.revision);
@@ -229,13 +233,14 @@ public class Build {
 	}
 
 	private void remove(File dir) {
-		if (dir.exists()) {
-			for (File found : dir.listFiles()) {
-				if (found.isDirectory()) {
-					remove(found);
-				} else {
-					found.delete();
-				}
+		if (!dir.exists()) {
+			return;
+		}
+		for (File found : dir.listFiles()) {
+			if (found.isDirectory()) {
+				remove(found);
+			} else {
+				found.delete();
 			}
 		}
 		dir.delete();
@@ -270,12 +275,12 @@ public class Build {
 			}
 		}
 	}
-	
+
 	public String getRevisionName() {
-		if(revision==null) {
+		if (revision == null) {
 			return "unknown";
 		}
 		return revision.getName();
 	}
-	
+
 }
