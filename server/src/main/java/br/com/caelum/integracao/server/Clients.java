@@ -29,8 +29,10 @@ package br.com.caelum.integracao.server;
 
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 
+import br.com.caelum.integracao.server.client.Tag;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
@@ -63,6 +65,21 @@ public class Clients {
 
 	public Client get(Client client) {
 		return (Client) session.load(Client.class, client.getId());
+	}
+
+	public List<Tag> getTags() {
+		return session.createQuery("from Tag").list();
+	}
+
+	public Tag getTag(String name) {
+		Query query = session.createQuery("from Tag as t where t.name = :name");
+		query.setParameter("name", name);
+		List<Tag> results = query.list();
+		if(results.isEmpty()) {
+			Tag tag = new Tag(name);
+			session.save(tag);
+		}
+		return results.get(0);
 	}
 
 }

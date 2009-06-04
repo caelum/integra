@@ -29,7 +29,10 @@ package br.com.caelum.integracao.server.logic;
 
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
+import br.com.caelum.vraptor.Post;
+import br.com.caelum.vraptor.Put;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.view.Results;
@@ -60,12 +63,14 @@ public class ClientController {
 		result.include("inactive", clients.inactiveClients());
 	}
 
+	@Post
 	@Path("/client/{client.id}/deactivate")
 	public void deactivate(Client client) {
 		clients.get(client).deactivate();
 		showList();
 	}
 	
+	@Post
 	@Path("/client/{client.id}/activate")
 	public void activate(Client client) {
 		clients.get(client).activate();
@@ -73,6 +78,26 @@ public class ClientController {
 	}
 	
 	public void form() {
+	}
+	
+	@Get
+	@Path("/client/{client.id}")
+	public void show(Client client) {
+		result.include("client", clients.get(client));
+		result.include("tags", clients.getTags());
+	}
+	
+	@Put
+	@Path("/client/{client.id}")
+	public void update(Client client, String tags) {
+		client = clients.get(client);
+		String[] tagsFound = tags.split("\\s*,\\s*");
+		for(String tag : tagsFound) {
+			if(!tag.equals("")) {
+				client.tag(clients.getTag(tag));
+			}
+		}
+		showList();
 	}
 
 }
