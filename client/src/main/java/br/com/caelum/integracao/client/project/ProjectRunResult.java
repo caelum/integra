@@ -44,6 +44,10 @@ public class ProjectRunResult {
 	public String getContent() {
 		return content;
 	}
+
+	public boolean failed() {
+		return result!=0;
+	}
 	
 	
 

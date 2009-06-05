@@ -45,7 +45,7 @@ public class ExecuteCommandLineTest {
 	
 	@Test
 	public void shouldHaveTheNameAsTheCommand() {
-		ExecuteCommandLine line = new ExecuteCommandLine(phase, "hello world");
+		ExecuteCommandLine line = new ExecuteCommandLine(phase, new String[] {"hello world"}, new String[] { "stop world"});
 		assertThat(line.getName(), is(equalTo("hello world ")));
 	}
 

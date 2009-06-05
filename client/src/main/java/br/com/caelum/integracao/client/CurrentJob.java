@@ -31,6 +31,7 @@ package br.com.caelum.integracao.client;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Calendar;
@@ -76,8 +77,8 @@ public class CurrentJob {
 		return thread;
 	}
 
-	public synchronized void start(Project project, final String revision, final List<String> command,
-			final String resultUri) {
+	public synchronized void start(Project project, final String revision, final List<String> startCommand,
+			final List<String> stopCommand, final String resultUri) {
 		if (isRunning()) {
 			throw new RuntimeException("Cannot take another job as im currently processing " + this.project.getName());
 		}
@@ -86,7 +87,7 @@ public class CurrentJob {
 		Runnable runnable = new Runnable() {
 			public void run() {
 				try {
-					executeBuildFor(revision, command, resultUri);
+					executeBuildFor(revision, startCommand, stopCommand, resultUri);
 				} finally {
 					CurrentJob.this.project = null;
 					CurrentJob.this.thread = null;
@@ -99,44 +100,67 @@ public class CurrentJob {
 		thread.start();
 	}
 
-	private void executeBuildFor(String revision, List<String> command, String resultUri) {
-		ProjectRunResult result = null;
-		boolean success = false;
+	private void executeBuildFor(String revision, List<String> startCommand, List<String> stopCommand, String resultUri) {
+		ProjectRunResult checkoutResult = null;
+		ProjectRunResult startResult = null;
+		ProjectRunResult stopResult = null;
 		try {
-			this.outputFile = File.createTempFile("integra-run-" + revision, ".txt");
+
+			this.outputFile = File.createTempFile("integra-client-run-", ".txt");
 			outputFile.deleteOnExit();
-			result = project.run(point.getBaseDir(), revision, command, outputFile);
-			success = result.getResult() == 0;
+
+			checkoutResult = project.checkout(point.getBaseDir(), revision, outputFile);
+			if (!checkoutResult.failed()) {
+				startResult = project.run(this.point.getBaseDir(), startCommand, outputFile);
+			}
+
 		} catch (Exception e) {
 			logger.debug("Something wrong happened during the checkout/build", e);
 			StringWriter writer = new StringWriter();
 			e.printStackTrace(new PrintWriter(writer, true));
-			result = new ProjectRunResult(writer.toString(), -1);
-			success = false;
+			startResult = new ProjectRunResult(writer.toString(), -1);
 		} finally {
 			if (project != null) {
-				logger.debug("Job " + project.getName() + " has finished");
-				Http http = new DefaultHttp();
-				logger.debug("Acessing uri " + resultUri + " to finish the job");
-				Method post = http.post(resultUri);
 				try {
-					if (result != null) {
-						post.with("result", result.getContent());
+					if (stopCommand != null && stopCommand.size() != 0) {
+						stopResult = project.run(this.point.getBaseDir(), stopCommand, outputFile);
 					} else {
-						post.with("result", "unable-to-read-result");
+						stopResult = new ProjectRunResult("No command to run.", 0);
 					}
-					post.with("success", "" + success);
-					post.send();
-					if (post.getResult() != 200) {
-						logger.error(post.getContent());
-						throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
+				} catch (IOException e) {
+					logger.error("Unable to stop command on server!", e);
+				} finally {
+					logger.debug("Job " + project.getName() + " has finished");
+					Http http = new DefaultHttp();
+					logger.debug("Acessing uri " + resultUri + " to finish the job");
+					Method post = http.post(resultUri);
+					try {
+						addTo(post, checkoutResult, "checkout");
+						addTo(post, startResult, "start");
+						addTo(post, stopResult, "stop");
+						post.with("success", ""
+								+ !(checkoutResult.failed() || startResult.failed() || stopResult.failed()));
+						post.send();
+						if (post.getResult() != 200) {
+							logger.error(post.getContent());
+							throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
+						}
+					} catch (Exception e) {
+						logger
+								.error(
+										"Was unable to notify the server of this request... maybe the server think im still busy.",
+										e);
 					}
-				} catch (Exception e) {
-					logger.error(
-							"Was unable to notify the server of this request... maybe the server think im still busy.",
-							e);
 				}
 			}
+		}
+	}
+
+	private void addTo(Method post, ProjectRunResult result, String prefix) {
+		if (result != null) {
+			post.with(prefix + "Result", result.getContent());
+		} else {
+			post.with(prefix + "Result", "unable to read result");
 		}
 	}
 

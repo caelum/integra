@@ -55,7 +55,12 @@ public class ExecuteCommandLine {
 	@OneToMany
 	@OrderBy("id")
 	@Cascade(value = { CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE })
-	private List<Command> commands;
+	private List<Command> start;
+
+	@OneToMany
+	@OrderBy("id")
+	@Cascade(value = { CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE })
+	private List<Command> stop;
 
 	@NotNull
 	@ManyToOne
@@ -64,25 +69,32 @@ public class ExecuteCommandLine {
 	protected ExecuteCommandLine() {
 	}
 
-	public ExecuteCommandLine(Phase phase, String... cmds) {
+	public ExecuteCommandLine(Phase phase, String[] start, String[] stop) {
 		this.phase = phase;
-		this.commands = new ArrayList<Command>();
-		for (String command : cmds) {
-			this.commands.add(new Command(command));
+		this.start = new ArrayList<Command>();
+		for (String command : start) {
+			this.start.add(new Command(command));
+		}
+		for (String command : stop) {
+			this.stop.add(new Command(command));
 		}
 		phase.getCommands().add(this);
 	}
 
 	public String getName() {
 		String name = "";
-		for (Command cmd : commands) {
+		for (Command cmd : start) {
 			name += cmd.getValue() + " ";
 		}
 		return name;
 	}
 
-	public List<Command> getCommands() {
-		return commands;
+	public List<Command> getStartCommands() {
+		return start;
+	}
+	
+	public List<Command> getStopCommands() {
+		return start;
 	}
 	
 	public Long getId() {

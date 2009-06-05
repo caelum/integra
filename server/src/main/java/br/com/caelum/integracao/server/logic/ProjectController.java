@@ -122,12 +122,12 @@ public class ProjectController {
 
 	@Post
 	@Path("/finish/job/{job.id}")
-	public void finish(final Job job, final String result, final boolean success)  {
+	public void finish(final Job job, final String checkoutResult, final String stopResult, final String startResult, final boolean success)  {
 		Job loaded = jobs.load(job.getId());
 		loaded.getClient().leaveJob();
 		new Thread(new Runnable() {
 			public void run() {
-				new ProjectContinue(new Database(factory)).nextPhase(job.getId(), result, success);
+				new ProjectContinue(new Database(factory)).nextPhase(job.getId(), checkoutResult, startResult, stopResult, success);
 				queue.wakeup();
 			}
 		}).start();

@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -72,24 +71,18 @@ public class Project {
 		this.scmType = Class.forName(scmControl);
 	}
 
-	public ScmControl getControl(File baseDirectory) throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException {
+	public ScmControl getControl(File baseDirectory) throws ScmException {
 		logger.debug("Creating scm control " + scmType + " for project " + getName());
-		return (ScmControl) scmType.getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
-				baseDirectory, name);
+		try {
+			return (ScmControl) scmType.getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
+					baseDirectory, name);
+		} catch (Exception ex) {
+			throw new ScmException("Unable to checkout project", ex);
+		}
 	}
 
-	public ProjectRunResult run(File baseDirectory, String desiredRevision, List<String> command, File output)
-			throws IOException, InstantiationException, IllegalAccessException, InvocationTargetException,
-			NoSuchMethodException {
-		logger.debug("Checking out project @ " + uri + ", revision=" + desiredRevision + " to " + baseDirectory + "/" + name);
-		File checkoutLog = File.createTempFile("checkout-client-", ".txt");
-		ScmControl control = getControl(baseDirectory);
-		try {
-			control.checkoutOrUpdate(desiredRevision, checkoutLog);
-		} catch (ScmException ex) {
-			return new ProjectRunResult(content(checkoutLog), -1);
-		}
+	public ProjectRunResult run(File baseDirectory, List<String> command, File output) throws IOException {
+		logger.debug("Checking out project @ " + uri + " to " + baseDirectory + "/" + name);
 
 		File workDir = new File(baseDirectory, name);
 		String[] commands = command.toArray(new String[command.size()]);
@@ -98,6 +91,17 @@ public class Project {
 		this.executing = new CommandToExecute(commands).at(workDir).logTo(output);
 		int result = this.executing.run();
 		return new ProjectRunResult(content(output), result);
+
+	}
+
+	public ProjectRunResult checkout(File baseDirectory, String desiredRevision, File output) throws IOException,
+			ScmException {
+		logger.debug("Checking out project @ " + uri + ", revision=" + desiredRevision + " to " + baseDirectory + "/"
+				+ name);
+		File checkoutLog = File.createTempFile("checkout-client-", ".txt");
+		ScmControl control = getControl(baseDirectory);
+		int result = control.checkoutOrUpdate(desiredRevision, checkoutLog);
+		return new ProjectRunResult(content(checkoutLog), result);
 
 	}
 

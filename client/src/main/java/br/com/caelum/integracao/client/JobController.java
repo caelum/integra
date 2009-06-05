@@ -71,8 +71,8 @@ public class JobController {
 	}
 
 	@Post
-	public synchronized void execute(Project project, String revision, List<String> command, String resultUri) {
-		job.start(projects.get(project.getName()), revision, command, resultUri);
+	public synchronized void execute(Project project, String revision, List<String> startCommand, List<String> stopCommand, String resultUri) {
+		job.start(projects.get(project.getName()), revision, startCommand, stopCommand, resultUri);
 	}
 
 	@Get

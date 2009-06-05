@@ -82,8 +82,11 @@ public class Dispatcher {
 		post.with("revision",  job.getBuild().getRevision().getName());
 		post.with("project.name", job.getBuild().getProject().getName());
 		post.with("resultUri", "http://" + myself + "/integracao/finish/job/" + job.getId());
-		for (int i = 0; i < command.getCommands().size(); i++) {
-			post.with("command[" + i + "]", command.getCommands().get(i).getValue());
+		for (int i = 0; i < command.getStartCommands().size(); i++) {
+			post.with("startCommand[" + i + "]", command.getStartCommands().get(i).getValue());
+		}
+		for (int i = 0; i < command.getStopCommands().size(); i++) {
+			post.with("stopCommand[" + i + "]", command.getStopCommands().get(i).getValue());
 		}
 		try {
 			post.send();

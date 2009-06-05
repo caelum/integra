@@ -44,13 +44,14 @@ public class ProjectContinue {
 		this.database = database;
 	}
 
-	void nextPhase(Long jobId, String result, boolean success) {
+	void nextPhase(Long jobId, String checkoutResult, String startResult, String stopResult, boolean success) {
 		try {
+			String completeResult = "Checkout:\n" + checkoutResult + "\n\n" + "Start result:\n" + startResult + "\n\n" + "Stop result:\n" + stopResult;
 			logger.debug("Will try to do next phase for job.id=" + jobId);
 			database.beginTransaction();
 			Jobs jobs = new Jobs(database);
 			Job job = jobs.load(jobId);
-			job.finish(result, success, database);
+			job.finish(completeResult, success, database);
 			database.commit();
 		} catch (Exception e) {
 			e.printStackTrace();

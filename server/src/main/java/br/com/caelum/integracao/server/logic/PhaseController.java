@@ -72,9 +72,9 @@ public class PhaseController {
 
 	@Post
 	@Path("/project/command")
-	public void addCommand(Phase phase, String command) {
+	public void addCommand(Phase phase, String command, String stopCommand) {
 		phase = projects.load(phase);
-		ExecuteCommandLine line = new ExecuteCommandLine(phase, command.split("\\s"));
+		ExecuteCommandLine line = new ExecuteCommandLine(phase, command.split("\\s"), stopCommand.split("\\s"));
 		projects.register(line);
 		showList();
 	}
