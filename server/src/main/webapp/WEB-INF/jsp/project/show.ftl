@@ -38,7 +38,7 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 				<div class="phase_title">${phase.name } (${phase.position })</div>
 				<#list phase.commands as cmd>
 				<div class="command">
-					${cmd.name }
+					${cmd.name } <#if cmd.stopName??>(stop: ${cmd.stopName})</#if>
 					(<a href="command/${cmd.id}?_method=DELETE">remove</a>)
 				</div>
 				</#list>

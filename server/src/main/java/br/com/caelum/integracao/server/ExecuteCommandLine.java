@@ -91,6 +91,17 @@ public class ExecuteCommandLine {
 		return name;
 	}
 
+	public String getStopName() {
+		if(stop==null || stop.isEmpty()) {
+			return null;
+		}
+		String name = "";
+		for (Command cmd : stop) {
+			name += cmd.getValue() + " ";
+		}
+		return name;
+	}
+
 	public List<Command> getStartCommands() {
 		return start;
 	}
