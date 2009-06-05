@@ -27,6 +27,8 @@
  */
 package br.com.caelum.integracao.server.queue;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -64,12 +66,8 @@ public class QueueThread {
 				while (shouldRun) {
 					Database db = new Database(factory);
 					try {
-						db.beginTransaction();
-						JobQueue queue = new DefaultJobQueue(new Jobs(db), new Clients(db), new Application(db)
-								.getConfig());
-						int result = queue.iterate();
-						db.commit();
-						logger.debug("Job queue started " + result + " jobs");
+						stopOldJobs(db);
+						startJobs(db);
 					} catch (Exception ex) {
 						logger.error("Something really nasty ocurred while executing the job queue", ex);
 					} finally {
@@ -78,7 +76,7 @@ public class QueueThread {
 						}
 						db.close();
 					}
-					if(shouldRun) {
+					if (shouldRun) {
 						try {
 							synchronized (waiter) {
 								waiter.wait(60000);
@@ -90,8 +88,32 @@ public class QueueThread {
 				}
 				logger.info("QueueThread is stopping.");
 			}
+
 		});
 		thread.start();
+	}
+
+	private void startJobs(Database db) {
+		db.beginTransaction();
+		JobQueue queue = new DefaultJobQueue(new Jobs(db), new Clients(db), new Application(db).getConfig());
+		int result = queue.iterate();
+		db.commit();
+		logger.debug("Job queue started " + result + " jobs");
+	}
+
+	private void stopOldJobs(Database db) {
+		db.beginTransaction();
+		List<Job> jobs = new Jobs(db).runningJobs();
+		int result = 0;
+		for (Job job : jobs) {
+			if (System.currentTimeMillis() - job.getStartTime().getTimeInMillis() > new Application(db).getConfig()
+					.getMaximumTimeForAJob() * 60 * 1000) {
+				// stop the job
+			}
+		}
+		result++;
+		db.commit();
+		logger.debug("Job queue killed " + result + " old jobs");
 	}
 
 	@PreDestroy

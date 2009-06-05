@@ -25,72 +25,61 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.queue;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import org.junit.Before;
+import org.junit.Test;
 
-@Entity
-public class Config {
-	
-	@Id
-	@GeneratedValue
-	public Long id;
-	
-	private String hostname = "localhost";
-	
-	private Integer port = 9091;
-	
-	private int checkInterval = 60;
-	
-	private int maximumTimeForAJob = 60;
+import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 
-	@OneToMany(mappedBy="config")
-	private List<RegisteredPlugin> plugins= new ArrayList<RegisteredPlugin>();
+public class JobsTest extends DatabaseBasedTest{
 
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
+	private Jobs jobs;
+	private Job running;
+	private Job finished;
+	private Job notStarted;
+	@Before
+	public void insertData() {
+		this.jobs = new Jobs(database);
+		Clients clients = new Clients(database);
+
+		Client busy = new Client();
+		clients.register(busy);
+
+		this.running = new Job(null,null);
+		running.useClient(busy);
+		jobs.add(running);
+		
+		this.finished = new Job(null,null);
+		finished.useClient(busy);
+		finished.setFinished(true);
+		jobs.add(finished);
+		
+		this.notStarted = new Job(null, null);
+		jobs.add(notStarted);
+		
+		database.getSession().flush();
+	}
+	@Test
+	public void shouldParseWellJobsRunning() {
+		
+		assertThat(jobs.runningJobs().contains(running), is(equalTo(true)));
+		assertThat(jobs.runningJobs().contains(finished), is(equalTo(false)));
+		assertThat(jobs.runningJobs().contains(notStarted), is(equalTo(false)));
 	}
 
-	public String getHostname() {
-		return hostname;
-	}
-
-	public void setPort(Integer port) {
-		this.port = port;
-	}
-
-	public Integer getPort() {
-		return port;
-	}
-
-	public String getUrl() {
-		return getHostname() + ":" + getPort();
-	}
-	
-	public List<RegisteredPlugin> getAvailablePlugins() {
-		return plugins;
-	}
-
-	public void setCheckInterval(int checkInterval) {
-		this.checkInterval = checkInterval;
-	}
-
-	public int getCheckInterval() {
-		return checkInterval;
-	}
-
-	public void setMaximumTimeForAJob(int maximumTimeForAJob) {
-		this.maximumTimeForAJob = maximumTimeForAJob;
-	}
-
-	public int getMaximumTimeForAJob() {
-		return maximumTimeForAJob;
+	@Test
+	public void shouldParseWellNotYetStartedJobs() {
+		
+		assertThat(jobs.todo().contains(running), is(equalTo(false)));
+		assertThat(jobs.todo().contains(finished), is(equalTo(false)));
+		assertThat(jobs.todo().contains(notStarted), is(equalTo(true)));
 	}
 
 }

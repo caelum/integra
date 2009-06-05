@@ -35,6 +35,7 @@ import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
 @RequestScoped
+@SuppressWarnings("unchecked")
 public class Jobs {
 	
 	private final Session session;
@@ -43,7 +44,6 @@ public class Jobs {
 		this.session = db.getSession();
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<Job> todo() {
 		return session.createQuery("from Job as j where j.client is null").list();
 	}
@@ -54,6 +54,10 @@ public class Jobs {
 
 	public Job load(Long jobId) {
 		return (Job) session.load(Job.class, jobId);
+	}
+
+	public List<Job> runningJobs() {
+		return session.createQuery("from Job as j where j.client is not null and j.finished = false").list();
 	}
 
 }

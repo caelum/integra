@@ -82,7 +82,7 @@ public class Job {
 
 	private boolean success;
 
-	protected Job() {
+	Job() {
 	}
 
 	public Job(Build build, ExecuteCommandLine command) {
@@ -95,11 +95,15 @@ public class Job {
 		Dispatcher connection = at.getConnection(logFile, config.getUrl());
 		try {
 			connection.register(build.getProject()).execute(command, this).close();
-			this.client = at;
+			useClient(at);
 			this.startTime = Calendar.getInstance();
 		} finally {
 			connection.close();
 		}
+	}
+
+	void useClient(Client at) {
+		this.client = at;
 	}
 
 	public void finish(String result, boolean success, Database database) throws IOException {
@@ -172,6 +176,10 @@ public class Job {
 	
 	public boolean isSuccess() {
 		return success;
+	}
+
+	void setFinished(boolean b) {
+		this.finished = true;
 	}
 
 }

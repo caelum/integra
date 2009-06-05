@@ -65,6 +65,7 @@ public class Application {
 		result.setHostname(config.getHostname());
 		result.setPort(config.getPort());
 		result.setCheckInterval(config.getCheckInterval());
+		result.setMaximumTimeForAJob(config.getMaximumTimeForAJob());
 	}
 
 }
