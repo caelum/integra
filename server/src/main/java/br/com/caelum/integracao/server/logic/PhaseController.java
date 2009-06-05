@@ -37,7 +37,6 @@ import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
-import br.com.caelum.integracao.server.plugin.PluginParameter;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.vraptor.Delete;
 import br.com.caelum.vraptor.Get;
@@ -75,7 +74,7 @@ public class PhaseController {
 	@Path("/project/{project.name}/command")
 	public void addCommand(Phase phase, String startCommand, String stopCommand) {
 		logger.debug("Adding a new command with " + startCommand + " and " + stopCommand);
-		phase = projects.load(phase);
+		phase = projects.get(phase);
 		ExecuteCommandLine line = new ExecuteCommandLine(phase, commandsFor(startCommand), commandsFor(stopCommand));
 		projects.register(line);
 		showProject(phase.getProject());
@@ -105,7 +104,7 @@ public class PhaseController {
 	@Post
 	@Path("/project/{project.name}/phase/plugin")
 	public void addPlugin(Phase phase, String pluginType) throws ClassNotFoundException {
-		phase = projects.load(phase);
+		phase = projects.get(phase);
 		PluginToRun plugin = new PluginToRun((Class<? extends PluginInformation>) Class.forName(pluginType));
 		phase.add(plugin);
 		showProject(phase.getProject());
@@ -120,12 +119,19 @@ public class PhaseController {
 	@Delete
 	@Path("/project/{project.name}/plugin/{plugin.id}")
 	public void remove(PluginToRun plugin, Project project) throws ClassNotFoundException {
-		project = projects.get(project.getName());
+		project = projects.get(project.getName());	
 		plugin = projects.get(plugin);
 		project.getPlugins().remove(plugin);
-		for(PluginParameter parameter : plugin.getConfig()) {
-			projects.delete(parameter);
-		}
+		projects.remove(plugin);
+		showProject(project);
+	}
+
+	@Delete
+	@Path("/project/{project.name}/phase/${phase.id}/plugin/{plugin.id}")
+	public void remove(PluginToRun plugin, Phase phase, Project project) throws ClassNotFoundException {
+		phase = projects.get(phase);
+		plugin = projects.get(plugin);
+		phase.getPlugins().remove(plugin);
 		projects.remove(plugin);
 		showProject(project);
 	}

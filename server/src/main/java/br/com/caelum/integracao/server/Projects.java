@@ -91,7 +91,7 @@ public class Projects {
 		session.save(phase);
 	}
 
-	public Phase load(Phase phase) {
+	public Phase get(Phase phase) {
 		return (Phase) session.load(Phase.class, phase.getId());
 	}
 
@@ -111,10 +111,5 @@ public class Projects {
 		}
 		session.delete(plugin);
 	}
-
-	public void delete(PluginParameter parameter) {
-		session.delete(parameter);
-	}
-
 
 }

@@ -53,7 +53,7 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 						<span class="plugin_title">${plugin.type.simpleName }</span>
 						<span class="commands">
 							(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
-							(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)
+							(<a href="phase/${phase.id}/plugin/${plugin.id}?_method=DELETE">remove</a>)
 						</span>
 						<div id="plugin_${plugin.id }"></div>
 				</div>

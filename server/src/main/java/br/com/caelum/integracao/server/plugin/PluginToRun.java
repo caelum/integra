@@ -39,6 +39,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +63,7 @@ public class PluginToRun {
 	private Class<? extends PluginInformation> type;
 
 	@OneToMany(mappedBy = "plugin")
+	@Cascade(CascadeType.ALL)
 	private List<PluginParameter> config = new ArrayList<PluginParameter>();
 
 	public PluginToRun(Class<? extends PluginInformation> type) {
