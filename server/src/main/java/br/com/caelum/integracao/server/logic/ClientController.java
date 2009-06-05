@@ -99,11 +99,11 @@ public class ClientController {
 	@Path("/client/show/{client.id}")
 	public void update(Client client, String tags) {
 		logger.debug("Updating " + client.getId() + " with " + tags);
-		client = clients.get(client);
+		Client toUpdate = clients.get(client);
 		String[] tagsFound = tags.split("\\s*,\\s*");
 		for(String tag : tagsFound) {
 			if(!tag.equals("")) {
-				client.tag(clients.getTag(tag));
+				toUpdate.tag(clients.getTag(tag));
 			}
 		}
 		showList();

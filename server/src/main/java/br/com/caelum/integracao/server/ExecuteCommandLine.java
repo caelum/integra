@@ -33,6 +33,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -54,13 +55,15 @@ public class ExecuteCommandLine {
 
 	@OneToMany
 	@OrderBy("id")
+	@JoinTable(name="CommandStart")
 	@Cascade(value = { CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE })
-	private List<Command> start;
+	private List<Command> start = new ArrayList<Command>();
 
 	@OneToMany
 	@OrderBy("id")
+	@JoinTable(name="CommandStop")
 	@Cascade(value = { CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE })
-	private List<Command> stop;
+	private List<Command> stop = new ArrayList<Command>();
 
 	@NotNull
 	@ManyToOne
@@ -71,7 +74,6 @@ public class ExecuteCommandLine {
 
 	public ExecuteCommandLine(Phase phase, String[] start, String[] stop) {
 		this.phase = phase;
-		this.start = new ArrayList<Command>();
 		for (String command : start) {
 			this.start.add(new Command(command));
 		}

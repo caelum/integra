@@ -160,7 +160,7 @@ public class Project {
 		}
 	}
 
-	public Calendar getLastBuild() {
+	public Calendar getLastBuildTime() {
 		return lastBuild;
 	}
 
@@ -241,6 +241,10 @@ public class Project {
 			}
 		}
 		return null;
+	}
+	
+	public Build getLastBuild() {
+		return getBuild(getBuildCount());
 	}
 
 }

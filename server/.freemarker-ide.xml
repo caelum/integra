@@ -3,6 +3,9 @@
 		<resource path="src/main/webapp/WEB-INF/jsp/client/show.ftl">
 			<value key="tags" object-class="java.util.ArrayList" item-class="br.com.caelum.integracao.server.client.Tag"/>
 		</resource>
+		<resource path="src/main/webapp/WEB-INF/jsp/project/show.ftl">
+			<value key="project" object-class="br.com.caelum.integracao.server.Project"/>
+		</resource>
 		<resource path="src/main/webapp/WEB-INF/jsp/build/show.ftl">
 			<value key="build" object-class="br.com.caelum.integracao.server.Build"/>
 		</resource>

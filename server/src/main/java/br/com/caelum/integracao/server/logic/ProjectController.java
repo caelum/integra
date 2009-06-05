@@ -90,7 +90,6 @@ public class ProjectController {
 	@Path("/project/")
 	public void list() {
 		result.include("projectList", projects.all());
-		result.include("plugins", app.getConfig().getAvailablePlugins());
 	}
 
 	@Post
@@ -140,16 +139,27 @@ public class ProjectController {
 
 	@SuppressWarnings("unchecked")
 	@Post
-	@Path("/project/plugin")
+	@Path("/project/{project.name}/plugin")
 	public void addPlugin(Project project, String pluginType) throws ClassNotFoundException {
 		project = projects.get(project.getName());
 		PluginToRun plugin = new PluginToRun((Class<? extends PluginInformation>) Class.forName(pluginType));
 		project.add(plugin);
-		showList();
+		showProject(project);
+	}
+	
+	private void showProject(Project project) {
+		result.use(Results.logic()).redirectTo(ProjectController.class).show(project);
+	}
+
+	@Get
+	@Path("/project/{project.name}/")
+	public void show(Project project) {
+		result.include("plugins", app.getConfig().getAvailablePlugins());
+		result.include("project", projects.get(project.getName()));
 	}
 	
 	@Get
-	@Path("/project/jobs")
+	@Path("/jobs")
 	public List<Job> showJobs() {
 		return jobs.todo();
 	}

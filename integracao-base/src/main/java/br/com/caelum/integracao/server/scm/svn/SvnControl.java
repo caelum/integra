@@ -27,17 +27,19 @@ public class SvnControl implements ScmControl {
 	}
 
 	public int checkoutOrUpdate(String revision, File log) throws ScmException {
-		if(revision==null) {
-			revision="HEAD";
+		if (revision == null) {
+			revision = "HEAD";
 		}
 		try {
-			if(new File(baseDirectory, ".svn").exists()) {
-				return update(revision, log); 
+			if (new File(baseDirectory, ".svn").exists()) {
+				return update(revision, log);
 			} else {
-				return prepare("svn", "co", uri, baseName, "-r", revision, "--non-interactive").at(baseDir).logTo(log).run();
+				return prepare("svn", "co", uri, baseName, "-r", revision, "--non-interactive").at(baseDir).logTo(log)
+						.run();
 			}
 		} catch (IOException e) {
-			throw new ScmException("Unable to checkout or update from svn " + uri + " but logged to " + log.getAbsolutePath(), e);
+			throw new ScmException("Unable to checkout or update from svn " + uri + " but logged to "
+					+ log.getAbsolutePath(), e);
 		}
 	}
 
@@ -49,7 +51,7 @@ public class SvnControl implements ScmControl {
 		return prepare("svn", "add", file.getAbsolutePath()).at(file.getParentFile()).run();
 	}
 
-	private CommandToExecute prepare(String ... cmd) {
+	private CommandToExecute prepare(String... cmd) {
 		return new CommandToExecute(cmd);
 	}
 
@@ -58,7 +60,7 @@ public class SvnControl implements ScmControl {
 	}
 
 	public int update(String revision, File log) throws IOException {
-		return prepare("svn", "update","-r", revision,  "--non-interactive").at(getDir()).logTo(log).run();
+		return prepare("svn", "update", "-r", revision, "--non-interactive").at(getDir()).logTo(log).run();
 	}
 
 	public int remove(File file) {
@@ -68,14 +70,18 @@ public class SvnControl implements ScmControl {
 	public Revision getCurrentRevision(Revision fromRevision, File log) throws ScmException {
 		String content = extract(log, "svn", "info", uri, "--non-interactive");
 		int pos = content.indexOf("Last Changed Rev: ");
-		String name =content.substring(pos+ "Last Changed Rev: ".length(), content.indexOf("\n", pos));
-		
-		String revisionRange = (fromRevision==null? "" : fromRevision.getName() + ":") + "HEAD";
+		String name = content.substring(pos + "Last Changed Rev: ".length(), content.indexOf("\n", pos));
+
+		String from = "";
+		if (fromRevision != null) {
+			from = "" + (Long.parseLong(fromRevision.getName()) + 1) + ":";
+		}
+		String revisionRange = from + "HEAD";
 		String logContent = extract(log, "svn", "log", uri, "-r", revisionRange, "-v", "--non-interactive");
 		return new Revision(name, logContent, "");
 	}
 
-	private String extract(File log, String ... cmd) throws ScmException {
+	private String extract(File log, String... cmd) throws ScmException {
 		try {
 			StringWriter writer = new StringWriter();
 			prepare(cmd).logTo(writer).at(getDir()).run();

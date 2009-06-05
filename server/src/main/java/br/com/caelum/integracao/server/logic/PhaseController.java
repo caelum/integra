@@ -63,59 +63,67 @@ public class PhaseController {
 	}
 
 	@Delete
-	@Path("/project/command/{command.id}")
+	@Path("/project/{project.name}/command/{command.id}")
 	public void removeCommand(ExecuteCommandLine command) {
 		command = projects.load(command);
 		projects.remove(command);
-		showList();
+		showProject(command.getPhase().getProject());
 	}
 
 	@Post
-	@Path("/project/command")
-	public void addCommand(Phase phase, String command, String stopCommand) {
+	@Path("/project/{project.name}/command")
+	public void addCommand(Phase phase, String startCommand, String stopCommand) {
+		logger.debug("Adding a new command with " + startCommand + " and " + stopCommand);
 		phase = projects.load(phase);
-		ExecuteCommandLine line = new ExecuteCommandLine(phase, command.split("\\s"), stopCommand.split("\\s"));
+		ExecuteCommandLine line = new ExecuteCommandLine(phase, commandsFor(startCommand), commandsFor(stopCommand));
 		projects.register(line);
-		showList();
+		showProject(phase.getProject());
 	}
 
-	private void showList() {
-		result.use(Results.logic()).redirectTo(ProjectController.class).list();
+	private String[] commandsFor(String cmd) {
+		if(cmd==null || cmd.trim().equals("")) {
+			return new String[0];
+		}
+		return cmd.split("\\s");
+	}
+
+	private void showProject(Project project) {
+		result.use(Results.logic()).redirectTo(ProjectController.class).show(project);
 	}
 
 	@Post
-	@Path("/project/phase")
+	@Path("/project/{project.name}/phase")
 	public void addPhase(Project project, Phase phase) {
 		project = projects.get(project.getName());
 		project.add(phase);
 		projects.register(phase);
-		showList();
+		showProject(project);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Post
-	@Path("/project/phase/plugin")
+	@Path("/project/{project.name}/phase/plugin")
 	public void addPlugin(Phase phase, String pluginType) throws ClassNotFoundException {
 		phase = projects.load(phase);
 		PluginToRun plugin = new PluginToRun((Class<? extends PluginInformation>) Class.forName(pluginType));
 		phase.add(plugin);
-		showList();
+		showProject(phase.getProject());
 	}
 
 	@Get
-	@Path("/project/plugin/{plugin.id}")
+	@Path("/project/{project.name}/plugin/{plugin.id}")
 	public void viewPlugin(PluginToRun plugin) throws ClassNotFoundException {
 		result.include("plugin", projects.get(plugin));
 	}
 
 	@Put
-	@Path("/project/plugin/{plugin.id}")
-	public void updatePlugin(PluginToRun plugin, List<String> keys, List<String> values) throws ClassNotFoundException {
+	@Path("/project/{project.name}/plugin/{plugin.id}")
+	public void updatePlugin(Project project, PluginToRun plugin, List<String> keys, List<String> values) throws ClassNotFoundException {
 		logger.debug("Updating " + plugin.getId());
 		plugin = projects.get(plugin);
 		plugin.updateParameters(keys, values);
 		projects.registerOrUpdate(plugin.getConfig());
-		showList();
+		showProject(project);
 	}
 
 }

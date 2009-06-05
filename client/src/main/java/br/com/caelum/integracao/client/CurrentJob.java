@@ -123,7 +123,9 @@ public class CurrentJob {
 			if (project != null) {
 				try {
 					if (stopCommand != null && stopCommand.size() != 0) {
-						stopResult = project.run(this.point.getBaseDir(), stopCommand, outputFile);
+						File stopFile = File.createTempFile("integra-client-run-", ".txt");
+						stopFile.deleteOnExit();
+						stopResult = project.run(this.point.getBaseDir(), stopCommand, stopFile);
 					} else {
 						stopResult = new ProjectRunResult("No command to run.", 0);
 					}
