@@ -3,32 +3,30 @@
 Uri: ${project.uri }<br />
 Basedir: ${project.buildsDirectory.absolutePath }<br />
 Control: ${project.controlType.name } <br />
-Actions: <a href="run?project.name=${project.name }">run</a>
+Actions: <a href="run?_method=post">force build</a>
 <br />
 Last build: ${project.lastBuildTime.time?datetime }<br />
 </div>
-<table>
+<div class="plugin">
+	<div class="plugin_title">Plugins</div>
 	<#list project.plugins as plugin>
-		<tr>
-			<td>${plugin.type.simpleName }
-			<div id="plugin_${plugin.id }"></div>
-			</td>
-			<td>(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)</td>
-			<td>(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)</td>
-		</tr>
+		<span class="plugin_title">${plugin.type.simpleName }</span>
+		<span class="commands">
+			(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
+			(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)
+		</span><br/>
+		<span id="plugin_${plugin.id }"></span>
 	</#list>
-	<tr>
-		<td>
-		<form action="plugin" method="post"><input type="hidden"
-			name="project.name" value="${project.name }" /> <select
-			name="pluginType">
+	<form action="plugin" method="post">
+		<input type="hidden" name="project.name" value="${project.name }" />
+		<select name="pluginType">
 			<#list plugins as plugin>
 				<option value="${plugin.type.name }">${plugin.type.simpleName }</option>
 			</#list>
-		</select> <input type="submit" value="add" /></form>
-		</td>
-	</tr>
-</table>
+		</select>
+		<input type="submit" value="add" />
+	</form>
+</div>
 
 <table>
 	<tr>
@@ -45,27 +43,31 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 				<div class="command formulario">
 					<form action="command" method="post">
 						<input type="hidden" name="phase.id" value="${phase.id }" />
-						(start) <input type="text" name="startCommand" value="" size="5" /> 
-						(stop) <input type="text" name="stopCommand" value="" size="5" /> 
+						(start) <input type="text" name="startCommand" value="" size="5" /> <br/>
+						(stop) <input type="text" name="stopCommand" value="" size="5" /> <br/>
 						<input type="submit" value="add" />
 					</form>
 				</div>
 				<#list phase.plugins as plugin>
 				<div class="plugin">
-						${plugin.type.simpleName }
+						<span class="plugin_title">${plugin.type.simpleName }</span>
+						<span class="commands">
+							(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
+							(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)
+						</span>
 						<div id="plugin_${plugin.id }"></div>
-						(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
-						(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)
 				</div>
 				</#list>
 				<div class="plugin, formulario">
-					<form action="phase/plugin" method="post"><input type="hidden"
-						name="phase.id" value="${phase.id }" /> <select
-						name="pluginType">
+					<form action="phase/plugin" method="post">
+						<input type="hidden" name="phase.id" value="${phase.id }" />
+						<select name="pluginType">
 						<#list plugins as plugin>
 							<option value="${plugin.type.name }">${plugin.type.simpleName }</option>
 						</#list>
-					</select> <input type="submit" value="add" /></form>
+						</select>
+						<input type="submit" value="add" />
+					</form>
 				</div>
 			</div>
 			</td>
@@ -83,7 +85,7 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 	<#list project.builds as build>
 		<tr>
 			<td><a
-				href="${project.name}/build/${build.buildCount}/view/">results</a>
+				href="build/${build.buildCount}/view/">results</a>
 			</td>
 			<td>build-${build.buildCount}</td>
 			<td>

@@ -8,15 +8,13 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
 	<title><decorator:title default="Integracao" /></title>
-	<div id="actions">
+	<div class="actions">
 		<a href="${pageContext.request.contextPath }/client/form">new client</a>
 		<a href="${pageContext.request.contextPath }/client/list">list clients</a>
 		<a href="${pageContext.request.contextPath }/project/">list projects</a>
 		<a href="${pageContext.request.contextPath }/settings">settings</a>
 		<a href="${pageContext.request.contextPath }/project/jobs">jobs</a>
 		<br/>
-		<a href="${pageContext.request.contextPath }/project/addAll?myUrl=localhost:9091">add all @ localhost:9091</a>
-		<a href="${pageContext.request.contextPath }/project/addAll?myUrl=192.168.0.159:9091">add all @ 159:9091</a>
 	</div>
 	<link rel="stylesheet" type="text/css" media="all" href="/integracao/css/integracao.css" />
 </head>

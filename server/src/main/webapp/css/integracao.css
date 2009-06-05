@@ -3,11 +3,16 @@
 	margin: 5px;
 	padding: 5px;
 }
+.plugin {
+	width: 280px;
+}
 .phase {
+	width: 300px;
+}
+.phase, .plugin {
 	border: 2px solid gray;
 	margin: 5px;
 	padding: 5px;
-	width: 250px;
 }
 .command {
 	font-size: small;
@@ -28,7 +33,7 @@
 	background-color: #fffff1;
 }
 
-.phase_title {
+.phase_title, .plugin_title {
 	margin: 5px;
 	font-weight: bold;
 	text-align: center;
@@ -36,4 +41,20 @@
 
 .title {
 	font-size: 1.8em;
+}
+
+.actions {
+	font-size: 0.8em;
+	font-style: italic;
+	background-color: silver;
+	color: white;
+	padding: 5px;
+}
+
+a:link,a:visited,a:active {
+	color: #3366cc;
+}
+
+a:hover {
+	color: #000091;
 }

@@ -101,6 +101,8 @@ public class ProjectController {
 		showList();
 	}
 
+	@Post
+	@Path("/project/{project.name}/run")
 	public void run(Project project) throws IllegalArgumentException, SecurityException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		final Project found = projects.get(project.getName());

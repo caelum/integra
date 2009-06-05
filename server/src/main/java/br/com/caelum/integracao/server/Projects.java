@@ -97,12 +97,23 @@ public class Projects {
 
 	public PluginToRun get(PluginToRun plugin) {
 		return (PluginToRun) session.load(PluginToRun.class, plugin.getId());
-	}
+	} 
 
 	public void registerOrUpdate(List<PluginParameter> config) {
 		for(PluginParameter param : config) {
 			session.saveOrUpdate(param);
 		}
+	}
+
+	public void remove(PluginToRun plugin) {
+		for(PluginParameter parameter : plugin.getConfig()) {
+			session.delete(parameter);
+		}
+		session.delete(plugin);
+	}
+
+	public void delete(PluginParameter parameter) {
+		session.delete(parameter);
 	}
 
 

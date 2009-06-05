@@ -41,6 +41,7 @@ import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.http.Method;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.log.LogFile;
 import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.queue.Job;
 
@@ -61,48 +62,68 @@ public class CopyFiles implements Plugin {
 	}
 
 	public boolean after(Build build, Phase phase) {
-		String projectName = build.getProject().getName();
-		logger.debug("Copying for project " + projectName + " dirs " + Arrays.toString(dirs));
-		List<Job> jobs = build.getJobsFor(phase);
-		boolean success = true;
-		for (Job job : jobs) {
-			if(!job.isFinished()) {
-				continue;
+		LogFile logFile = null;
+		try {
+			logFile = new LogFile(build.getFile(phase.getName() + "/copy-files.txt"));
+			String projectName = build.getProject().getName();
+			logger.debug("Copying for project " + projectName + " dirs " + Arrays.toString(dirs));
+			List<Job> jobs = build.getJobsFor(phase);
+			boolean success = true;
+			for (Job job : jobs) {
+				success &= execute(job, projectName, build, logFile, phase);
 			}
-			String uri = job.getClient().getBaseUri();
-			logger.debug("Copying from server " + uri);
-			Method post = http.post(uri + "/plugin/CopyFiles/" + projectName);
-			for (int i = 0; i < dirs.length; i++) {
-				post.with("directory[" + i + "]", dirs[i]);
-			}
+			return success;
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+			return false;
+		} finally {
 			try {
-				post.send();
-				if (post.getResult() == 201) {
-					File tmp = File.createTempFile("integracao-copy-file-server-", ".zip");
-					post.saveContentToDisk(tmp);
-
-					File commandDirectory = build.getFile(phase.getName() + "/"
-							+ job.getCommand().getId());
-					commandDirectory.mkdirs();
-					File unzipResult = new File(commandDirectory, "copy-files-unzip.txt");
-					int result =  new CommandToExecute("unzip", "-qo", tmp.getAbsolutePath()).at(commandDirectory).logTo(unzipResult).run();
-					if(result!=0) {
-						success = false;
-						logger.error("Unable to copy from server " + uri + " due to unzip returning " + result);
-					}
-				} else {
-					success = false;
-					logger.error("Unable to copy from server " + uri + " due to " + post.getResult());
+				if (logFile != null) {
+					logFile.close();
 				}
-			} catch (HttpException e) {
-				logger.error("Unable to copy from server " + uri, e);
-				success = false;
 			} catch (IOException e) {
-				logger.error("Unable to copy from server " + uri, e);
-				success = false;
+				logger.error(e.getMessage(), e);
 			}
 		}
-		return success;
+	}
+
+	private boolean execute(Job job, String projectName, Build build, LogFile logFile, Phase phase) {
+		if (!job.isFinished()) {
+			return true;
+		}
+		String uri = job.getClient().getBaseUri();
+		logger.debug("Copying from server " + uri);
+		Method post = http.post(uri + "/plugin/CopyFiles/" + projectName);
+		for (int i = 0; i < dirs.length; i++) {
+			post.with("directory[" + i + "]", dirs[i]);
+		}
+		try {
+			post.send();
+			if (post.getResult() == 201) {
+				File tmp = File.createTempFile("integracao-copy-file-server-", ".zip");
+				post.saveContentToDisk(tmp);
+
+				File commandDirectory = build.getFile(phase.getName() + "/" + job.getCommand().getId());
+				commandDirectory.mkdirs();
+				File unzipResult = new File(commandDirectory, "copy-files-unzip.txt");
+				int result = new CommandToExecute("unzip", "-qo", tmp.getAbsolutePath()).at(commandDirectory)
+						.logTo(unzipResult).run();
+				if (result != 0) {
+					logFile.error("Unable to copy from server " + uri + " due to unzip returning " + result);
+					return false;
+				}
+			} else {
+				logFile.error("Unable to copy from server " + uri + " due to " + post.getResult());
+				return false;
+			}
+		} catch (HttpException e) {
+			logFile.error("Unable to copy from server " + uri, e);
+			return false;
+		} catch (IOException e) {
+			logFile.error("Unable to copy from server " + uri, e);
+			return false;
+		}
+		return true;
 	}
 
 	public boolean before(Build build) {

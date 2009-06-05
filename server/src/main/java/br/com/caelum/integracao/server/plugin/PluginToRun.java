@@ -61,7 +61,7 @@ public class PluginToRun {
 	private Class<? extends PluginInformation> type;
 
 	@OneToMany(mappedBy = "plugin")
-	private List<PluginParameter> config;
+	private List<PluginParameter> config = new ArrayList<PluginParameter>();
 
 	public PluginToRun(Class<? extends PluginInformation> type) {
 		this.type = type;
@@ -125,9 +125,6 @@ public class PluginToRun {
 	}
 
 	public List<PluginParameter> getConfig() {
-		if (config == null) {
-			config = new ArrayList<PluginParameter>();
-		}
 		return config;
 	}
 
