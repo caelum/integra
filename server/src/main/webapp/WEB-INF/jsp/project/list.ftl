@@ -42,10 +42,12 @@
 					</div>
 					</#list>
 					<div class="command formulario">
-						<form action="command" method="post"><input type="hidden"
-							name="phase.id" value="${phase.id }" /> <input type="text"
-							name="command" value="" size="5" /> <input type="submit"
-							value="add" /></form>
+						<form action="command" method="post">
+							<input type="hidden" name="phase.id" value="${phase.id }" />
+							(start) <input type="text" name="startCommand" value="" size="5" /> 
+							(stop) <input type="text" name="stopCommand" value="" size="5" /> 
+							<input type="submit" value="add" />
+						</form>
 					</div>
 					<#list phase.plugins as plugin>
 					<div class="plugin">
