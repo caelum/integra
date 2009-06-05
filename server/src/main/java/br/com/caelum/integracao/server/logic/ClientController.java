@@ -27,6 +27,9 @@
  */
 package br.com.caelum.integracao.server.logic;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.vraptor.Get;
@@ -39,6 +42,9 @@ import br.com.caelum.vraptor.view.Results;
 
 @Resource
 public class ClientController {
+	
+	
+	private final Logger logger = LoggerFactory.getLogger(ClientController.class);
 	
 	private final Clients clients;
 	private final Result result;
@@ -77,19 +83,22 @@ public class ClientController {
 		showList();
 	}
 	
+	@Get
 	public void form() {
+		logger.debug("Client form");
 	}
 	
 	@Get
-	@Path("/client/{client.id}")
+	@Path("/client/show/{client.id}")
 	public void show(Client client) {
 		result.include("client", clients.get(client));
 		result.include("tags", clients.getTags());
 	}
 	
 	@Put
-	@Path("/client/{client.id}")
+	@Path("/client/show/{client.id}")
 	public void update(Client client, String tags) {
+		logger.debug("Updating " + client.getId() + " with " + tags);
 		client = clients.get(client);
 		String[] tagsFound = tags.split("\\s*,\\s*");
 		for(String tag : tagsFound) {

@@ -172,7 +172,9 @@ public class Client {
 	}
 	
 	public void tag(Tag tag) {
-		this.tags.add(tag);
+		if(!this.tags.contains(tag)) {
+			this.tags.add(tag);
+		}
 	}
 	
 	void setCurrentJob(Job currentJob) {

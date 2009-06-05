@@ -2,7 +2,7 @@
 <table>
 	<#list free as client>
 		<tr>
-			<td><a href="#edit_client" onclick="$('#edit_client}').load('${client.id}')"></a></td>
+			<td><a href="#edit_client" onclick="$('#edit_client').load('show/${client.id}')">edit</a></td>
 			<td>${client.host }</td>
 			<td>${client.port }</td>
 			<td>free</td>
