@@ -25,48 +25,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.project;
+package br.com.caelum.integracao.server.client;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
-import br.com.caelum.integracao.server.Project;
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.dao.DatabaseFactory;
-import br.com.caelum.integracao.server.scm.ScmControl;
-
-public class DatabaseBasedTest extends BaseTest{
-	private static DatabaseFactory databaseFactory;
-
-	protected Database database;
+@Entity
+@Table(uniqueConstraints=@UniqueConstraint(columnNames="name"))
+public class Tag {
 	
-	@BeforeClass
-	public static void configDatabase() {
-		databaseFactory = new DatabaseFactory();
-		databaseFactory.clear();
-		databaseFactory.startup();
+	@Id
+	@GeneratedValue
+	private Long id;
+	
+	private String name;
+	
+	public Tag(String name) {
+		this.name = name;
 	}
 	
-	@AfterClass
-	public static void stopDatabase() {
-		databaseFactory.destroy();
+	Tag() {
 	}
 
-	@Before
-	public void configData() {
-		this.database = new Database(databaseFactory);
+	public String getName() {
+		return name;
 	}
-
-	@After
-	public void removeData() {
-		this.database.close();
-	}
-
-	public Project project(String name) {
-		Project project = new Project(ScmControl.class, name, baseDir, name);
-		return project;
+	
+	public Long getId() {
+		return id;
 	}
 
 }

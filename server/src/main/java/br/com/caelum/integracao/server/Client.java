@@ -30,10 +30,13 @@ package br.com.caelum.integracao.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
 import org.apache.commons.httpclient.HttpException;
@@ -43,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.http.Method;
 import br.com.caelum.integracao.server.action.Dispatcher;
+import br.com.caelum.integracao.server.client.Tag;
 import br.com.caelum.integracao.server.queue.Job;
 
 /**
@@ -67,6 +71,9 @@ public class Client {
 
 	@ManyToOne
 	private Job currentJob;
+	
+	@ManyToMany
+	private List<Tag> tags = new ArrayList<Tag>();
 
 	private boolean active;
 
@@ -159,5 +166,17 @@ public class Client {
 	public Job getCurrentJob() {
 		return currentJob;
 	}
-
+	
+	public List<Tag> getTags() {
+		return tags;
+	}
+	
+	public void tag(Tag tag) {
+		this.tags.add(tag);
+	}
+	
+	void setCurrentJob(Job currentJob) {
+		this.currentJob = currentJob;
+	}
+	
 }

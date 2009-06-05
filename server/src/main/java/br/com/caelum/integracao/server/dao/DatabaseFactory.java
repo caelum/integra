@@ -33,6 +33,7 @@ import javax.annotation.PreDestroy;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +92,12 @@ public class DatabaseFactory {
 
 	public Session getSession() {
 		return this.factory.openSession();
+	}
+
+	public void clear() {
+		// TODO  DANGER DANGER!!
+		AnnotationConfiguration cfg = new AnnotationConfiguration().configure();
+		new SchemaExport(cfg).create(false, true);
 	}
 
 }

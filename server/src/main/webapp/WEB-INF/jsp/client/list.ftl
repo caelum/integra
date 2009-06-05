@@ -2,11 +2,12 @@
 <table>
 	<#list free as client>
 		<tr>
+			<td><a href="#edit_client" onclick="$('#edit_client}').load('${client.id}')"></a></td>
 			<td>${client.host }</td>
 			<td>${client.port }</td>
 			<td>free</td>
 			<td>${client.alive?string('alive', 'dead')}</td>
-			<td><a href="${client.id }/deactivate">deactivate</a></td>
+			<td><a href="${client.id }/deactivate?_method=post">deactivate</a></td>
 		</tr>
 	</#list>
 	<#list locked as client>
@@ -16,6 +17,7 @@
 			<td><font color="red">(busy)</font> ${client.currentJob }</td>
 			<td><a href="http://${client.host }:${client.port }${client.context }/job/current">ask for its job</a></td>
 			<td><a href="http://${client.host }:${client.port }${client.context }/job/stop">stop</a></td>
+			<td><a href="${client.id }/deactivate?_method=post">deactivate</a></td>
 		</tr>
 	</#list>
 	<#list inactive as client>
@@ -23,7 +25,10 @@
 			<td>${client.host }</td>
 			<td>${client.port }</td>
 			<td>inactive</td>
-			<td><a href="${client.id }/activate">activate</a></td>
+			<td><a href="${client.id }/activate?_method=post">activate</a></td>
 		</tr>
 	</#list>
 </table>
+
+<div id="edit_client">
+</div>
