@@ -127,7 +127,7 @@ public class PhaseController {
 	}
 
 	@Delete
-	@Path("/project/{project.name}/phase/${phase.id}/plugin/{plugin.id}")
+	@Path("/project/{project.name}/phase/{phase.id}/plugin/{plugin.id}")
 	public void remove(PluginToRun plugin, Phase phase, Project project) throws ClassNotFoundException {
 		phase = projects.get(phase);
 		plugin = projects.get(plugin);
