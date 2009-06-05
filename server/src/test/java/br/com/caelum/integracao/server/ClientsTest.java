@@ -34,7 +34,10 @@ import static org.hamcrest.Matchers.is;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.com.caelum.integracao.server.client.Tag;
 import br.com.caelum.integracao.server.project.DatabaseBasedTest;
+import br.com.caelum.integracao.server.queue.Job;
+import br.com.caelum.integracao.server.queue.Jobs;
 
 public class ClientsTest extends DatabaseBasedTest{
 
@@ -46,13 +49,22 @@ public class ClientsTest extends DatabaseBasedTest{
 	@Before
 	public void configClients() {
 		this.clients = new Clients(database);
+		
+		Job job = new Job(null,null);
+		new Jobs(database).add(job);
+
 		this.busy = new Client();
+		busy.setCurrentJob(job);
 		clients.register(busy);
+		
 		this.free = new Client();
 		clients.register(free);
+		
 		this.inactive = new Client();
-		this.inactive.deactivate();
 		clients.register(inactive);
+		this.inactive.deactivate();
+		
+		database.getSession().flush();
 	}
 
 	@Test
@@ -74,6 +86,13 @@ public class ClientsTest extends DatabaseBasedTest{
 		assertThat(clients.lockedClients().contains(free), is(equalTo(false)));
 		assertThat(clients.lockedClients().contains(inactive), is(equalTo(false)));
 		assertThat(clients.lockedClients().contains(busy), is(equalTo(true)));
+	}
+	
+	@Test
+	public void retrievingANonExistingTagCreatesIt() {
+		Tag tag = clients.getTag("garbage"); // creates
+		Tag found = clients.getTag("garbage");
+		assertThat(tag, is(equalTo(found)));
 	}
 
 }

@@ -78,6 +78,7 @@ public class Clients {
 		if(results.isEmpty()) {
 			Tag tag = new Tag(name);
 			session.save(tag);
+			return tag;
 		}
 		return results.get(0);
 	}
