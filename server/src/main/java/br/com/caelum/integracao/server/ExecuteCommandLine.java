@@ -67,6 +67,8 @@ public class ExecuteCommandLine {
 	@JoinTable(name="CommandStop")
 	@Cascade(value = { CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE })
 	private List<Command> stop = new ArrayList<Command>();
+	
+	private boolean active = true;
 
 	@NotNull
 	@ManyToOne
@@ -114,7 +116,7 @@ public class ExecuteCommandLine {
 	}
 	
 	public List<Command> getStopCommands() {
-		return start;
+		return stop;
 	}
 	
 	public Long getId() {
@@ -130,5 +132,13 @@ public class ExecuteCommandLine {
 
 	public List<Tag> getLabels() {
 		return labels;
+	}
+
+	public void deactivate() {
+		this.active = false;
+	}
+
+	public boolean isActive() {
+		return active;
 	}
 }
