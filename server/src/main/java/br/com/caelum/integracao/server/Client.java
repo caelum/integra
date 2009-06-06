@@ -39,13 +39,13 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
-import org.apache.commons.httpclient.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.http.DefaultHttp;
-import br.com.caelum.integracao.http.Method;
 import br.com.caelum.integracao.server.action.Dispatcher;
+import br.com.caelum.integracao.server.agent.Agent;
+import br.com.caelum.integracao.server.agent.AgentControl;
+import br.com.caelum.integracao.server.agent.AgentStatus;
 import br.com.caelum.integracao.server.client.Tag;
 import br.com.caelum.integracao.server.queue.Job;
 
@@ -63,11 +63,11 @@ public class Client {
 	@GeneratedValue
 	private Long id;
 
-	private int port;
+	private int port = 8080;
 
-	private String context;
+	private String context = "/integracao-client";
 
-	private String host;
+	private String host = "localhost";
 
 	@ManyToOne
 	private Job currentJob;
@@ -136,27 +136,26 @@ public class Client {
 		this.active = true;
 	}
 
-	public boolean isAlive() {
-		Method post = new DefaultHttp().post(getBaseUri() + "/job/current");
-		try {
-			post.send();
-		} catch (HttpException e) {
-			return false;
-		} catch (IOException e) {
+	public boolean isAlive(AgentControl control) {
+		Agent agent = control.to(getBaseUri());
+		AgentStatus status = agent.getStatus();
+		if(status.equals(AgentStatus.UNAVAILABLE)) {
+			weirdJobMightNotBeThere();
 			return false;
 		}
-		if (post.getResult() == 410) {
-			if (currentJob != null) {
-				logger.warn("Leaving the job because the server just told me there is nothing running there..."
-						+ "Did the client break or was it sending me the info right now?");
-				currentJob = null;
-			}
+		if(status.equals(AgentStatus.FREE)) {
+			weirdJobMightNotBeThere();
 			return true;
 		}
-		if (post.getResult() != 200) {
-			return false;
-		}
 		return true;
+	}
+
+	private void weirdJobMightNotBeThere() {
+		if(currentJob!=null) {
+			logger.error("Leaving the job because the server just told me there is nothing running there..."
+					+ "Did the client break or was it sending me the info right now?");
+			currentJob = null;
+		}
 	}
 
 	public void leaveJob() {
@@ -187,8 +186,8 @@ public class Client {
 		
 	}
 
-	public boolean canHandle(ExecuteCommandLine command) {
-		return isAlive() && this.labels.containsAll(command.getLabels());
+	public boolean canHandle(ExecuteCommandLine command, AgentControl control) {
+		return isAlive(control) && this.labels.containsAll(command.getLabels());
 	}
 
 }

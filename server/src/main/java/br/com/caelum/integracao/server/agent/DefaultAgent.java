@@ -25,53 +25,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.agent;
 
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
+import java.io.IOException;
 
-import br.com.caelum.integracao.server.queue.Job;
+import org.apache.commons.httpclient.HttpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class IntegracaoMatchers {
+import br.com.caelum.integracao.http.DefaultHttp;
+import br.com.caelum.integracao.http.Method;
 
-	public static TypeSafeMatcher<Job> jobFor(final Build build, final ExecuteCommandLine command) {
-		return new TypeSafeMatcher<Job>() {
+/**
+ * Default implementation of an agent.
+ * @author guilherme silveira
+ */
+public class DefaultAgent implements Agent {
+	
+	private final Logger logger = LoggerFactory.getLogger(DefaultAgent.class);
 
-			@Override
-			protected void describeMismatchSafely(Job item, Description mismatchDescription) {
-				mismatchDescription.appendText("job for " + item.getBuild() + " and " + item.getCommand());
-			}
+	private final String baseUri;
 
-			@Override
-			protected boolean matchesSafely(Job item) {
-				return build.equals(item.getBuild()) && command.equals(item.getCommand());
-			}
-
-			public void describeTo(Description description) {
-				description.appendText("job for " + build + " and " + command);
-			}
-			
-		};
+	public DefaultAgent(String baseUri) {
+		this.baseUri = baseUri;
 	}
 
-	public static <T> TypeSafeMatcher<T> naturalEquals(final T original) {
-		return new TypeSafeMatcher<T>() {
-
-			@Override
-			protected void describeMismatchSafely(T item, Description mismatchDescription) {
-				mismatchDescription.appendText("Type " + original);
-			}
-
-			@Override
-			protected boolean matchesSafely(T item) {
-				return item==original;
-			}
-
-			public void describeTo(Description description) {
-				description.appendText("type " + original);
-			}
-			
-		};
+	public AgentStatus getStatus() {
+		Method post = new DefaultHttp().post(baseUri + "/job/current");
+		try {
+			post.send();
+		} catch (HttpException e) {
+			logger.debug("Setting the agent as unavailable.",e);
+			return AgentStatus.UNAVAILABLE;
+		} catch (IOException e) {
+			logger.debug("Setting the agent as unavailable.",e);
+			return AgentStatus.UNAVAILABLE;
+		}
+		if (post.getResult() == 410) {
+			return AgentStatus.FREE;
+		}
+		if (post.getResult() != 200) {
+			return AgentStatus.UNAVAILABLE;
+		}
+		return AgentStatus.BUSY;
 	}
 
 }

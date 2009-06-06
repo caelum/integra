@@ -88,7 +88,7 @@ public class Phase {
 		}
 	}
 
-	public Phase() {
+	protected Phase() {
 	}
 
 	public void execute(Build build, Jobs jobs) {

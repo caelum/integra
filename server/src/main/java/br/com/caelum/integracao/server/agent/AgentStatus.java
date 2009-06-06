@@ -25,53 +25,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.agent;
 
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
-
-import br.com.caelum.integracao.server.queue.Job;
-
-public class IntegracaoMatchers {
-
-	public static TypeSafeMatcher<Job> jobFor(final Build build, final ExecuteCommandLine command) {
-		return new TypeSafeMatcher<Job>() {
-
-			@Override
-			protected void describeMismatchSafely(Job item, Description mismatchDescription) {
-				mismatchDescription.appendText("job for " + item.getBuild() + " and " + item.getCommand());
-			}
-
-			@Override
-			protected boolean matchesSafely(Job item) {
-				return build.equals(item.getBuild()) && command.equals(item.getCommand());
-			}
-
-			public void describeTo(Description description) {
-				description.appendText("job for " + build + " and " + command);
-			}
-			
-		};
-	}
-
-	public static <T> TypeSafeMatcher<T> naturalEquals(final T original) {
-		return new TypeSafeMatcher<T>() {
-
-			@Override
-			protected void describeMismatchSafely(T item, Description mismatchDescription) {
-				mismatchDescription.appendText("Type " + original);
-			}
-
-			@Override
-			protected boolean matchesSafely(T item) {
-				return item==original;
-			}
-
-			public void describeTo(Description description) {
-				description.appendText("type " + original);
-			}
-			
-		};
-	}
+public enum AgentStatus {
+	UNAVAILABLE, FREE, BUSY;
 
 }
