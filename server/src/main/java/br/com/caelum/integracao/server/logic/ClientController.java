@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.agent.DefaultAgent;
 import br.com.caelum.integracao.server.label.Labels;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
@@ -105,6 +106,15 @@ public class ClientController {
 		logger.debug("Updating " + client.getId() + " with " + labels);
 		Client toUpdate = clients.get(client);
 		toUpdate.tag(this.labels.lookup(labels));
+		showList();
+	}
+	
+	@Post
+	@Path("/client/{client.id}/stop")
+	public void stop(Client client) {
+		logger.debug("Stopping " + client.getId());
+		client = clients.get(client);
+		client.stop(new DefaultAgent(client.getBaseUri()));
 		showList();
 	}
 

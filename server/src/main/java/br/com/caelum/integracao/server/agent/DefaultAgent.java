@@ -29,19 +29,24 @@ package br.com.caelum.integracao.server.agent;
 
 import java.io.IOException;
 
-import org.apache.commons.httpclient.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.http.Method;
+import br.com.caelum.integracao.server.queue.Job;
 
 /**
  * Default implementation of an agent.
+ * 
  * @author guilherme silveira
  */
 public class DefaultAgent implements Agent {
-	
+
+	private static final int CONFLICT = 409;
+
+	private static final int GONE = 410;
+
 	private final Logger logger = LoggerFactory.getLogger(DefaultAgent.class);
 
 	private final String baseUri;
@@ -53,21 +58,42 @@ public class DefaultAgent implements Agent {
 	public AgentStatus getStatus() {
 		Method post = new DefaultHttp().post(baseUri + "/job/current");
 		try {
-			post.send();
-		} catch (HttpException e) {
-			logger.debug("Setting the agent as unavailable.",e);
-			return AgentStatus.UNAVAILABLE;
-		} catch (IOException e) {
-			logger.debug("Setting the agent as unavailable.",e);
-			return AgentStatus.UNAVAILABLE;
+			try {
+				post.send();
+			} catch (IOException e) {
+				logger.debug("Setting the agent as unavailable.", e);
+				return AgentStatus.UNAVAILABLE;
+			}
+			if (post.getResult() == GONE) {
+				return AgentStatus.FREE;
+			}
+			if (post.getResult() != 200) {
+				return AgentStatus.UNAVAILABLE;
+			}
+			return AgentStatus.BUSY;
+		} finally {
+			post.close();
 		}
-		if (post.getResult() == 410) {
-			return AgentStatus.FREE;
+	}
+
+	public boolean stop(Job currentJob) {
+		Method post = new DefaultHttp().post(baseUri + "/job/stop/");
+		post.with("jobId", ""+ currentJob.getId());
+		try {
+			try {
+				post.send();
+			} catch (IOException e) {
+				logger.debug("Could not stop the job.", currentJob.getId());
+				return false;
+			}
+			if (post.getResult() != 200) {
+				logger.debug("Could not stop the job.", currentJob.getId());
+				return false;
+			}
+			return true;
+		} finally {
+			post.close();
 		}
-		if (post.getResult() != 200) {
-			return AgentStatus.UNAVAILABLE;
-		}
-		return AgentStatus.BUSY;
 	}
 
 }

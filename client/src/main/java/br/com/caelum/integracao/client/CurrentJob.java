@@ -61,6 +61,8 @@ public class CurrentJob {
 
 	private File outputFile;
 
+	private String jobId;
+
 	public CurrentJob(Settings settings) {
 		this.point = settings;
 	}
@@ -77,11 +79,12 @@ public class CurrentJob {
 		return thread;
 	}
 
-	public synchronized void start(Project project, final String revision, final List<String> startCommand,
+	public synchronized void start(String jobId, Project project, final String revision, final List<String> startCommand,
 			final List<String> stopCommand, final String resultUri) {
 		if (isRunning()) {
 			throw new RuntimeException("Cannot take another job as im currently processing " + this.project.getName());
 		}
+		this.jobId = jobId;
 		this.start = Calendar.getInstance();
 		this.project = project;
 		Runnable runnable = new Runnable() {
@@ -89,6 +92,7 @@ public class CurrentJob {
 				try {
 					executeBuildFor(revision, startCommand, stopCommand, resultUri);
 				} finally {
+					CurrentJob.this.jobId = null;
 					CurrentJob.this.project = null;
 					CurrentJob.this.thread = null;
 					CurrentJob.this.start = null;
@@ -166,14 +170,23 @@ public class CurrentJob {
 		}
 	}
 
-	public synchronized void stop() {
-		logger.debug("Stopping job " + project.getName());
+	public synchronized boolean stop(String jobIdToStop) {
+		logger.debug("Stopping job " + project.getName() + " looking for " + jobIdToStop);
+		if(this.jobId == null) {
+			logger.warn("Could not stop " + jobIdToStop + " because I am not running anything");
+			return true;
+		}
+		if(this.jobId.equals(jobIdToStop)) {
+			logger.error("Could not stop " + jobIdToStop + " because I am running: " + this.jobId);
+			return false;
+		}
 		if (this.thread != null) {
 			this.thread.interrupt();
 		}
 		if (this.project != null) {
 			this.project.stop();
 		}
+		return true;
 	}
 
 	public double getTime() {

@@ -53,6 +53,10 @@ import br.com.caelum.vraptor.view.Results;
 @Resource
 public class JobController {
 
+	private static final int GONE = 410;
+
+	private static final int CONFLICT = 409;
+
 	private final Logger logger = LoggerFactory.getLogger(JobController.class);
 
 	private final Projects projects;
@@ -71,24 +75,28 @@ public class JobController {
 	}
 
 	@Post
-	public synchronized void execute(Project project, String revision, List<String> startCommand, List<String> stopCommand, String resultUri) {
-		job.start(projects.get(project.getName()), revision, startCommand, stopCommand, resultUri);
+	public synchronized void execute(String jobId, Project project, String revision, List<String> startCommand, List<String> stopCommand, String resultUri) {
+		job.start(jobId, projects.get(project.getName()), revision, startCommand, stopCommand, resultUri);
 	}
 
 	@Get
 	@Post
 	public void current() throws IOException {
-		// TODO possible sync fail
+		// TODO possible sync fail... time to render might already set the job to null :(
 		result.include("job", job);
 		if (job.getProject() != null) {
 			logger.debug("Displaying info on current job: " + job.getProject().getName());
 		} else {
-			response.sendError(410);
+			response.sendError(GONE);
 			result.use(Results.nothing());
 		}
 	}
 
-	public void stop() {
-		job.stop();
+	public void stop(String jobId) throws IOException {
+		boolean succeeded = job.stop(jobId);
+		if(!succeeded) {
+			response.sendError(CONFLICT);
+		}
+		result.use(Results.nothing());
 	}
 }

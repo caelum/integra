@@ -51,6 +51,8 @@ public class Method {
 	private final HttpClient client;
 	private int result;
 
+	private boolean released;
+
 	public Method(HttpClient client, PostMethod post) {
 		this.client = client;
 		this.post = post;
@@ -74,6 +76,7 @@ public class Method {
 		try {
 			return post.getResponseBodyAsString();
 		} finally {
+			released = true;
 			post.releaseConnection();
 		}
 	}
@@ -97,8 +100,20 @@ public class Method {
 			fos.close();
 			is.close();
 		} finally {
+			released = true;
 			post.releaseConnection();
 		}
+	}
+
+	public void close() {
+		if (!released) {
+			post.releaseConnection();
+		}
+	}
+
+	protected void finalize() throws Throwable {
+		close();
+		super.finalize();
 	}
 
 }

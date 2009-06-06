@@ -36,8 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Application;
+import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.agent.AgentControl;
+import br.com.caelum.integracao.server.agent.DefaultAgent;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
@@ -109,7 +111,8 @@ public class QueueThread {
 		for (Job job : jobs) {
 			if (System.currentTimeMillis() - job.getStartTime().getTimeInMillis() > new Application(db).getConfig()
 					.getMaximumTimeForAJob() * 60 * 1000) {
-				job.getClient().stop(job);
+				Client client = job.getClient();
+				client.stop(new DefaultAgent(client.getBaseUri()));
 				result++;
 			}
 		}

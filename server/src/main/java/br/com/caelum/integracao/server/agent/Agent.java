@@ -27,6 +27,8 @@
  */
 package br.com.caelum.integracao.server.agent;
 
+import br.com.caelum.integracao.server.queue.Job;
+
 /**
  * Controls an agent throughr RESt calls
  * @author guilherme silveira
@@ -35,5 +37,7 @@ package br.com.caelum.integracao.server.agent;
 public interface Agent {
 
 	AgentStatus getStatus();
+
+	boolean stop(Job currentJob);
 
 }
