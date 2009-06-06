@@ -82,7 +82,7 @@ public class Project {
 	}
 
 	public ProjectRunResult run(File baseDirectory, List<String> command, File output) throws IOException {
-		logger.debug("Checking out project @ " + uri + " to " + baseDirectory + "/" + name);
+		logger.debug("Executing " + command + " to " + baseDirectory + "/" + name);
 
 		File workDir = new File(baseDirectory, name);
 		String[] commands = command.toArray(new String[command.size()]);

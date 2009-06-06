@@ -36,7 +36,9 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 				<div class="phase_title">${phase.name } (${phase.position })</div>
 				<#list phase.commands as cmd>
 				<div class="command">
-					${cmd.name } <#if cmd.stopName??>(stop: ${cmd.stopName})</#if>
+					${cmd.name }
+					<#if cmd.stopName??>(stop: ${cmd.stopName})</#if>
+					"<#list cmd.labels as label>${label.name},</#list>"
 					(<a href="command/${cmd.id}?_method=DELETE">remove</a>)
 				</div>
 				</#list>
@@ -45,6 +47,7 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 						<input type="hidden" name="phase.id" value="${phase.id }" />
 						(start) <input type="text" name="startCommand" value="" size="5" /> <br/>
 						(stop) <input type="text" name="stopCommand" value="" size="5" /> <br/>
+						(labels) <textarea name="labels"></textarea>
 						<input type="submit" value="add" />
 					</form>
 				</div>

@@ -8,8 +8,8 @@
 	Context: <input type="text" name="client.context" value="${client.context}" /><br/>
 	Port: <input type="text" name="client.port" value="${client.port}" /><br/>
 	
-	<textarea name="tags">
-	<#list client.tags as tag>${tag.name},</#list>
+	<textarea name="labels">
+	<#list client.labels as label>${label.name},</#list>
 	</textarea>
 	<br/>
 	<input type="submit" value="update" />

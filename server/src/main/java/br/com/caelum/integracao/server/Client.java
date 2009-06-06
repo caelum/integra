@@ -187,4 +187,8 @@ public class Client {
 		
 	}
 
+	public boolean canHandle(ExecuteCommandLine command) {
+		return isAlive() && this.labels.containsAll(command.getLabels());
+	}
+
 }

@@ -54,7 +54,7 @@ public class DefaultJobQueue implements JobQueue{
 		for(Job job : todo) {
 			for (Iterator<Client> iterator = freeFound.iterator(); iterator.hasNext();) {
 				Client client = iterator.next();
-				if(client.isAlive() && client.work(job, config)) {
+				if(client.canHandle(job.getCommand()) && client.work(job, config)) {
 					completed++;
 					break;
 				}

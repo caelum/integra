@@ -70,16 +70,16 @@ public class PhaseController {
 	@Path("/project/{project.name}/command/{command.id}")
 	public void removeCommand(ExecuteCommandLine command) {
 		command = projects.load(command);
-		projects.remove(command);
+		command.deactivate();
 		showProject(command.getPhase().getProject());
 	}
 
 	@Post
 	@Path("/project/{project.name}/command")
-	public void addCommand(Phase phase, String startCommand, String stopCommand, String tags) {
+	public void addCommand(Phase phase, String startCommand, String stopCommand, String labels) {
 		logger.debug("Adding a new command with " + startCommand + " and " + stopCommand);
 		phase = projects.get(phase);
-		ExecuteCommandLine line = new ExecuteCommandLine(phase, commandsFor(startCommand), commandsFor(stopCommand), labels.lookup(tags));
+		ExecuteCommandLine line = new ExecuteCommandLine(phase, commandsFor(startCommand), commandsFor(stopCommand), this.labels.lookup(labels));
 		projects.register(line);
 		showProject(phase.getProject());
 	}

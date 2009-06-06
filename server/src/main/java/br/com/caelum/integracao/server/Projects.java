@@ -75,10 +75,6 @@ public class Projects {
 		return (ExecuteCommandLine) session.load(ExecuteCommandLine.class, command.getId());
 	}
 
-	public void remove(ExecuteCommandLine command) {
-		session.delete(command);
-	}
-
 	public void register(Build build) {
 		session.save(build);
 	}

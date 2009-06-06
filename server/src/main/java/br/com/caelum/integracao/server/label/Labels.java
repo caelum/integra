@@ -52,7 +52,7 @@ public class Labels {
 	}
 
 	public Tag getTag(String name) {
-		Query query = session.createQuery("from Tag as t where t.name in :names");
+		Query query = session.createQuery("from Tag as t where t.name = :name");
 		query.setParameter("name", name);
 		List<Tag> results = query.list();
 		if(results.isEmpty()) {

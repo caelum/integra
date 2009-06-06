@@ -100,11 +100,11 @@ public class ClientController {
 	}
 	
 	@Put
-	@Path("/client/show/{client.id}")
-	public void update(Client client, String tags) {
-		logger.debug("Updating " + client.getId() + " with " + tags);
+	@Path("/client/{client.id}")
+	public void update(Client client, String labels) {
+		logger.debug("Updating " + client.getId() + " with " + labels);
 		Client toUpdate = clients.get(client);
-		toUpdate.tag(labels.lookup(tags));
+		toUpdate.tag(this.labels.lookup(labels));
 		showList();
 	}
 

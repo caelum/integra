@@ -13,7 +13,7 @@
 		<a href="${pageContext.request.contextPath }/client/list">list clients</a>
 		<a href="${pageContext.request.contextPath }/project/">list projects</a>
 		<a href="${pageContext.request.contextPath }/settings">settings</a>
-		<a href="${pageContext.request.contextPath }/project/jobs">jobs</a>
+		<a href="${pageContext.request.contextPath }/jobs">jobs</a>
 		<br/>
 	</div>
 	<link rel="stylesheet" type="text/css" media="all" href="/integracao/css/integracao.css" />

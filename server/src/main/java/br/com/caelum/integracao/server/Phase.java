@@ -115,10 +115,13 @@ public class Phase {
 	}
 
 	public List<ExecuteCommandLine> getCommands() {
-		if (commands == null) {
-			this.commands = new ArrayList<ExecuteCommandLine>();
+		List<ExecuteCommandLine> active = new ArrayList<ExecuteCommandLine>();
+		for (ExecuteCommandLine cmd : commands) {
+			if (cmd.isActive()) {
+				active.add(cmd);
+			}
 		}
-		return commands;
+		return active;
 	}
 
 	public void setCommands(List<ExecuteCommandLine> commands) {

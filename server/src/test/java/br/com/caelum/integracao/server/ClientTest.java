@@ -75,5 +75,29 @@ public class ClientTest extends BaseTest{
 		assertThat(c.work(job, config), is(equalTo(true)));
 		assertThat(c.getCurrentJob(), is(equalTo(job)));
 	}
+	
+	@Test
+	public void shouldFreeClientIfThoughItWasBusyAndAliveRequestReturned410() {
+		
+	}
+	
+	@Test
+	public void shouldMarkTheClientAsDeadIfTheResultIsNotOkOr410() {
+		
+	}
+	
+	@Test
+	public void shouldMarkTheClientAsDeadIfCannotConnect() {
+		
+	}
+	
+	@Test
+	public void shouldMarkTheClientAsAliveIfReturning200() {
+		
+	}
+	
+	public void shouldBeCapableToRunTheJobOnlyIfContainsAllLabelsAndIsAlive() {
+		
+	}
 
 }
