@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.agent.AgentControl;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
@@ -95,7 +96,7 @@ public class QueueThread {
 
 	private void startJobs(Database db) {
 		db.beginTransaction();
-		JobQueue queue = new DefaultJobQueue(new Jobs(db), new Clients(db), new Application(db).getConfig());
+		JobQueue queue = new DefaultJobQueue(new Jobs(db), new Clients(db), new Application(db).getConfig(), new AgentControl());
 		int result = queue.iterate();
 		db.commit();
 		logger.debug("Job queue started " + result + " jobs");

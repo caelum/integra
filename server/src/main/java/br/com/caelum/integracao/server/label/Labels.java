@@ -51,7 +51,7 @@ public class Labels {
 		return session.createQuery("from Tag").list();
 	}
 
-	public Tag getTag(String name) {
+	public Tag getLabel(String name) {
 		Query query = session.createQuery("from Tag as t where t.name = :name");
 		query.setParameter("name", name);
 		List<Tag> results = query.list();
@@ -68,7 +68,7 @@ public class Labels {
 		String[] tagsFound = tags.split("\\s*,\\s*");
 		for(String tag : tagsFound) {
 			if(!tag.equals("")) {
-				list.add(getTag(tag));
+				list.add(getLabel(tag));
 			}
 		}
 		return list;

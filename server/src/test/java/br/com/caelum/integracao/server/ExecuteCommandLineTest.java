@@ -31,8 +31,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import br.com.caelum.integracao.server.client.Tag;
 
 public class ExecuteCommandLineTest {
 	
@@ -45,7 +49,7 @@ public class ExecuteCommandLineTest {
 	
 	@Test
 	public void shouldHaveTheNameAsTheCommand() {
-		ExecuteCommandLine line = new ExecuteCommandLine(phase, new String[] {"hello world"}, new String[] { "stop world"});
+		ExecuteCommandLine line = new ExecuteCommandLine(phase, new String[] {"hello world"}, new String[]{"stop world"},Arrays.asList(new Tag("stop world")));
 		assertThat(line.getName(), is(equalTo("hello world ")));
 	}
 

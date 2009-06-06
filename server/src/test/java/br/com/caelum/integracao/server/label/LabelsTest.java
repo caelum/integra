@@ -25,45 +25,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.queue;
+package br.com.caelum.integracao.server.label;
 
-import java.util.Iterator;
-import java.util.List;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
-import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Clients;
-import br.com.caelum.integracao.server.Config;
-import br.com.caelum.integracao.server.agent.AgentControl;
+import org.junit.Test;
 
-public class DefaultJobQueue implements JobQueue{
-	
-	
-	private final Jobs jobs;
-	private final Clients clients;
-	private final Config config;
-	private final AgentControl control;
+import br.com.caelum.integracao.server.client.Tag;
+import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 
-	public DefaultJobQueue(Jobs jobs, Clients clients, Config config, AgentControl control) {
-		this.jobs = jobs;
-		this.clients = clients;
-		this.config = config;
-		this.control = control;
-	}
+public class LabelsTest extends DatabaseBasedTest{
 
-	public int iterate() {
-		List<Job> todo = jobs.todo();
-		int completed = 0;
-		List<Client> freeFound = clients.freeClients();
-		for(Job job : todo) {
-			for (Iterator<Client> iterator = freeFound.iterator(); iterator.hasNext();) {
-				Client client = iterator.next();
-				if(client.canHandle(job.getCommand(), control) && client.work(job, config)) {
-					completed++;
-					break;
-				}
-			}
-		}
-		return completed;
+	@Test
+	public void retrievingANonExistingTagCreatesIt() {
+		Labels labels = new Labels(database);
+		Tag tag = labels.getLabel("garbage"); // creates
+		Tag found = labels.getLabel("garbage");
+		assertThat(tag, is(equalTo(found)));
 	}
 
 }

@@ -41,6 +41,7 @@ import org.junit.Test;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Config;
+import br.com.caelum.integracao.server.agent.AgentControl;
 import br.com.caelum.integracao.server.project.BaseTest;
 
 public class DefaultJobQueueTest extends BaseTest{
@@ -51,13 +52,15 @@ public class DefaultJobQueueTest extends BaseTest{
 	private Clients clients;
 	private Client firstClient;
 	private Config config;
+	private AgentControl control;
 
 	@Before
 	public void config() {
 		this.jobs = mockery.mock(Jobs.class);
 		this.clients = mockery.mock(Clients.class);
 		this.config = mockery.mock(Config.class);
-		this.queue = new DefaultJobQueue(jobs, clients, config);
+		this.control = mockery.mock(AgentControl.class);
+		this.queue = new DefaultJobQueue(jobs, clients, config, control);
 		this.first = mockery.mock(Job.class, "first");
 		this.firstClient = mockery.mock(Client.class, "firstClient");
 	}
@@ -87,7 +90,7 @@ public class DefaultJobQueueTest extends BaseTest{
 			one(jobs).todo(); will(returnValue(Arrays.asList(first)));
 			one(clients).freeClients(); will(returnValue(Arrays.asList(firstClient)));
 			one(firstClient).work(first, config); will(returnValue(true));
-			one(firstClient).isAlive(); will(returnValue(true));
+			one(firstClient).isAlive(control); will(returnValue(true));
 		}});
 		assertThat(queue.iterate(), is(equalTo(1)));
 	}
@@ -98,7 +101,7 @@ public class DefaultJobQueueTest extends BaseTest{
 			one(jobs).todo(); will(returnValue(Arrays.asList(first)));
 			one(clients).freeClients(); will(returnValue(Arrays.asList(firstClient)));
 			one(firstClient).work(first, config); will(returnValue(false));
-			one(firstClient).isAlive(); will(returnValue(true));
+			one(firstClient).isAlive(control); will(returnValue(true));
 		}});
 		assertThat(queue.iterate(), is(equalTo(0)));
 	}

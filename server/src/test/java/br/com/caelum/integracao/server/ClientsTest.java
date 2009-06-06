@@ -34,7 +34,6 @@ import static org.hamcrest.Matchers.is;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.com.caelum.integracao.server.client.Tag;
 import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;
@@ -86,13 +85,6 @@ public class ClientsTest extends DatabaseBasedTest{
 		assertThat(clients.lockedClients().contains(free), is(equalTo(false)));
 		assertThat(clients.lockedClients().contains(inactive), is(equalTo(false)));
 		assertThat(clients.lockedClients().contains(busy), is(equalTo(true)));
-	}
-	
-	@Test
-	public void retrievingANonExistingTagCreatesIt() {
-		Tag tag = clients.getTag("garbage"); // creates
-		Tag found = clients.getTag("garbage");
-		assertThat(tag, is(equalTo(found)));
 	}
 
 }
