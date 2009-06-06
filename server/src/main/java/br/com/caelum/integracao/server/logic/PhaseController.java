@@ -36,6 +36,7 @@ import br.com.caelum.integracao.server.ExecuteCommandLine;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
+import br.com.caelum.integracao.server.label.Labels;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.vraptor.Delete;
@@ -57,9 +58,12 @@ public class PhaseController {
 	private final Projects projects;
 	private final Result result;
 
-	public PhaseController(Result result, Projects projects) {
+	private final Labels labels;
+
+	public PhaseController(Result result, Projects projects, Labels labels) {
 		this.result = result;
 		this.projects = projects;
+		this.labels = labels;
 	}
 
 	@Delete
@@ -72,10 +76,10 @@ public class PhaseController {
 
 	@Post
 	@Path("/project/{project.name}/command")
-	public void addCommand(Phase phase, String startCommand, String stopCommand) {
+	public void addCommand(Phase phase, String startCommand, String stopCommand, String tags) {
 		logger.debug("Adding a new command with " + startCommand + " and " + stopCommand);
 		phase = projects.get(phase);
-		ExecuteCommandLine line = new ExecuteCommandLine(phase, commandsFor(startCommand), commandsFor(stopCommand));
+		ExecuteCommandLine line = new ExecuteCommandLine(phase, commandsFor(startCommand), commandsFor(stopCommand), labels.lookup(tags));
 		projects.register(line);
 		showProject(phase.getProject());
 	}

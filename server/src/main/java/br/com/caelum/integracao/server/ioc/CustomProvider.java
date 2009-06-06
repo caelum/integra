@@ -31,6 +31,7 @@ import br.com.caelum.integracao.server.Builds;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
+import br.com.caelum.integracao.server.label.Labels;
 import br.com.caelum.integracao.server.logic.PingScm;
 import br.com.caelum.integracao.server.queue.Jobs;
 import br.com.caelum.integracao.server.queue.QueueThread;
@@ -52,6 +53,7 @@ public class CustomProvider extends PicoProvider {
         container.register(PingScm.class, PingScm.class);
         container.register(QueueThread.class, QueueThread.class);
         container.register(Builds.class, Builds.class);
+        container.register(Labels.class, Labels.class);
         container.register(RoutesConfiguration.class, CustomRoutes.class);
     }
 

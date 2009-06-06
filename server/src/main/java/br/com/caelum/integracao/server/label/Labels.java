@@ -25,44 +25,54 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.label;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 
+import br.com.caelum.integracao.server.client.Tag;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
-@RequestScoped
 @SuppressWarnings("unchecked")
-public class Clients {
-
+@RequestScoped
+public class Labels {
+	
 	private final Session session;
 
-	public Clients(Database database) {
-		this.session = database.getSession();
+	public Labels(Database db) {
+		this.session = db.getSession();
 	}
 
-	public void register(Client client) {
-		client.activate();
-		this.session.save(client);
+	public List<Tag> getTags() {
+		return session.createQuery("from Tag").list();
 	}
 
-	public List<Client> freeClients() {
-		return this.session.createQuery("from Client as c where c.active = true and c.currentJob is null").list();
+	public Tag getTag(String name) {
+		Query query = session.createQuery("from Tag as t where t.name in :names");
+		query.setParameter("name", name);
+		List<Tag> results = query.list();
+		if(results.isEmpty()) {
+			Tag tag = new Tag(name);
+			session.save(tag);
+			return tag;
+		}
+		return results.get(0);
 	}
 
-	public List<Client> lockedClients() {
-		return this.session.createQuery("from Client as c where c.currentJob is not null and c.active = true").list();
+	public List<Tag> lookup(String tags) {
+		List<Tag> list = new ArrayList<Tag>();
+		String[] tagsFound = tags.split("\\s*,\\s*");
+		for(String tag : tagsFound) {
+			if(!tag.equals("")) {
+				list.add(getTag(tag));
+			}
+		}
+		return list;
 	}
 
-	public List<Client> inactiveClients() {
-		return this.session.createQuery("from Client as c where c.active = false").list();
-	}
-
-	public Client get(Client client) {
-		return (Client) session.load(Client.class, client.getId());
-	}
 
 }

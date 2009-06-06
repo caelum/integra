@@ -108,7 +108,8 @@ public class QueueThread {
 		for (Job job : jobs) {
 			if (System.currentTimeMillis() - job.getStartTime().getTimeInMillis() > new Application(db).getConfig()
 					.getMaximumTimeForAJob() * 60 * 1000) {
-				// stop the job
+				job.getClient().stop(job);
+				result++;
 			}
 		}
 		result++;

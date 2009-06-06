@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.label.Labels;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
@@ -49,9 +50,12 @@ public class ClientController {
 	private final Clients clients;
 	private final Result result;
 
-	public ClientController(Clients db, Result result) {
+	private final Labels labels;
+
+	public ClientController(Clients db, Result result, Labels labels) {
 		this.clients = db;
 		this.result = result;
+		this.labels = labels;
 	}
 	
 	public void add(Client client) {
@@ -92,7 +96,7 @@ public class ClientController {
 	@Path("/client/show/{client.id}")
 	public void show(Client client) {
 		result.include("client", clients.get(client));
-		result.include("tags", clients.getTags());
+		result.include("tags", labels.getTags());
 	}
 	
 	@Put
@@ -100,12 +104,7 @@ public class ClientController {
 	public void update(Client client, String tags) {
 		logger.debug("Updating " + client.getId() + " with " + tags);
 		Client toUpdate = clients.get(client);
-		String[] tagsFound = tags.split("\\s*,\\s*");
-		for(String tag : tagsFound) {
-			if(!tag.equals("")) {
-				toUpdate.tag(clients.getTag(tag));
-			}
-		}
+		toUpdate.tag(labels.lookup(tags));
 		showList();
 	}
 

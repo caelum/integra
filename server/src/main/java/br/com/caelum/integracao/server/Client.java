@@ -71,9 +71,9 @@ public class Client {
 
 	@ManyToOne
 	private Job currentJob;
-	
+
 	@ManyToMany
-	private List<Tag> tags = new ArrayList<Tag>();
+	private List<Tag> labels = new ArrayList<Tag>();
 
 	private boolean active;
 
@@ -147,9 +147,8 @@ public class Client {
 		}
 		if (post.getResult() == 410) {
 			if (currentJob != null) {
-				logger
-						.warn("Leaving the job because the server just told me there is nothing running there..." +
-								"Did the client break or was it sending me the info right now?");
+				logger.warn("Leaving the job because the server just told me there is nothing running there..."
+						+ "Did the client break or was it sending me the info right now?");
 				currentJob = null;
 			}
 			return true;
@@ -163,22 +162,29 @@ public class Client {
 	public void leaveJob() {
 		this.currentJob = null;
 	}
+
 	public Job getCurrentJob() {
 		return currentJob;
 	}
-	
-	public List<Tag> getTags() {
-		return tags;
+
+	public List<Tag> getLabels() {
+		return labels;
 	}
-	
-	public void tag(Tag tag) {
-		if(!this.tags.contains(tag)) {
-			this.tags.add(tag);
-		}
+
+	public void tag(List<Tag> list) {
+		this.labels.addAll(list);
 	}
-	
+
 	void setCurrentJob(Job currentJob) {
 		this.currentJob = currentJob;
 	}
-	
+
+	/**
+	 * Will tell the client to stop this job. If the client returns a 200 its
+	 * suposed to call the server back telling what hapenned to the job.
+	 */
+	public void stop(Job job) {
+		
+	}
+
 }

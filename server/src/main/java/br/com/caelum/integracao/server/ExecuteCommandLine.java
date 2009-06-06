@@ -34,6 +34,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -43,6 +44,8 @@ import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import br.com.caelum.integracao.server.client.Tag;
 
 @Entity
 public class ExecuteCommandLine {
@@ -69,11 +72,15 @@ public class ExecuteCommandLine {
 	@ManyToOne
 	private Phase phase;
 
-	protected ExecuteCommandLine() {
+	@ManyToMany
+	private List<Tag> labels = new ArrayList<Tag>();
+
+	ExecuteCommandLine() {
 	}
 
-	public ExecuteCommandLine(Phase phase, String[] start, String[] stop) {
+	public ExecuteCommandLine(Phase phase, String[] start, String[] stop, List<Tag> labels) {
 		this.phase = phase;
+		this.labels = labels;
 		for (String command : start) {
 			this.start.add(new Command(command));
 		}
@@ -119,5 +126,9 @@ public class ExecuteCommandLine {
 	}
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public List<Tag> getLabels() {
+		return labels;
 	}
 }
