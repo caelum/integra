@@ -103,9 +103,9 @@ public class SvnControl implements ScmControl {
 	}
 
 	public Revision getNextRevision(Revision fromRevision, File log) throws ScmException {
-
-		String range = fromRevision.getName()+ ":HEAD";
-		String diff = extract(log, "svn", "diff", uri, "-r", range, "--summarize", "--non-interactive");
+		
+		String checkRange = (Long.parseLong(fromRevision.getName())+1)+ ":HEAD";
+		String diff = extract(log, "svn", "log", uri, "-r", checkRange, "-v", "--non-interactive");
 		if(diff.indexOf("Changed paths:")==-1) {
 			// there was no change in the content
 			return fromRevision;
