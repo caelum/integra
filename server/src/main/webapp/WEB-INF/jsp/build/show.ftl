@@ -88,6 +88,7 @@ Commands running or already run:<br/>
 </#list>
 
 <ul>
+	<#if content??>
 	<#list content as file>
 		<#if file.directory>
 			<li>(<a
@@ -99,5 +100,8 @@ Commands running or already run:<br/>
 			</a>) ${file.name }</li>
 		</#if>
 	</#list>
+	<#else>
+		no content found
+	</#if>
 </ul>
 </#compress>
