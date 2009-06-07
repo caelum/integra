@@ -93,7 +93,7 @@ public class Dispatcher {
 			post.send();
 			int result = post.getResult();
 			if (result != 200) {
-				throw new RuntimeException("Unable to continue with result " + result);
+				throw new RuntimeException("Unable to continue with result " + result + " with " + post.getContent());
 			}
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to run the job at the server.", e);

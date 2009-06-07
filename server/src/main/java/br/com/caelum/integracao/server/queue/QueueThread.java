@@ -114,15 +114,17 @@ public class QueueThread {
 					.getMaximumTimeForAJob() * 60 * 1000) {
 				Client client = job.getClient();
 				if(client.getCurrentJob()!=null && client.getCurrentJob().equals(job)) {
-					client.stop(new DefaultAgent(client.getBaseUri()));
+					if(client.stop(new DefaultAgent(client.getBaseUri()))) {
+						result++;
+					}
 				} else {
 					try {
 						job.finish("killing job because there was no response and the client is not actually running it", false, db);
+						result++;
 					} catch (IOException e) {
 						logger.error("Tried to kill job but couldnt.", e);
 					}
 				}
-				result++;
 			}
 		}
 		result++;

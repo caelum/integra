@@ -182,11 +182,13 @@ public class Client {
 	 * Will tell the client to stop this job. If the client returns a 200 its
 	 * suposed to call the server back telling what hapenned to the job.
 	 */
-	public void stop(Agent agent) {
+	public boolean stop(Agent agent) {
 		if(agent.stop(currentJob)) {
 			logger.debug("Successfully stopped the job after being requested to do so.");
 			this.currentJob = null;
+			return true;
 		}
+		return false;
 	}
 
 	public boolean canHandle(ExecuteCommandLine command, AgentControl control) {

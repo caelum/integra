@@ -14,7 +14,7 @@
 		<tr>
 			<td>${client.host }</td>
 			<td>${client.port }</td>
-			<td><font color="red">(busy)</font> ${client.currentJob }</td>
+			<td><font color="red">(busy)</font> #${client.currentJob.id } ${client.currentJob.command.name}</td>
 			<td><a href="http://${client.host }:${client.port }${client.context }/job/current">ask for its job</a></td>
 			<td><a href="${client.id}/stop?_method=post">stop</a></td>
 			<td><a href="${client.id }/deactivate?_method=post">deactivate</a></td>
