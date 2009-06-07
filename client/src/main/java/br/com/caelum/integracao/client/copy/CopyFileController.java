@@ -36,9 +36,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import br.com.caelum.integracao.CommandToExecute;
 import br.com.caelum.integracao.client.Settings;
 import br.com.caelum.integracao.client.project.Project;
+import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Resource;

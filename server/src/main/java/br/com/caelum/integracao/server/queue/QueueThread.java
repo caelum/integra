@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server.queue;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -112,7 +113,15 @@ public class QueueThread {
 			if (System.currentTimeMillis() - job.getStartTime().getTimeInMillis() > new Application(db).getConfig()
 					.getMaximumTimeForAJob() * 60 * 1000) {
 				Client client = job.getClient();
-				client.stop(new DefaultAgent(client.getBaseUri()));
+				if(client.getCurrentJob()!=null && client.getCurrentJob().equals(job)) {
+					client.stop(new DefaultAgent(client.getBaseUri()));
+				} else {
+					try {
+						job.finish("killing job because there was no response and the client is not actually running it", false, db);
+					} catch (IOException e) {
+						logger.error("Tried to kill job but couldnt.", e);
+					}
+				}
 				result++;
 			}
 		}

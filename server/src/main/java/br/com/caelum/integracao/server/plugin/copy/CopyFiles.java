@@ -36,7 +36,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.CommandToExecute;
+import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.http.Method;
 import br.com.caelum.integracao.server.Build;
