@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
+import br.com.caelum.integracao.server.action.BasicProjects;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
@@ -113,8 +114,13 @@ public class ProjectController {
 		validator.validate();
 		Runnable execution = new Runnable() {
 			public void run() {
-				new ProjectStart(new Database(factory)).runProject(found.getName());
-				queue.wakeup();
+				Database db = new Database(factory);
+				try {
+					new ProjectStart(db).runProject(found.getName());
+					queue.wakeup();
+				} finally {
+					db.close();
+				}
 			}
 		};
 		Thread thread = new Thread(execution);
@@ -123,9 +129,10 @@ public class ProjectController {
 
 	@Post
 	@Path("/finish/job/{job.id}")
-	public void finish(final Job job, final String checkoutResult, final String stopResult, final String startResult, final boolean success)  {
+	public void finish(final Job job, final String checkoutResult, final String stopResult, final String startResult,
+			final boolean success) {
 		Job loaded = jobs.load(job.getId());
-		if(loaded.getClient()==null) {
+		if (loaded.getClient() == null) {
 			// we do not know who was executing this job!!!
 			logger.error("Dont know who was executing " + job.getId());
 		} else {
@@ -133,7 +140,8 @@ public class ProjectController {
 		}
 		new Thread(new Runnable() {
 			public void run() {
-				new ProjectContinue(new Database(factory)).nextPhase(job.getId(), checkoutResult, startResult, stopResult, success);
+				new ProjectContinue(new Database(factory)).nextPhase(job.getId(), checkoutResult, startResult,
+						stopResult, success);
 				queue.wakeup();
 			}
 		}).start();
@@ -153,7 +161,7 @@ public class ProjectController {
 		project.add(plugin);
 		showProject(project);
 	}
-	
+
 	private void showProject(Project project) {
 		result.use(Results.logic()).redirectTo(ProjectController.class).show(project);
 	}
@@ -164,7 +172,7 @@ public class ProjectController {
 		result.include("plugins", app.getConfig().getAvailablePlugins());
 		result.include("project", projects.get(project.getName()));
 	}
-	
+
 	@Get
 	@Path("/jobs")
 	public List<Job> showJobs() {

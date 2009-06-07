@@ -45,7 +45,7 @@ import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.client.Tag;
+import br.com.caelum.integracao.server.label.Label;
 
 @Entity
 public class ExecuteCommandLine {
@@ -75,12 +75,12 @@ public class ExecuteCommandLine {
 	private Phase phase;
 
 	@ManyToMany
-	private List<Tag> labels = new ArrayList<Tag>();
+	private List<Label> labels = new ArrayList<Label>();
 
 	ExecuteCommandLine() {
 	}
 
-	public ExecuteCommandLine(Phase phase, String[] start, String[] stop, List<Tag> labels) {
+	public ExecuteCommandLine(Phase phase, String[] start, String[] stop, List<Label> labels) {
 		this.phase = phase;
 		this.labels = labels;
 		for (String command : start) {
@@ -130,7 +130,7 @@ public class ExecuteCommandLine {
 		this.id = id;
 	}
 
-	public List<Tag> getLabels() {
+	public List<Label> getLabels() {
 		return labels;
 	}
 

@@ -28,6 +28,7 @@
 package br.com.caelum.integracao.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -50,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.plugin.PluginToRun;
+import br.com.caelum.integracao.server.scm.Revision;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
 
@@ -82,6 +84,9 @@ public class Project {
 	private List<Phase> phases = new ArrayList<Phase>();
 	@NotNull
 	private File baseDir;
+	
+	private boolean buildEveryRevision;
+	private boolean allowAutomaticStartNextRevisionWhileBuildingPrevious;
 
 	private Long buildCount = 0L;
 	
@@ -246,5 +251,53 @@ public class Project {
 	public Build getLastBuild() {
 		return getBuild(getBuildCount());
 	}
+
+	public boolean isBuildEveryRevision() {
+		return buildEveryRevision;
+	}
+	
+	public void setBuildEveryRevision(boolean buildEveryRevision) {
+		this.buildEveryRevision = buildEveryRevision;
+	}
+
+	public Revision extractNextRevision(Build forBuild,Builds builds, ScmControl control) throws IOException, ScmException {
+		logger.debug("Checking revision for " + getName() + ", build = " + buildCount);
+		Build lastBuild = getBuild(forBuild.getBuildCount() - 1);
+
+		File log = File.createTempFile(Files.CHECK_REVISION, ".txt");
+		Revision revision = extractRevisionAfter(lastBuild, control, builds, log);
+		log.renameTo(forBuild.getFile("revision-check.txt"));
+		return revision;
+		
+	}
+
+	public Revision extractRevisionAfter(Build lastBuild, ScmControl control, Builds builds, File log) throws IOException, ScmException {
+		Revision lastRevision = lastBuild == null ? null : lastBuild.getRevision();
+		
+		Revision revision;
+		if(lastRevision!=null && isBuildEveryRevision()) {
+			revision = control.getNextRevision(lastRevision, log);
+		} else {
+			revision = control.getCurrentRevision(lastRevision, log);
+		}
+		
+		Revision found = builds.contains(this, revision.getName());
+		if (found != null) {
+			revision = found;
+		} else {
+			builds.register(revision);
+		}
+		return revision;
+	}
+
+	public void setAllowAutomaticStartNextRevisionWhileBuildingPrevious(
+			boolean allowAutomaticStartNextRevisionWhileBuildingPrevious) {
+		this.allowAutomaticStartNextRevisionWhileBuildingPrevious = allowAutomaticStartNextRevisionWhileBuildingPrevious;
+	}
+
+	public boolean isAllowAutomaticStartNextRevisionWhileBuildingPrevious() {
+		return allowAutomaticStartNextRevisionWhileBuildingPrevious;
+	}
+
 
 }

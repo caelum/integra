@@ -77,8 +77,13 @@ public class SvnControl implements ScmControl {
 			from = "" + (Long.parseLong(fromRevision.getName()) + 1) + ":";
 		}
 		String revisionRange = from + "HEAD";
-		String logContent = extract(log, "svn", "log", uri, "-r", revisionRange, "-v", "--non-interactive");
+		String logContent = extractInfoForRevision(log, revisionRange);
 		return new Revision(name, logContent, "");
+	}
+
+	private String extractInfoForRevision(File log, String revisionRange) throws ScmException {
+		String logContent = extract(log, "svn", "log", uri, "-r", revisionRange, "-v", "--non-interactive");
+		return logContent;
 	}
 
 	private String extract(File log, String... cmd) throws ScmException {
@@ -97,4 +102,20 @@ public class SvnControl implements ScmControl {
 		}
 	}
 
+	public Revision getNextRevision(Revision fromRevision, File log) throws ScmException {
+
+		String range = fromRevision.getName()+ ":HEAD";
+		String diff = extract(log, "svn", "diff", uri, "-r", range, "--summarize", "--non-interactive");
+		if(diff.indexOf("Changed paths:")==-1) {
+			// there was no change in the content
+			return fromRevision;
+		}
+		
+		int start = diff.lastIndexOf("r", diff.indexOf("|")) +1;
+		int end = diff.indexOf( " ", start);
+		String name = diff.substring(start,end);
+		return new Revision(name, extractInfoForRevision(log, name), "");
+		
+	}
+	
 }

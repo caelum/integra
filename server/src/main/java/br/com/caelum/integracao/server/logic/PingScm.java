@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Build;
+import br.com.caelum.integracao.server.Builds;
 import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.Files;
 import br.com.caelum.integracao.server.Project;
@@ -104,16 +105,20 @@ public class PingScm {
 			// no build so far
 			return;
 		}
+		Builds builds = new Builds(db);
 		logger.debug("Project " + project.getName() + " last build finished=" + lastBuild.isFinished());
-		if (lastBuild.isFinished()) {
+		if (lastBuild.isFinished() || project.isAllowAutomaticStartNextRevisionWhileBuildingPrevious()) {
+			logger.debug("Checking if " + project.getName() + " needs a build");
 			Revision lastRevision = lastBuild.getRevision();
 			try {
 				File log = File.createTempFile(Files.CHECK_REVISION, ".txt");
-				Revision revision = project.getControl().getCurrentRevision(lastRevision, log);
-				if (lastRevision == null || !lastRevision.getName().equals(revision.getName())) {
-					logger.debug("Project " + project.getName() + " has a revision '" + revision.getName()
+				Revision nextRevision = project.extractRevisionAfter(lastBuild, project.getControl(), builds, log);
+				if (lastRevision == null || !lastRevision.getName().equals(nextRevision.getName())) {
+					logger.debug("Project " + project.getName() + " has a revision '" + nextRevision.getName()
 							+ "', therefore we will start the build.");
 					new ProjectStart(db).runProject(project.getName());
+				} else {
+					logger.debug(project.getName() + " did not require a new build");
 				}
 			} catch (Exception e) {
 				logger.debug("Unable to build project " + project.getName(), e);

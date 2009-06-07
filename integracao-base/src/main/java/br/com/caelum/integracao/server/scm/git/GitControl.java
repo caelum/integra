@@ -113,4 +113,8 @@ public class GitControl implements ScmControl {
 		return new Revision(name, "", "");
 	}
 
+	public Revision getNextRevision(Revision fromRevision, File log) throws ScmException {
+		return null;
+	}
+
 }

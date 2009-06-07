@@ -33,7 +33,6 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-import br.com.caelum.integracao.server.client.Tag;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
@@ -47,24 +46,24 @@ public class Labels {
 		this.session = db.getSession();
 	}
 
-	public List<Tag> getTags() {
+	public List<Label> getTags() {
 		return session.createQuery("from Tag").list();
 	}
 
-	public Tag getLabel(String name) {
+	public Label getLabel(String name) {
 		Query query = session.createQuery("from Tag as t where t.name = :name");
 		query.setParameter("name", name);
-		List<Tag> results = query.list();
+		List<Label> results = query.list();
 		if(results.isEmpty()) {
-			Tag tag = new Tag(name);
+			Label tag = new Label(name);
 			session.save(tag);
 			return tag;
 		}
 		return results.get(0);
 	}
 
-	public List<Tag> lookup(String tags) {
-		List<Tag> list = new ArrayList<Tag>();
+	public List<Label> lookup(String tags) {
+		List<Label> list = new ArrayList<Label>();
 		String[] tagsFound = tags.split("\\s*,\\s*");
 		for(String tag : tagsFound) {
 			if(!tag.equals("")) {

@@ -43,7 +43,7 @@ import org.junit.Test;
 import br.com.caelum.integracao.server.agent.Agent;
 import br.com.caelum.integracao.server.agent.AgentControl;
 import br.com.caelum.integracao.server.agent.AgentStatus;
-import br.com.caelum.integracao.server.client.Tag;
+import br.com.caelum.integracao.server.label.Label;
 import br.com.caelum.integracao.server.project.BaseTest;
 import br.com.caelum.integracao.server.queue.Job;
 
@@ -156,9 +156,9 @@ public class ClientTest extends BaseTest {
 				exactly(2).of(agent).getStatus(); will(returnValue(AgentStatus.FREE));
 			}
 		});
-		Tag java = new Tag("java");
-		Tag ant = new Tag("ant");
-		Tag maven = new Tag("mvn");
+		Label java = new Label("java");
+		Label ant = new Label("ant");
+		Label maven = new Label("mvn");
 		Client c = new Client();
 		c.tag(Arrays.asList(java,ant));
 		assertThat(c.canHandle(new ExecuteCommandLine(new Phase(),new String[0], new String[0], Arrays.asList(java)), control), is(equalTo(true)));

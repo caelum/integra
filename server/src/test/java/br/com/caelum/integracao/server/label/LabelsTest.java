@@ -33,7 +33,6 @@ import static org.hamcrest.Matchers.is;
 
 import org.junit.Test;
 
-import br.com.caelum.integracao.server.client.Tag;
 import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 
 public class LabelsTest extends DatabaseBasedTest{
@@ -41,8 +40,8 @@ public class LabelsTest extends DatabaseBasedTest{
 	@Test
 	public void retrievingANonExistingTagCreatesIt() {
 		Labels labels = new Labels(database);
-		Tag tag = labels.getLabel("garbage"); // creates
-		Tag found = labels.getLabel("garbage");
+		Label tag = labels.getLabel("garbage"); // creates
+		Label found = labels.getLabel("garbage");
 		assertThat(tag, is(equalTo(found)));
 	}
 

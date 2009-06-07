@@ -25,7 +25,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.client;
+package br.com.caelum.integracao.server.label;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -35,7 +35,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(uniqueConstraints=@UniqueConstraint(columnNames="name"))
-public class Tag {
+public class Label {
 	
 	@Id
 	@GeneratedValue
@@ -43,11 +43,11 @@ public class Tag {
 	
 	private String name;
 	
-	public Tag(String name) {
+	public Label(String name) {
 		this.name = name;
 	}
 	
-	Tag() {
+	Label() {
 	}
 
 	public String getName() {

@@ -69,15 +69,15 @@ public class SendMail implements Plugin {
 			email.setFrom(fromMail, fromName);
 			if(build.isSuccessSoFar()) {
 				if(build.buildStatusChangedFromLastBuild()) {
-					email.setSubject(phase.getProject().getName()  + " " + build.getRevision() + " was a success.");
-					email.setMsg(phase.getProject().getName()  + " build " + build.getRevision() + " was a success.");
+					email.setSubject(phase.getProject().getName()  + " " + build.getBuildCount() + " was a success.");
+					email.setMsg(phase.getProject().getName()  + " build " + build.getBuildCount() + " was a success.");
 				} else {
 					logger.debug("There is no need to send the email...");
 					return true;
 				}
 			} else {
-				email.setSubject(phase.getProject().getName()  + " " + build.getRevision() + " failed.");
-				email.setMsg(phase.getProject().getName()  + " build " + build.getRevision() + " failed.");
+				email.setSubject(phase.getProject().getName()  + " " + build.getBuildCount() + " failed.");
+				email.setMsg(phase.getProject().getName()  + " build " + build.getBuildCount() + " failed.");
 			}
 			email.send();
 			return true;

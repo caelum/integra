@@ -46,7 +46,7 @@ import br.com.caelum.integracao.server.action.Dispatcher;
 import br.com.caelum.integracao.server.agent.Agent;
 import br.com.caelum.integracao.server.agent.AgentControl;
 import br.com.caelum.integracao.server.agent.AgentStatus;
-import br.com.caelum.integracao.server.client.Tag;
+import br.com.caelum.integracao.server.label.Label;
 import br.com.caelum.integracao.server.queue.Job;
 
 /**
@@ -73,7 +73,7 @@ public class Client {
 	private Job currentJob;
 
 	@ManyToMany
-	private List<Tag> labels = new ArrayList<Tag>();
+	private List<Label> labels = new ArrayList<Label>();
 
 	private boolean active;
 
@@ -166,11 +166,11 @@ public class Client {
 		return currentJob;
 	}
 
-	public List<Tag> getLabels() {
+	public List<Label> getLabels() {
 		return labels;
 	}
 
-	public void tag(List<Tag> list) {
+	public void tag(List<Label> list) {
 		this.labels.addAll(list);
 	}
 

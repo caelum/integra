@@ -63,7 +63,6 @@ public class ProjectStart {
 			if (database.hasTransaction()) {
 				database.rollback();
 			}
-			database.close();
 		}
 	}
 

@@ -34,6 +34,6 @@ public class Files {
 	/**
 	 * used when checking a revision from a svn controller.
 	 */
-	public static final String CHECK_REVISION = "integra-revision-";
+	public static final String CHECK_REVISION = "integracao-revision-";
 
 }

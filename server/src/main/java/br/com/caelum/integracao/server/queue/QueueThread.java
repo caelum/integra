@@ -127,7 +127,6 @@ public class QueueThread {
 				}
 			}
 		}
-		result++;
 		db.commit();
 		logger.debug("Job queue killed " + result + " old jobs");
 	}
