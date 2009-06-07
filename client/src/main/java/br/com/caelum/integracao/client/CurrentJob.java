@@ -171,7 +171,7 @@ public class CurrentJob {
 	}
 
 	public synchronized boolean stop(String jobIdToStop) {
-		logger.debug("Stopping job " + project.getName() + " looking for " + jobIdToStop);
+		logger.debug("Stopping job, looking for " + jobIdToStop);
 		if(this.jobId == null) {
 			logger.warn("Could not stop " + jobIdToStop + " because I am not running anything");
 			return true;
