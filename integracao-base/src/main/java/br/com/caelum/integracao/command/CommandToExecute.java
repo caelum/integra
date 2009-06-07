@@ -154,4 +154,8 @@ public class CommandToExecute {
 	enum Status {
 		RUN, STOP
 	}
+	
+	public String getName() {
+		return Arrays.toString(cmd);
+	}
 }

@@ -176,7 +176,7 @@ public class CurrentJob {
 			logger.warn("Could not stop " + jobIdToStop + " because I am not running anything");
 			return true;
 		}
-		if(this.jobId.equals(jobIdToStop)) {
+		if(!this.jobId.equals(jobIdToStop)) {
 			logger.error("Could not stop " + jobIdToStop + " because I am running: " + this.jobId);
 			return false;
 		}

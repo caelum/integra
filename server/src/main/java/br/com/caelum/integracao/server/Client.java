@@ -192,5 +192,9 @@ public class Client {
 	public boolean canHandle(ExecuteCommandLine command, AgentControl control) {
 		return isAlive(control) && this.labels.containsAll(command.getLabels());
 	}
+	
+	public boolean isAlive() {
+		return isAlive(new AgentControl());
+	}
 
 }

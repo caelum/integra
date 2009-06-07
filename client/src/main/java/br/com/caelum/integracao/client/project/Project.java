@@ -121,5 +121,11 @@ public class Project {
 			executing.stop();
 		}
 	}
+	public String getExecutingCommand() {
+		if(executing!=null) {
+			return executing.getName();
+		}
+		return "";
+	}
 
 }

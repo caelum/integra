@@ -77,7 +77,7 @@ public class DefaultAgent implements Agent {
 	}
 
 	public boolean stop(Job currentJob) {
-		Method post = new DefaultHttp().post(baseUri + "/job/stop/");
+		Method post = new DefaultHttp().post(baseUri + "/job/stop");
 		post.with("jobId", ""+ currentJob.getId());
 		try {
 			try {
@@ -87,7 +87,11 @@ public class DefaultAgent implements Agent {
 				return false;
 			}
 			if (post.getResult() != 200) {
-				logger.debug("Could not stop the job.", currentJob.getId());
+				try {
+					logger.debug("Could not stop the job: " + post.getResult() + " with: " + post.getContent());
+				} catch (IOException e) {
+					logger.debug("Could not stop the job: " + post.getResult(),e);
+				}
 				return false;
 			}
 			return true;
