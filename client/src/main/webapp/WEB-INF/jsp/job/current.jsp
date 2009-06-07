@@ -2,6 +2,7 @@
 <html>
 <c:if test="${job.running}">
 	Building ${job.project.name} @ ${job.project.uri}<br />
+	Executing: ${job.project.executingCommand}<br/>
 	Start time: ${job.start.time }<br/>
 	Time so far: ${job.time / 60} minutes ${job.time % 60} seconds<br/>
 	Thread name: ${job.thread.name} <br/>

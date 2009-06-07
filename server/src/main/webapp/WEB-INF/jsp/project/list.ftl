@@ -1,14 +1,16 @@
 <h2>Projects</h2>
 
 <#list projectList as project>
+	<a href="${project.name}/run?_method=post">force build</a>
 	<a href="${project.name}/">view</a>
 	<span class="title">${project.name}</span> -
 	<#if project.lastBuild??>
-		build ${project.lastBuild.buildCount}
-		<#if !project.lastBuild.finished>
+		<#assign build = project.lastBuild>
+		<a href="${project.name}/build/${build.buildCount}/view/">build ${build.buildCount}</a>
+		<#if !build.finished>
 			<font color="orange">is building</font>
 		<#else>
-			<#if project.lastBuild.successSoFar>
+			<#if build.successSoFar>
 				<font color="green">was a success</font>
 			<#else>
 				<font color="red">failed</font>
