@@ -25,13 +25,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.plugin.copy;
+package br.com.caelum.integracao.server.plugin.junit;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
 
@@ -40,16 +39,15 @@ import br.com.caelum.integracao.server.plugin.PluginInformation;
  * 
  * @author guilherme silveira
  */
-public class CopyFilesInformation implements PluginInformation {
+public class JUnitReportInformation implements PluginInformation {
 
 	public List<String> getParameters() {
-		return Arrays.asList(new String[] { "artifactDirectories" });
+		return Arrays.asList(new String[] { "reportDirectory" });
 	}
 
-	public CopyFiles getPlugin(Database db, Map<String, String> parameters) {
-		String value = parameters.get("artifactDirectories");
-		String[] dirs = value == null ? new String[0] : value.split(",");
-		return new CopyFiles(new DefaultHttp(), dirs);
+	public JUnitReport getPlugin(Database db, Map<String, String> parameters) {
+		String value = parameters.get("reportDirectory");
+		return new JUnitReport(value);
 	}
 
 }

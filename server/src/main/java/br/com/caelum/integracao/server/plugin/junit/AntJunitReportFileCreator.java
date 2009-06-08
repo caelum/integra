@@ -25,31 +25,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.plugin.copy;
+package br.com.caelum.integracao.server.plugin.junit;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
 
-import br.com.caelum.integracao.http.DefaultHttp;
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.plugin.PluginInformation;
+public class AntJunitReportFileCreator {
 
-/**
- * Copies artifacts from the client machine to the server.
- * 
- * @author guilherme silveira
- */
-public class CopyFilesInformation implements PluginInformation {
+	private final List<File> reportsDir;
 
-	public List<String> getParameters() {
-		return Arrays.asList(new String[] { "artifactDirectories" });
+	public AntJunitReportFileCreator(List<File> reportsDir) {
+		this.reportsDir = reportsDir;
 	}
 
-	public CopyFiles getPlugin(Database db, Map<String, String> parameters) {
-		String value = parameters.get("artifactDirectories");
-		String[] dirs = value == null ? new String[0] : value.split(",");
-		return new CopyFiles(new DefaultHttp(), dirs);
+	public void create(PrintWriter out, File outputDir) {
+		out.println("<project name=\"junit\" default=\"report\">");
+		out.println("\t<target name=\"report\">");
+		out.println("\t<junitreport todir=\"./reports\">");
+		for (File reportDir : reportsDir) {
+			out.println("\t\t<fileset dir=\"" + reportDir.getAbsolutePath() + "\">");
+			out.println("\t\t\t<include name=\"TEST-*.xml\"/>");
+			out.println("\t\t</fileset>");
+		}
+		out.println("\t\t<report format=\"frames\" todir=\"" + outputDir + "\"/>");
+		out.println("\t</junitreport>");
+		out.println("\t</target>");
+		out.println("</project>");
 	}
 
 }

@@ -41,9 +41,8 @@ import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.scm.ScmException;
 
 public class GitControlTest extends AtDirectoryTest {
-	
-	private File myGitDir;
 
+	private File myGitDir;
 
 	@Before
 	public void configGit() throws IOException {
@@ -52,10 +51,10 @@ public class GitControlTest extends AtDirectoryTest {
 		File file = new File(myGitDir, "sample-file");
 		givenA(file, "misc content");
 		prepare("git", "add", file.getAbsolutePath()).at(myGitDir).run();
-		prepare("git","commit", "-m", "ha").at(myGitDir).run();
+		prepare("git", "commit", "-m", "ha").at(myGitDir).run();
 	}
-	
-	private CommandToExecute prepare(String ... cmd) {
+
+	private CommandToExecute prepare(String... cmd) {
 		return new CommandToExecute(cmd);
 	}
 
@@ -65,23 +64,23 @@ public class GitControlTest extends AtDirectoryTest {
 		File log = new File(this.baseDir, "my-checkout");
 
 		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "my-cloned-cruise");
-		Assert.assertEquals(0,control1.checkoutOrUpdate(null,log));
+		Assert.assertEquals(0, control1.checkoutOrUpdate(null, log));
 		File file = new File(control1.getDir(), "test-file");
 		givenA(file, "misc content");
 
 		GitControl control2 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "apostilas-2");
-		Assert.assertEquals(0,control2.checkoutOrUpdate(null,new File(this.baseDir, "my-second-checkout")));
-		
-		Assert.assertEquals(0,control1.add(file));
-		Assert.assertEquals(0,control1.commit("commiting test file"));
-		control2.checkoutOrUpdate(null,log);
+		Assert.assertEquals(0, control2.checkoutOrUpdate(null, new File(this.baseDir, "my-second-checkout")));
+
+		Assert.assertEquals(0, control1.add(file));
+		Assert.assertEquals(0, control1.commit("commiting test file"));
+		control2.checkoutOrUpdate(null, log);
 		File found = new File(control2.getDir(), "test-file");
 		Assert.assertTrue(found.exists());
 		String content = new BufferedReader(new FileReader(found)).readLine();
 		Assert.assertEquals("misc content", content);
 		control2.remove(found);
 		control2.commit("removed test file");
-		control1.checkoutOrUpdate(null,log);
+		control1.checkoutOrUpdate(null, log);
 		Assert.assertFalse(file.exists());
 	}
 

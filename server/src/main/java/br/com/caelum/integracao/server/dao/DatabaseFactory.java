@@ -42,6 +42,7 @@ import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.RegisteredPlugin;
 import br.com.caelum.integracao.server.plugin.build.RemoveOldBuildsInformation;
 import br.com.caelum.integracao.server.plugin.copy.CopyFilesInformation;
+import br.com.caelum.integracao.server.plugin.junit.JUnitReportInformation;
 import br.com.caelum.integracao.server.plugin.mail.SendMailInformation;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
@@ -68,6 +69,7 @@ public class DatabaseFactory {
 					session.save(new RegisteredPlugin(cfg, CopyFilesInformation.class));
 					session.save(new RegisteredPlugin(cfg, SendMailInformation.class));
 					session.save(new RegisteredPlugin(cfg, RemoveOldBuildsInformation.class));
+					session.save(new RegisteredPlugin(cfg, JUnitReportInformation.class));
 					db.commit();
 				} finally {
 					if (db.hasTransaction()) {

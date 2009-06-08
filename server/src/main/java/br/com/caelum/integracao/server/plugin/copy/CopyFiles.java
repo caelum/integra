@@ -72,6 +72,9 @@ public class CopyFiles implements Plugin {
 			for (Job job : jobs) {
 				success &= execute(job, projectName, build, logFile, phase);
 			}
+			if(!success) {
+				logFile.error("We were unable to copy the files, therefore we are returning a phase failure.");
+			}
 			return success;
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);

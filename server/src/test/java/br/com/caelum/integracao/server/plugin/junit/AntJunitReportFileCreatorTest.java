@@ -25,31 +25,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.plugin.copy;
+package br.com.caelum.integracao.server.plugin.junit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
-import br.com.caelum.integracao.http.DefaultHttp;
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.plugin.PluginInformation;
+import org.junit.Test;
 
-/**
- * Copies artifacts from the client machine to the server.
- * 
- * @author guilherme silveira
- */
-public class CopyFilesInformation implements PluginInformation {
+public class AntJunitReportFileCreatorTest {
 
-	public List<String> getParameters() {
-		return Arrays.asList(new String[] { "artifactDirectories" });
-	}
-
-	public CopyFiles getPlugin(Database db, Map<String, String> parameters) {
-		String value = parameters.get("artifactDirectories");
-		String[] dirs = value == null ? new String[0] : value.split(",");
-		return new CopyFiles(new DefaultHttp(), dirs);
+	@Test
+	public void shouldCreateContentForAllDirectories() {
+		String content = 	"<project name=\"junit\" default=\"report\">\n" + 
+								"\t<target name=\"report\">\n" +
+								"\t<junitreport todir=\"./reports\">\n" +
+								"\t\t<fileset dir=\"/tmp/first/dir\">\n"+
+								"\t\t\t<include name=\"TEST-*.xml\"/>\n" +
+								"\t\t</fileset>\n" + 
+								"\t\t<fileset dir=\"/tmp/second/dir\">\n"+
+								"\t\t\t<include name=\"TEST-*.xml\"/>\n" +
+								"\t\t</fileset>\n" + 
+								"\t\t<report format=\"frames\" todir=\"/tmp/output/dir/anywhere\"/>\n" +
+								"\t</junitreport>\n"+
+								"\t</target>\n" +
+							"</project>\n";
+		StringWriter out = new StringWriter();
+		File outputDir = new File("/tmp/output/dir/anywhere");
+		File firstDir = new File("/tmp/first/dir");
+		File secondDir = new File("/tmp/second/dir");
+		new AntJunitReportFileCreator(Arrays.asList(firstDir, secondDir)).create(new PrintWriter(out, true), outputDir);
+		assertThat(out.getBuffer().toString(), is(equalTo(content)));
 	}
 
 }

@@ -144,8 +144,8 @@ public class CurrentJob {
 						addTo(post, checkoutResult, "checkout");
 						addTo(post, startResult, "start");
 						addTo(post, stopResult, "stop");
-						post.with("success", ""
-								+ !(checkoutResult.failed() || startResult.failed() || stopResult.failed()));
+						post.with("success", "" + (failed(checkoutResult) || failed(stopResult) || failed(startResult))
+								);
 						post.send();
 						if (post.getResult() != 200) {
 							logger.error(post.getContent());
@@ -162,8 +162,13 @@ public class CurrentJob {
 		}
 	}
 
+	private boolean failed(ProjectRunResult result) {
+		return result==null || result.failed();
+	}
+
 	private void addTo(Method post, ProjectRunResult result, String prefix) {
 		if (result != null) {
+			logger.debug(prefix + "Result success=" + result.getResult());
 			post.with(prefix + "Result", result.getContent());
 		} else {
 			post.with(prefix + "Result", "unable to read result");
