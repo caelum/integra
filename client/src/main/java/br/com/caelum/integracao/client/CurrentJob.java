@@ -79,8 +79,8 @@ public class CurrentJob {
 		return thread;
 	}
 
-	public synchronized void start(String jobId, Project project, final String revision, final List<String> startCommand,
-			final List<String> stopCommand, final String resultUri) {
+	public synchronized void start(String jobId, Project project, final String revision,
+			final List<String> startCommand, final List<String> stopCommand, final String resultUri) {
 		if (isRunning()) {
 			throw new RuntimeException("Cannot take another job as im currently processing " + this.project.getName());
 		}
@@ -144,18 +144,17 @@ public class CurrentJob {
 						addTo(post, checkoutResult, "checkout");
 						addTo(post, startResult, "start");
 						addTo(post, stopResult, "stop");
-						post.with("success", "" + (failed(checkoutResult) || failed(stopResult) || failed(startResult))
-								);
+						post
+								.with("success", ""
+										+ !(failed(checkoutResult) || failed(stopResult) || failed(startResult)));
 						post.send();
 						if (post.getResult() != 200) {
 							logger.error(post.getContent());
 							throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
 						}
 					} catch (Exception e) {
-						logger
-								.error(
-										"Was unable to notify the server of this request... maybe the server think im still busy.",
-										e);
+						logger.error("Was unable to notify the server of this request..."
+								+ "maybe the server think im still busy.", e);
 					}
 				}
 			}
@@ -163,7 +162,7 @@ public class CurrentJob {
 	}
 
 	private boolean failed(ProjectRunResult result) {
-		return result==null || result.failed();
+		return result == null || result.failed();
 	}
 
 	private void addTo(Method post, ProjectRunResult result, String prefix) {
@@ -177,11 +176,11 @@ public class CurrentJob {
 
 	public synchronized boolean stop(String jobIdToStop) {
 		logger.debug("Stopping job, looking for " + jobIdToStop);
-		if(this.jobId == null) {
+		if (this.jobId == null) {
 			logger.warn("Could not stop " + jobIdToStop + " because I am not running anything");
 			return true;
 		}
-		if(!this.jobId.equals(jobIdToStop)) {
+		if (!this.jobId.equals(jobIdToStop)) {
 			logger.error("Could not stop " + jobIdToStop + " because I am running: " + this.jobId);
 			return false;
 		}

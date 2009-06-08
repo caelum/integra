@@ -29,12 +29,19 @@ package br.com.caelum.integracao.http;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.multipart.FilePart;
+import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
+import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +57,8 @@ public class Method {
 	private final PostMethod post;
 	private final HttpClient client;
 	private int result;
+	
+	private List<Part> parts = new ArrayList<Part>();
 
 	private boolean released;
 
@@ -60,11 +69,18 @@ public class Method {
 
 	public Method with(String key, String value) {
 		logger.debug("with " + key + "=" + value);
-		post.addParameter(key, value);
+		parts.add(new StringPart(key, value));
+		return this;
+	}
+
+	public Method with(String key, File f) throws FileNotFoundException {
+		logger.debug("with " + key + "=" + f.getAbsolutePath());
+		parts.add(new FilePart(key, f));
 		return this;
 	}
 
 	public void send() throws IOException {
+		post.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[0]), post.getParams()));
 		this.result = client.executeMethod(post);
 	}
 

@@ -68,7 +68,7 @@ public class JUnitReport implements Plugin {
 			// executes the ant task to generate the junit report from all those
 			// reports
 			logger.debug("Creating junit report generation xml file");
-			build.getFile(phase.getName()+ "/junit").mkdirs();
+			build.getFile(phase.getName()+ "/junit/reports").mkdirs();
 			File xml = build.getFile(phase.getName() + "/junit/report-generate.xml");
 			FileWriter writer = new FileWriter(xml);
 			PrintWriter out = new PrintWriter(writer, true);
