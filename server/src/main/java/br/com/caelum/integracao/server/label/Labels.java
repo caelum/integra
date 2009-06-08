@@ -47,11 +47,11 @@ public class Labels {
 	}
 
 	public List<Label> getTags() {
-		return session.createQuery("from Tag").list();
+		return session.createQuery("from Label").list();
 	}
 
 	public Label getLabel(String name) {
-		Query query = session.createQuery("from Tag as t where t.name = :name");
+		Query query = session.createQuery("from Label as t where t.name = :name");
 		query.setParameter("name", name);
 		List<Label> results = query.list();
 		if(results.isEmpty()) {
