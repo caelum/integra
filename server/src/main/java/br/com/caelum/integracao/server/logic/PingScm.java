@@ -87,6 +87,11 @@ public class PingScm {
 		try {
 			Config config = new Application(db).getConfig();
 			int time = config.getCheckInterval();
+			if(time<=0) {
+				// no automatic pinging, thank you
+				Thread.sleep(5 * 60 * 1000);
+				return;
+			}
 			Thread.sleep(time * 1000);
 			Projects projects = new Projects(db);
 			for (Project project : projects.all()) {
