@@ -7,6 +7,7 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+	<meta http-equiv="refresh" content="40" />
 	<title><decorator:title default="Integracao" /></title>
 	<div class="actions">
 		<a href="${pageContext.request.contextPath }/client/form">new client</a>
