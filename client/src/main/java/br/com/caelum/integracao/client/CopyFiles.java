@@ -25,76 +25,64 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.client.copy;
+package br.com.caelum.integracao.client;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
-import br.com.caelum.integracao.client.Settings;
 import br.com.caelum.integracao.client.project.Project;
 import br.com.caelum.integracao.command.CommandToExecute;
-import br.com.caelum.vraptor.Path;
-import br.com.caelum.vraptor.Post;
-import br.com.caelum.vraptor.Resource;
-import br.com.caelum.vraptor.Result;
 
-@Resource
-public class CopyFileController {
+public class CopyFiles {
 
-	private final Result result;
+	private final String[] directoryToCopy;
 	private final Settings settings;
-	private final HttpServletResponse response;
+	private final Project project;
+	private final PrintWriter output;
 
-	public CopyFileController(Result result, Settings settings, HttpServletResponse response) {
-		this.result = result;
+	public CopyFiles(String[] directoryToCopy, Settings settings, Project project, StringWriter zipOutput) {
+		this.directoryToCopy = directoryToCopy;
 		this.settings = settings;
-		this.response = response;
+		this.project = project;
+		this.output = new PrintWriter(zipOutput, true);
 	}
 
-	@Post
-	@Path("/plugin/CopyFiles/{project.name}")
-	public File download(Project project, List<String> directory) throws IOException {
+	public File zipThemAll() throws IOException {
+
 		File result = File.createTempFile("integra-copy-files-", ".zip");
 		result.delete();
 
-		File baseDirectory = new File(settings.getBaseDir(), project.getName());
+		if (directoryToCopy != null) {
 
-		File output = File.createTempFile("integra-copy-files-output-", ".txt");
-		output.deleteOnExit();
-		PrintWriter writer = new PrintWriter(new FileWriter(output));
+			File baseDirectory = new File(settings.getBaseDir(), project.getName());
 
-		boolean success = true;
-		for (String resourceToCopy : directory) {
-			List<String> cmds = new ArrayList<String>();
-			cmds.add("zip");
-			cmds.add("-q9ro");
-			cmds.add(result.getAbsolutePath());
+			for (String resourceToCopy : directoryToCopy) {
+				if (!resourceToCopy.trim().equals("")) {
+					output.println("Zipping files " + resourceToCopy);
 
-			File fileToCopy = new File(baseDirectory, resourceToCopy);
-			cmds.add(fileToCopy.getName());
-			
-			CommandToExecute command = new CommandToExecute(cmds.toArray(new String[0])).at(fileToCopy.getParentFile());
+					List<String> cmds = new ArrayList<String>();
+					cmds.add("zip");
+					cmds.add("-q9ro");
+					cmds.add(result.getAbsolutePath());
 
-			int cmdResult = command.logTo(writer).run();
-			if(cmdResult!=0) {
-				success= false;
+					File fileToCopy = new File(baseDirectory, resourceToCopy);
+					cmds.add(fileToCopy.getName());
+
+					CommandToExecute command = new CommandToExecute(cmds.toArray(new String[0])).at(fileToCopy
+							.getParentFile());
+
+					int cmdResult = command.logTo(output).run();
+					if (cmdResult != 0) {
+						output.println("\tFailed zipping this one.");
+					}
+				}
 			}
 		}
-		writer.close();
 
-		if (!success) {
-			// response.setStatus(500) doesnt work!!!
-			response.setStatus(200);
-			return output;
-		}
-		result.deleteOnExit();
-		response.setStatus(201);
 		return result;
 	}
 

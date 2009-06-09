@@ -25,31 +25,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.plugin.copy;
+package br.com.caelum.integracao.client;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-import br.com.caelum.integracao.http.DefaultHttp;
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.plugin.PluginInformation;
+public class Command {
 
-/**
- * Copies artifacts from the client machine to the server.
- * 
- * @author guilherme silveira
- */
-public class CopyFilesInformation implements PluginInformation {
+	private final List<String> commands;
 
-	public List<String> getParameters() {
-		return Arrays.asList(new String[] { "artifactDirectories" });
+	public Command(List<String> startCommand) {
+		this.commands = startCommand;
 	}
 
-	public CopyFiles getPlugin(Database db, Map<String, String> parameters) {
-		String value = parameters.get("artifactDirectories");
-		String[] dirs = value == null ? new String[0] : value.split(",");
-		return new CopyFiles(new DefaultHttp(), dirs);
+	public boolean containsAnything() {
+		return commands != null && commands.size() != 0;
+	}
+	
+	@Override
+	public String toString() {
+		return (commands==null)? "[no command]" : commands.toString();
+	}
+
+	public String[] toArray() {
+		return commands.toArray(new String[commands.size()]);
 	}
 
 }

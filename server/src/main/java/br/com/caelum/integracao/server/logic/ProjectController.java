@@ -130,18 +130,19 @@ public class ProjectController {
 	@Post
 	@Path("/finish/job/{job.id}")
 	public void finish(final Job job, final String checkoutResult, final String stopResult, final String startResult,
-			final boolean success) {
+			final boolean success, final File content, final String zipOutput) {
 		Job loaded = jobs.load(job.getId());
 		if (loaded.getClient() == null) {
 			// we do not know who was executing this job!!!
 			logger.error("Dont know who was executing " + job.getId());
 		} else {
+			// TODO IMPORTANT JOB CHECK IF THIS IS THE RIGHT CLIENT, ITS STILL MISSING< OTHERWISE IM CLOSING THE WRONG CLIENT
 			loaded.getClient().leaveJob();
 		}
 		new Thread(new Runnable() {
 			public void run() {
 				new ProjectContinue(new Database(factory)).nextPhase(job.getId(), checkoutResult, startResult,
-						stopResult, success);
+						stopResult, success, zipOutput, content);
 				queue.wakeup();
 			}
 		}).start();

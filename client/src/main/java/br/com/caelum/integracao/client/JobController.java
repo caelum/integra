@@ -67,22 +67,29 @@ public class JobController {
 
 	private final HttpServletResponse response;
 
-	public JobController(Projects projects, CurrentJob job, Result result, HttpServletResponse response) {
+	private final Settings settings;
+
+	public JobController(Projects projects, CurrentJob job, Result result, HttpServletResponse response, Settings settings) {
 		this.projects = projects;
 		this.job = job;
 		this.result = result;
 		this.response = response;
+		this.settings = settings;
 	}
 
 	@Post
-	public synchronized void execute(String jobId, Project project, String revision, List<String> startCommand, List<String> stopCommand, String resultUri) {
-		job.start(jobId, projects.get(project.getName()), revision, startCommand, stopCommand, resultUri, new JobExecution());
+	public synchronized void execute(String jobId, Project project, String revision, List<String> startCommand,
+			List<String> stopCommand, String resultUri, String[] directoryToCopy) {
+		JobExecution execution = new JobExecution(projects.get(project.getName()), startCommand, stopCommand,
+				resultUri, revision, directoryToCopy, settings);
+		job.start(jobId, execution);
 	}
 
 	@Get
 	@Post
 	public void current() throws IOException {
-		// TODO possible sync fail... time to render might already set the job to null :(
+		// TODO possible sync fail... time to render might already set the job
+		// to null :(
 		result.include("job", job);
 		if (job.getProject() != null) {
 			logger.debug("Displaying info on current job: " + job.getProject().getName());
@@ -94,7 +101,7 @@ public class JobController {
 
 	public void stop(String jobId) throws IOException {
 		boolean succeeded = job.stop(jobId);
-		if(!succeeded) {
+		if (!succeeded) {
 			response.sendError(CONFLICT);
 		}
 		result.use(Results.nothing());

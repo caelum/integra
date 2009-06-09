@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -49,16 +50,36 @@ import br.com.caelum.integracao.http.Method;
 public class JobExecution {
 
 	private final Logger logger = LoggerFactory.getLogger(JobExecution.class);
+	private final Project project;
+	private final Command start;
+	private final Command stop;
+	private final String resultUri;
+	private final String[] directoryToCopy;
+	private final String revision;
+	private final Settings settings;
 
-	void executeBuildFor(String revision, List<String> startCommand, List<String> stopCommand, String resultUri, Project project, StringWriter output, Settings point) {
+	public JobExecution(Project project, List<String> startCommand, List<String> stopCommand, String resultUri,
+			String revision, String[] directoryToCopy, Settings settings) {
+		this.project = project;
+		this.settings = settings;
+		this.start = new Command(startCommand);
+		this.stop = new Command(stopCommand);
+		this.resultUri = resultUri;
+		this.revision = revision;
+		this.directoryToCopy = directoryToCopy;
+	}
+
+	void executeBuildFor(StringWriter output, Settings point) {
+
 		ProjectRunResult checkoutResult = null;
 		ProjectRunResult startResult = null;
 		ProjectRunResult stopResult = null;
+
 		try {
 
 			checkoutResult = project.checkout(point.getBaseDir(), revision, output);
 			if (!checkoutResult.failed()) {
-				startResult = project.run(point.getBaseDir(), startCommand, output);
+				startResult = project.run(point.getBaseDir(), start, output);
 			}
 
 		} catch (Exception e) {
@@ -67,36 +88,40 @@ public class JobExecution {
 			e.printStackTrace(new PrintWriter(errorOutput, true));
 			startResult = new ProjectRunResult(errorOutput.toString(), -1);
 		} finally {
-			if (project != null) {
+			try {
+				if (stop.containsAnything()) {
+					stopResult = project.run(point.getBaseDir(), stop, new StringWriter());
+				} else {
+					stopResult = new ProjectRunResult("No command to run.", 0);
+				}
+			} catch (IOException e) {
+				logger.error("Unable to stop command on server!", e);
+			} finally {
+				logger.debug("Job " + project.getName() + " has finished");
+				Http http = new DefaultHttp();
+				logger.debug("Acessing uri " + resultUri + " to finish the job");
+				Method post = http.post(resultUri);
 				try {
-					if (stopCommand != null && stopCommand.size() != 0) {
-						StringWriter stop = new StringWriter();
-						stopResult = project.run(point.getBaseDir(), stopCommand, stop);
-					} else {
-						stopResult = new ProjectRunResult("No command to run.", 0);
+					addTo(post, checkoutResult, "checkout");
+					addTo(post, startResult, "start");
+					addTo(post, stopResult, "stop");
+					StringWriter zipOutput = new StringWriter();
+					File zip = new CopyFiles(directoryToCopy, settings, project, zipOutput).zipThemAll();
+					if (zip.exists()) {
+						post.with("content", zip);
 					}
-				} catch (IOException e) {
-					logger.error("Unable to stop command on server!", e);
+					post.with("zipOutput", zipOutput.getBuffer().toString());
+					post.with("success", "" + !(failed(checkoutResult) || failed(stopResult) || failed(startResult)));
+					post.send();
+					if (post.getResult() != 200) {
+						logger.error(post.getContent());
+						throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
+					}
+				} catch (Exception e) {
+					logger.error("Was unable to notify the server of this request..."
+							+ "maybe the server thinks im still busy.", e);
 				} finally {
-					logger.debug("Job " + project.getName() + " has finished");
-					Http http = new DefaultHttp();
-					logger.debug("Acessing uri " + resultUri + " to finish the job");
-					Method post = http.post(resultUri);
-					try {
-						addTo(post, checkoutResult, "checkout");
-						addTo(post, startResult, "start");
-						addTo(post, stopResult, "stop");
-						post.with("success", ""
-								+ !(failed(checkoutResult) || failed(stopResult) || failed(startResult)));
-						post.send();
-						if (post.getResult() != 200) {
-							logger.error(post.getContent());
-							throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
-						}
-					} catch (Exception e) {
-						logger.error("Was unable to notify the server of this request..."
-								+ "maybe the server think im still busy.", e);
-					}
+					post.close();
 				}
 			}
 		}
@@ -115,4 +140,15 @@ public class JobExecution {
 		}
 	}
 
+	public Project getProject() {
+		return project;
+	}
+
+	public String getRevision() {
+		return revision;
+	}
+
+	public void stop() {
+		this.project.stop();
+	}
 }

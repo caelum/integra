@@ -27,6 +27,8 @@
  */
 package br.com.caelum.integracao.server.logic;
 
+import java.io.File;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +37,7 @@ import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;
 
 public class ProjectContinue {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(ProjectContinue.class);
 
 	private final Database database;
@@ -44,14 +46,17 @@ public class ProjectContinue {
 		this.database = database;
 	}
 
-	void nextPhase(Long jobId, String checkoutResult, String startResult, String stopResult, boolean success) {
+	void nextPhase(Long jobId, String checkoutResult, String startResult, String stopResult, boolean success,
+			String zipOutput, File zipContent) {
 		try {
-			String completeResult = "Checkout:\n" + checkoutResult + "\n\n" + "Start result:\n" + startResult + "\n\n" + "Stop result:\n" + stopResult;
+			String completeResult = "Checkout:\n" + checkoutResult + "\n\n" + "Start result:\n" + startResult + "\n\n"
+					+ "Stop result:\n" + stopResult;
 			logger.debug("Will try to do next phase for job.id=" + jobId);
 			database.beginTransaction();
 			Jobs jobs = new Jobs(database);
 			Job job = jobs.load(jobId);
-			job.finish(completeResult, success, database);
+
+			job.finish(completeResult, success, database, zipOutput, zipContent);
 			database.commit();
 		} catch (Exception e) {
 			e.printStackTrace();

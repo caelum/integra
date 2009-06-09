@@ -136,6 +136,10 @@ public class DefaultAgent implements Agent {
 		for (int i = 0; i < command.getStopCommands().size(); i++) {
 			post.with("stopCommand[" + i + "]", command.getStopCommands().get(i).getValue());
 		}
+		int k = 0;
+		for(String directory : command.getPhase().getDirectoriesToCopy()) {
+			post.with("directoryToCopy[" + (k++) + "]",directory);
+		}
 		try {
 			post.send();
 			int result = post.getResult();

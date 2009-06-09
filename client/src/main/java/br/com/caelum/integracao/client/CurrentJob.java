@@ -30,7 +30,6 @@ package br.com.caelum.integracao.client;
 
 import java.io.StringWriter;
 import java.util.Calendar;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,6 @@ public class CurrentJob {
 
 	private final Logger logger = LoggerFactory.getLogger(CurrentJob.class);
 
-	private Project project;
 	private Thread thread;
 	private final Settings settings;
 
@@ -53,48 +51,49 @@ public class CurrentJob {
 
 	private String jobId;
 
+	private JobExecution execution;
+
 	public CurrentJob(Settings settings) {
 		this.settings = settings;
 	}
 
 	public boolean isRunning() {
-		return project != null;
+		return execution != null;
 	}
 
 	public Project getProject() {
-		return project;
+		return execution.getProject();
 	}
 
 	public Thread getThread() {
 		return thread;
 	}
 
-	public synchronized void start(String jobId, final Project project, final String revision,
-			final List<String> startCommand, final List<String> stopCommand, final String resultUri, final JobExecution execution) {
+	public synchronized void start(String jobId, final JobExecution execution) {
 		if (isRunning()) {
-			throw new RuntimeException("Cannot take another job as im currently processing " + this.project.getName());
+			throw new RuntimeException("Cannot take another job as im currently processing " + this.execution.getProject().getName());
 		}
 		this.jobId = jobId;
 		this.start = Calendar.getInstance();
-		this.project = project;
+		this.execution = execution;
 		Runnable runnable = new Runnable() {
 			public void run() {
 				try {
 					output = new StringWriter();
-					execution.executeBuildFor(revision, startCommand, stopCommand, resultUri, project, output, settings);
+					execution.executeBuildFor(output, settings);
 				} finally {
 					clearThemAll();
 				}
 			}
 		};
-		this.thread = new Thread(runnable, project.getName() + " revision " + revision);
+		this.thread = new Thread(runnable, execution.getProject().getName() + " revision " + execution.getRevision());
 		thread.start();
 	}
 
 	private void clearThemAll() {
 		output.getBuffer().delete(0, output.getBuffer().length());
 		CurrentJob.this.jobId = null;
-		CurrentJob.this.project = null;
+		CurrentJob.this.execution = null;
 		CurrentJob.this.thread = null;
 		CurrentJob.this.start = null;
 	}
@@ -112,8 +111,8 @@ public class CurrentJob {
 		if (this.thread != null) {
 			this.thread.interrupt();
 		}
-		if (this.project != null) {
-			this.project.stop();
+		if (this.execution != null) {
+			this.execution.stop();
 		}
 		return true;
 	}

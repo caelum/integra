@@ -44,6 +44,7 @@ import javax.persistence.TemporalType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Config;
@@ -107,11 +108,25 @@ public class Job {
 		this.client = at;
 	}
 
-	public void finish(String result, boolean success, Database database) throws IOException {
+	public void finish(String result, boolean success, Database database, String zipOutput, File zipContent)
+			throws IOException {
 
 		Project project = build.getProject();
 		logger.debug("Finishing " + project.getName() + " build " + build.getBuildCount() + " phase "
 				+ command.getPhase().getName() + " command " + command.getId());
+
+		if (zipContent != null) {
+			getFile(command.getId() + "").mkdir();
+			PrintWriter unzipLog = new PrintWriter(new FileWriter(getFile(command.getId() + "/copy-files.txt")), true);
+			unzipLog.append(zipOutput);
+			int resultValue = new CommandToExecute("unzip", "-qo", zipContent.getAbsolutePath()).at(getFile("")).logTo(
+					unzipLog).run();
+			if (resultValue != 0) {
+				unzipLog.append("Unzipping resulted in " + resultValue + " --> FAILED");
+				success = false;
+			}
+			unzipLog.close();
+		}
 
 		this.success = success;
 		if (!success) {
@@ -121,7 +136,7 @@ public class Job {
 		this.finishTime = Calendar.getInstance();
 
 		Phase phase = command.getPhase();
-		File file = build.getFile(phase.getName() + "/" + command.getName() + ".txt");
+		File file = getFile(command.getName() + ".txt");
 		file.getParentFile().mkdirs();
 		PrintWriter writer = new PrintWriter(new FileWriter(file), true);
 		writer.print(result);
@@ -129,6 +144,11 @@ public class Job {
 
 		build.proceed(phase, database);
 
+	}
+
+	private File getFile(String name) {
+		File file = build.getFile(command.getPhase().getName() + "/" + name);
+		return file;
 	}
 
 	public Build getBuild() {

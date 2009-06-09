@@ -32,13 +32,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.client.Command;
 import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
@@ -82,14 +81,13 @@ public class Project {
 		}
 	}
 
-	public ProjectRunResult run(File baseDirectory, List<String> command, StringWriter output) throws IOException {
+	public ProjectRunResult run(File baseDirectory, Command command, StringWriter output) throws IOException {
 		logger.debug("Executing " + command + " to " + baseDirectory + "/" + name);
 
 		File workDir = new File(baseDirectory, name);
-		String[] commands = command.toArray(new String[command.size()]);
-		logger.debug("Ready to execute " + Arrays.toString(commands) + " @ " + workDir.getAbsolutePath()
+		logger.debug("Ready to execute " + command + " @ " + workDir.getAbsolutePath()
 				+ " using log=" + output);
-		this.executing = new CommandToExecute(commands).at(workDir).logTo(output);
+		this.executing = new CommandToExecute(command.toArray()).at(workDir).logTo(output);
 		int result = this.executing.run();
 		return new ProjectRunResult(output.getBuffer().toString(), result);
 

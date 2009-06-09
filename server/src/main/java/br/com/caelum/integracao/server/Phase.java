@@ -192,7 +192,8 @@ public class Phase {
 	}
 
 	public String[] getDirectoriesToCopy() {
-		return directoriesToCopy.split("\\s*,\\s*");
+		String[] vals = directoriesToCopy.split("\\s*,\\s*");
+		return vals;
 	}
 
 }

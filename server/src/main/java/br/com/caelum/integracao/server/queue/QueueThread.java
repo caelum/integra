@@ -119,7 +119,7 @@ public class QueueThread {
 					}
 				} else {
 					try {
-						job.finish("killing job because there was no response and the client is not actually running it", false, db);
+						job.finish("killing job because there was no response and the client is not actually running it", false, db, "", null);
 						result++;
 					} catch (IOException e) {
 						logger.error("Tried to kill job but couldnt.", e);
