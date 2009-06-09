@@ -78,8 +78,10 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 		</#list>
 		<td>
 		<form action="phase" method="post" class="formulario"><input type="hidden"
-			name="project.name" value="${project.name }" /> <input size="5"
-			name="phase.name" value="unnamed" /> <input type="submit"
+			name="project.name" value="${project.name }" />
+			Name: <input size="10" name="phase.name" value="unnamed" />
+			Directories: <input size="10" name="phase.directoriesToCopy" value="" />
+			<input type="submit"
 			value="new phase" /></form>
 		</td>
 	</tr>

@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -81,20 +82,20 @@ public class Project {
 		}
 	}
 
-	public ProjectRunResult run(File baseDirectory, List<String> command, File output) throws IOException {
+	public ProjectRunResult run(File baseDirectory, List<String> command, StringWriter output) throws IOException {
 		logger.debug("Executing " + command + " to " + baseDirectory + "/" + name);
 
 		File workDir = new File(baseDirectory, name);
 		String[] commands = command.toArray(new String[command.size()]);
 		logger.debug("Ready to execute " + Arrays.toString(commands) + " @ " + workDir.getAbsolutePath()
-				+ " using log=" + output.getAbsolutePath());
+				+ " using log=" + output);
 		this.executing = new CommandToExecute(commands).at(workDir).logTo(output);
 		int result = this.executing.run();
-		return new ProjectRunResult(content(output), result);
+		return new ProjectRunResult(output.getBuffer().toString(), result);
 
 	}
 
-	public ProjectRunResult checkout(File baseDirectory, String desiredRevision, File output) throws IOException,
+	public ProjectRunResult checkout(File baseDirectory, String desiredRevision, StringWriter output) throws IOException,
 			ScmException {
 		logger.debug("Checking out project @ " + uri + ", revision=" + desiredRevision + " to " + baseDirectory + "/"
 				+ name);

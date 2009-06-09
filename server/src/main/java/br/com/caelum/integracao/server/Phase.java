@@ -68,6 +68,9 @@ public class Phase {
 	@OrderBy("position")
 	@Cascade(CascadeType.ALL)
 	private List<PluginToRun> plugins = new ArrayList<PluginToRun>();
+	
+	@Column(length=10000)
+	private String directoriesToCopy;
 
 	@Id
 	@GeneratedValue
@@ -182,6 +185,14 @@ public class Phase {
 	public void add(PluginToRun run) {
 		getPlugins().add(run);
 		run.setPosition(this.getPlugins().size());
+	}
+
+	public void setDirectoriesToCopy(String directoriesToCopy) {
+		this.directoriesToCopy = directoriesToCopy;
+	}
+
+	public String[] getDirectoriesToCopy() {
+		return directoriesToCopy.split("\\s*,\\s*");
 	}
 
 }

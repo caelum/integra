@@ -28,24 +28,14 @@
 
 package br.com.caelum.integracao.client;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Scanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.client.project.Project;
-import br.com.caelum.integracao.client.project.ProjectRunResult;
-import br.com.caelum.integracao.http.DefaultHttp;
-import br.com.caelum.integracao.http.Http;
-import br.com.caelum.integracao.http.Method;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 @ApplicationScoped
@@ -55,16 +45,16 @@ public class CurrentJob {
 
 	private Project project;
 	private Thread thread;
-	private final Settings point;
+	private final Settings settings;
 
 	private Calendar start;
 
-	private File outputFile;
+	private StringWriter output = new StringWriter();
 
 	private String jobId;
 
 	public CurrentJob(Settings settings) {
-		this.point = settings;
+		this.settings = settings;
 	}
 
 	public boolean isRunning() {
@@ -79,8 +69,8 @@ public class CurrentJob {
 		return thread;
 	}
 
-	public synchronized void start(String jobId, Project project, final String revision,
-			final List<String> startCommand, final List<String> stopCommand, final String resultUri) {
+	public synchronized void start(String jobId, final Project project, final String revision,
+			final List<String> startCommand, final List<String> stopCommand, final String resultUri, final JobExecution execution) {
 		if (isRunning()) {
 			throw new RuntimeException("Cannot take another job as im currently processing " + this.project.getName());
 		}
@@ -90,13 +80,10 @@ public class CurrentJob {
 		Runnable runnable = new Runnable() {
 			public void run() {
 				try {
-					executeBuildFor(revision, startCommand, stopCommand, resultUri);
+					output = new StringWriter();
+					execution.executeBuildFor(revision, startCommand, stopCommand, resultUri, project, output, settings);
 				} finally {
-					CurrentJob.this.jobId = null;
-					CurrentJob.this.project = null;
-					CurrentJob.this.thread = null;
-					CurrentJob.this.start = null;
-					CurrentJob.this.outputFile = null;
+					clearThemAll();
 				}
 			}
 		};
@@ -104,74 +91,12 @@ public class CurrentJob {
 		thread.start();
 	}
 
-	private void executeBuildFor(String revision, List<String> startCommand, List<String> stopCommand, String resultUri) {
-		ProjectRunResult checkoutResult = null;
-		ProjectRunResult startResult = null;
-		ProjectRunResult stopResult = null;
-		try {
-
-			this.outputFile = File.createTempFile("integra-client-run-", ".txt");
-			outputFile.deleteOnExit();
-
-			checkoutResult = project.checkout(point.getBaseDir(), revision, outputFile);
-			if (!checkoutResult.failed()) {
-				startResult = project.run(this.point.getBaseDir(), startCommand, outputFile);
-			}
-
-		} catch (Exception e) {
-			logger.debug("Something wrong happened during the checkout/build", e);
-			StringWriter writer = new StringWriter();
-			e.printStackTrace(new PrintWriter(writer, true));
-			startResult = new ProjectRunResult(writer.toString(), -1);
-		} finally {
-			if (project != null) {
-				try {
-					if (stopCommand != null && stopCommand.size() != 0) {
-						File stopFile = File.createTempFile("integra-client-run-", ".txt");
-						stopFile.deleteOnExit();
-						stopResult = project.run(this.point.getBaseDir(), stopCommand, stopFile);
-					} else {
-						stopResult = new ProjectRunResult("No command to run.", 0);
-					}
-				} catch (IOException e) {
-					logger.error("Unable to stop command on server!", e);
-				} finally {
-					logger.debug("Job " + project.getName() + " has finished");
-					Http http = new DefaultHttp();
-					logger.debug("Acessing uri " + resultUri + " to finish the job");
-					Method post = http.post(resultUri);
-					try {
-						addTo(post, checkoutResult, "checkout");
-						addTo(post, startResult, "start");
-						addTo(post, stopResult, "stop");
-						post
-								.with("success", ""
-										+ !(failed(checkoutResult) || failed(stopResult) || failed(startResult)));
-						post.send();
-						if (post.getResult() != 200) {
-							logger.error(post.getContent());
-							throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
-						}
-					} catch (Exception e) {
-						logger.error("Was unable to notify the server of this request..."
-								+ "maybe the server think im still busy.", e);
-					}
-				}
-			}
-		}
-	}
-
-	private boolean failed(ProjectRunResult result) {
-		return result == null || result.failed();
-	}
-
-	private void addTo(Method post, ProjectRunResult result, String prefix) {
-		if (result != null) {
-			logger.debug(prefix + "Result success=" + result.getResult());
-			post.with(prefix + "Result", result.getContent());
-		} else {
-			post.with(prefix + "Result", "unable to read result");
-		}
+	private void clearThemAll() {
+		output.getBuffer().delete(0, output.getBuffer().length());
+		CurrentJob.this.jobId = null;
+		CurrentJob.this.project = null;
+		CurrentJob.this.thread = null;
+		CurrentJob.this.start = null;
 	}
 
 	public synchronized boolean stop(String jobIdToStop) {
@@ -201,16 +126,8 @@ public class CurrentJob {
 		return start;
 	}
 
-	public String getOutputContent() throws FileNotFoundException {
-		Scanner sc = new Scanner(new FileInputStream(this.outputFile)).useDelimiter("117473826478234211");
-		try {
-			if (sc.hasNext()) {
-				return sc.next();
-			}
-			return "";
-		} finally {
-			sc.close();
-		}
+	public String getOutputContent()  {
+		return this.output.getBuffer().toString();
 	}
 
 }
