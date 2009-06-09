@@ -3,7 +3,12 @@
          xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-  <display-name>integracao-server</display-name>
+  <display-name>Integracao agent</display-name>
+
+  <context-param>
+    <param-name>br.com.caelum.integracao.client.temp_dir</param-name>
+    <param-value>.tmps-client</param-value>
+  </context-param>
 
   <context-param>
     <param-name>br.com.caelum.vraptor.provider</param-name>

@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,11 @@ import br.com.caelum.vraptor.ioc.ApplicationScoped;
 public class Settings {
 	
 	private final Logger logger = LoggerFactory.getLogger(Settings.class);
+	private final ServletContext context;
+	
+	public Settings(ServletContext context) {
+		this.context = context;
+	}
 	
 	@PostConstruct
 	public void startup() throws IOException {
@@ -48,7 +54,7 @@ public class Settings {
 	}
 	
 	public File getBaseDir() {
-		File tmpDir = new File(".tmps-client");
+		File tmpDir = new File(context.getInitParameter("br.com.caelum.integracao.client.temp_dir"));
 		tmpDir.mkdir();
 		return tmpDir;
 	}
