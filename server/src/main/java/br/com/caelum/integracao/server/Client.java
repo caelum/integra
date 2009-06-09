@@ -27,7 +27,6 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -42,10 +41,10 @@ import javax.persistence.ManyToOne;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.action.Dispatcher;
 import br.com.caelum.integracao.server.agent.Agent;
 import br.com.caelum.integracao.server.agent.AgentControl;
 import br.com.caelum.integracao.server.agent.AgentStatus;
+import br.com.caelum.integracao.server.agent.DefaultAgent;
 import br.com.caelum.integracao.server.label.Label;
 import br.com.caelum.integracao.server.queue.Job;
 
@@ -81,8 +80,8 @@ public class Client {
 		return "http://" + this.getHost() + ":" + this.getPort() + this.getContext();
 	}
 
-	public Dispatcher getConnection(File logFile, String myUrl) throws UnknownHostException, IOException {
-		return new Dispatcher(this, logFile, myUrl);
+	public Agent getAgent() throws UnknownHostException, IOException {
+		return new DefaultAgent(this.getBaseUri());
 	}
 
 	public String getContext() {
@@ -119,13 +118,15 @@ public class Client {
 
 	public boolean work(Job job, Config config) {
 		try {
-			job.executeAt(this, File.createTempFile(Files.SERVER_TO_CLIENT_PREFIX, "txt"), config);
+			if(job.executeAt(this, config)) {
+				this.currentJob = job;
+				return true;
+			}
+			return false;
 		} catch (Exception e) {
 			logger.error("Unable to start the job at this client: " + getId(), e);
 			return false;
 		}
-		this.currentJob = job;
-		return true;
 	}
 
 	public void deactivate() {

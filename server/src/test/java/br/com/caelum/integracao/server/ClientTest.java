@@ -32,7 +32,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -73,7 +72,7 @@ public class ClientTest extends BaseTest {
 		final Client c = new Client();
 		mockery.checking(new Expectations() {
 			{
-				one(job).executeAt(with(IntegracaoMatchers.naturalEquals(c)), (File) with(an(File.class)), with(IntegracaoMatchers.naturalEquals(config)));
+				one(job).executeAt(c, config);
 			}
 		});
 		assertThat(c.work(job, config), is(equalTo(true)));
@@ -86,7 +85,7 @@ public class ClientTest extends BaseTest {
 		final Client c = new Client();
 		mockery.checking(new Expectations() {
 			{
-				one(job).executeAt(with(IntegracaoMatchers.naturalEquals(c)), (File) with(an(File.class)), with(IntegracaoMatchers.naturalEquals(config)));
+				one(job).executeAt(c,config);
 				will(throwException(new RuntimeException()));
 			}
 		});

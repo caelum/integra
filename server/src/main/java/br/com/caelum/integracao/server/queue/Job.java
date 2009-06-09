@@ -50,7 +50,7 @@ import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.ExecuteCommandLine;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
-import br.com.caelum.integracao.server.action.Dispatcher;
+import br.com.caelum.integracao.server.agent.Agent;
 import br.com.caelum.integracao.server.dao.Database;
 
 @Entity
@@ -90,16 +90,17 @@ public class Job {
 		this.command = command;
 	}
 
-	public void executeAt(Client at, File logFile, Config config) throws IOException {
+	public boolean executeAt(Client at, Config config) throws IOException {
 		logger.debug("Trying to execute " + command.getName() + " @ " + at.getHost() + ":" + at.getPort());
-		Dispatcher connection = at.getConnection(logFile, config.getUrl());
-		try {
-			connection.register(build.getProject()).execute(command, this).close();
-			useClient(at);
-			this.startTime = Calendar.getInstance();
-		} finally {
-			connection.close();
+		Agent agent = at.getAgent();
+		if (agent.register(build.getProject())) {
+			if (agent.execute(command, this, config.getUrl())) {
+				useClient(at);
+				this.startTime = Calendar.getInstance();
+			}
+			return true;
 		}
+		return false;
 	}
 
 	void useClient(Client at) {
@@ -107,27 +108,27 @@ public class Job {
 	}
 
 	public void finish(String result, boolean success, Database database) throws IOException {
-		
+
 		Project project = build.getProject();
 		logger.debug("Finishing " + project.getName() + " build " + build.getBuildCount() + " phase "
 				+ command.getPhase().getName() + " command " + command.getId());
-		
+
 		this.success = success;
-		if(!success) {
+		if (!success) {
 			build.failed();
 		}
 		finished = true;
 		this.finishTime = Calendar.getInstance();
-		
+
 		Phase phase = command.getPhase();
 		File file = build.getFile(phase.getName() + "/" + command.getName() + ".txt");
 		file.getParentFile().mkdirs();
 		PrintWriter writer = new PrintWriter(new FileWriter(file), true);
 		writer.print(result);
 		writer.close();
-		
+
 		build.proceed(phase, database);
-		
+
 	}
 
 	public Build getBuild() {
@@ -149,19 +150,19 @@ public class Job {
 	public boolean isFinished() {
 		return finished;
 	}
-	
+
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
+
 	public Calendar getSchedulingTime() {
 		return schedulingTime;
 	}
-	
+
 	public Calendar getStartTime() {
 		return startTime;
 	}
-	
+
 	public Calendar getFinishTime() {
 		return finishTime;
 	}
@@ -173,7 +174,7 @@ public class Job {
 		}
 		return (f.getTimeInMillis() - startTime.getTimeInMillis()) / 1000.0;
 	}
-	
+
 	public boolean isSuccess() {
 		return success;
 	}

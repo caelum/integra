@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.http.Method;
+import br.com.caelum.integracao.server.ExecuteCommandLine;
+import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.queue.Job;
 
 /**
@@ -78,7 +80,7 @@ public class DefaultAgent implements Agent {
 
 	public boolean stop(Job currentJob) {
 		Method post = new DefaultHttp().post(baseUri + "/job/stop");
-		post.with("jobId", ""+ currentJob.getId());
+		post.with("jobId", "" + currentJob.getId());
 		try {
 			try {
 				post.send();
@@ -90,7 +92,7 @@ public class DefaultAgent implements Agent {
 				try {
 					logger.debug("Could not stop the job: " + post.getResult() + " with: " + post.getContent());
 				} catch (IOException e) {
-					logger.debug("Could not stop the job: " + post.getResult(),e);
+					logger.debug("Could not stop the job: " + post.getResult(), e);
 				}
 				return false;
 			}
@@ -99,5 +101,57 @@ public class DefaultAgent implements Agent {
 			post.close();
 		}
 	}
+
+	public boolean register(Project project) {
+		Method post = new DefaultHttp().post(baseUri + "/project/register");
+		post.with("project.name", project.getName());
+		post.with("project.uri", project.getUri());
+		post.with("project.scmType", project.getControlType().getName());
+		try {
+			post.send();
+			int result = post.getResult();
+			if (result != 200) {
+				logger
+						.error("Unable to register " + project.getName() + "@" + baseUri + " due to "
+								+ post.getContent());
+			}
+			return result == 200;
+		} catch (IOException e) {
+			logger.error("Unable to register " + project.getName() + "@" + baseUri, e);
+			return false;
+		} finally {
+			post.close();
+		}
+	}
+
+	public boolean execute(ExecuteCommandLine command, Job job, String mySelf) {
+		Method post = new DefaultHttp().post(baseUri + "/job/execute");
+		post.with("jobId", "" + job.getId());
+		post.with("revision", job.getBuild().getRevision().getName());
+		post.with("project.name", job.getBuild().getProject().getName());
+		post.with("resultUri", "http://" + mySelf + "/integracao/finish/job/" + job.getId());
+		for (int i = 0; i < command.getStartCommands().size(); i++) {
+			post.with("startCommand[" + i + "]", command.getStartCommands().get(i).getValue());
+		}
+		for (int i = 0; i < command.getStopCommands().size(); i++) {
+			post.with("stopCommand[" + i + "]", command.getStopCommands().get(i).getValue());
+		}
+		try {
+			post.send();
+			int result = post.getResult();
+			if (result != 200) {
+				logger
+						.error("Unable to execute command.id=" + command.getId() + "@" + baseUri + " due to "
+								+ post.getContent());
+			}
+			return result == 200;
+		} catch (IOException e) {
+			logger.error("Unable to execute command.id=" + command.getId() + "@" + baseUri, e);
+			return false;
+		} finally {
+			post.close();
+		}
+	}
+
 
 }

@@ -27,6 +27,8 @@
  */
 package br.com.caelum.integracao.server.agent;
 
+import br.com.caelum.integracao.server.ExecuteCommandLine;
+import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.queue.Job;
 
 /**
@@ -39,5 +41,12 @@ public interface Agent {
 	AgentStatus getStatus();
 
 	boolean stop(Job currentJob);
+
+	/**
+	 * Registers a project information in this server.
+	 */
+	boolean register(Project project);
+
+	boolean execute(ExecuteCommandLine command, Job job, String mySelf);
 
 }
