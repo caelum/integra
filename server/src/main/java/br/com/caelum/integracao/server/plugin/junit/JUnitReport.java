@@ -82,7 +82,7 @@ public class JUnitReport implements Plugin {
 			logger.debug("Executing junit task to generate reports on dirs " + reportsDir);
 			int result = new CommandToExecute("ant", "-f", xml.getAbsolutePath()).logTo(build.getFile(phase.getName() + "/junit/report-output.txt")).at(xml.getParentFile()).run();
 			
-			projects.register(new Tab(build, phase.getName() + "-junit", "junit/index.html"));
+			projects.register(new Tab(build, phase.getName() + "-junit", phase.getName() + "/junit/index.html"));
 			
 			return result==0;
 		} catch (IOException e) {

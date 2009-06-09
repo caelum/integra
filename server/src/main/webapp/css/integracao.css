@@ -20,6 +20,13 @@
 .plugin {
 	font-size: small;
 }
+#tabContent {
+	border: 2px solid gray;
+	margin: 5px;
+	padding: 5px;
+	width: 780px;
+	height: 500px;
+}
 
 .formulario input[type=text], .formulario input[type=submit], .formulario select {
 	font-size: 0.8em;

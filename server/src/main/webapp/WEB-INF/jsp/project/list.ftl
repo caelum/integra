@@ -6,7 +6,7 @@
 	<span class="title">${project.name}</span> -
 	<#if project.lastBuild??>
 		<#assign build = project.lastBuild>
-		<a href="${project.name}/build/${build.buildCount}/view/">build ${build.buildCount}</a>
+		<a href="${project.name}/build/${build.buildCount}/info">build ${build.buildCount}</a>
 		<#if !build.finished>
 			<font color="orange">is building</font>
 		<#else>

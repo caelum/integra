@@ -90,7 +90,7 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 	<#list project.builds as build>
 		<tr>
 			<td><a
-				href="build/${build.buildCount}/view/">results</a>
+				href="build/${build.buildCount}/info">results</a>
 			</td>
 			<td>build-${build.buildCount}</td>
 			<td>

@@ -117,11 +117,12 @@ public class Job {
 				+ command.getPhase().getName() + " command " + command.getId());
 
 		if (content != null) {
-			getFile(command.getId() + "").mkdir();
+			File baseDir = getFile(command.getId() + "");
+			baseDir.mkdir();
 			PrintWriter unzipLog = new PrintWriter(new FileWriter(getFile(command.getId() + "/copy-files.txt")), true);
 			unzipLog.append(zipOutput);
-			int resultValue = new CommandToExecute("unzip", "-qo", content.getFile().getAbsolutePath()).at(getFile("")).logTo(
-					unzipLog).run();
+			int resultValue = new CommandToExecute("unzip", "-qo", content.getFile().getAbsolutePath()).at(baseDir)
+					.logTo(unzipLog).run();
 			if (resultValue != 0) {
 				unzipLog.append("Unzipping resulted in " + resultValue + " --> FAILED");
 				success = false;
