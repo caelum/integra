@@ -51,6 +51,7 @@ import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.Validator;
+import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
 import br.com.caelum.vraptor.validator.ValidationMessage;
 import br.com.caelum.vraptor.view.Results;
 
@@ -130,7 +131,7 @@ public class ProjectController {
 	@Post
 	@Path("/finish/job/{job.id}")
 	public void finish(final Job job, final String checkoutResult, final String stopResult, final String startResult,
-			final boolean success, final File content, final String zipOutput) {
+			final boolean success, final UploadedFile content, final String zipOutput) {
 		Job loaded = jobs.load(job.getId());
 		if (loaded.getClient() == null) {
 			// we do not know who was executing this job!!!

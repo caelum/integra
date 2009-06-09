@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 
+import br.com.caelum.integracao.server.build.Tab;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginParameter;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
@@ -106,6 +107,10 @@ public class Projects {
 			session.delete(parameter);
 		}
 		session.delete(plugin);
+	}
+
+	public void register(Tab tab) {
+		session.save(tab);
 	}
 
 }

@@ -39,6 +39,7 @@ import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
+import br.com.caelum.vraptor.view.Results;
 
 @Resource
 public class BuildController {
@@ -52,15 +53,17 @@ public class BuildController {
 		this.projects = projects;
 		this.result = result;
 	}
-
+	
+	@Get
+	@Path("/project/{project.name}/build/{buildId}")
+	public void simpleShow(Project project, Long buildId) {
+		result.use(Results.logic()).forwardTo(BuildController.class).show(project, buildId, "");
+	}
 
 	@Get
 	@Path("/project/{project.name}/build/{buildId}/view/{filename*}")
 	public void show(Project project, Long buildId, String filename) {
-		logger.debug("Displaying build result for " + project.getName() + "@build-" + buildId + "@" + filename);
-		project = projects.get(project.getName());
-		result.include("project", project);
-		Build build = project.getBuild(buildId);
+		Build build = getBuild(project, buildId, filename);
 		result.include("build", build);
 		if (filename.equals("")) {
 			result.include("currentPath", "");
@@ -72,12 +75,18 @@ public class BuildController {
 		}
 	}
 
+	private Build getBuild(Project project, Long buildId, String filename) {
+		logger.debug("Displaying build result for " + project.getName() + "@build-" + buildId + "@" + filename);
+		project = projects.get(project.getName());
+		Build build = project.getBuild(buildId);
+		result.include("project", project);
+		return build;
+	}
+	
 	@Get
 	@Path("/download/project/{project.name}/build/{buildId}/view/{filename*}")
 	public File showFile(Project project, Long buildId, String filename) {
-		logger.debug("Displaying file for " + project.getName() + "@" + buildId + ", file=" + filename);
-		project = projects.get(project.getName());
-		Build build = project.getBuild(buildId);
+		Build build = getBuild(project, buildId, "view@" + filename);
 		return build.getFile(filename.replaceAll("%20", " "));
 	}
 	

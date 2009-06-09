@@ -25,46 +25,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.logic;
+package br.com.caelum.integracao.server.build;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.queue.Job;
-import br.com.caelum.integracao.server.queue.Jobs;
-import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
+import br.com.caelum.integracao.server.Build;
 
-public class ProjectContinue {
+@Entity
+public class Tab {
 
-	private final Logger logger = LoggerFactory.getLogger(ProjectContinue.class);
+	@Id
+	@GeneratedValue
+	private Long id;
 
-	private final Database database;
+	private String name;
 
-	public ProjectContinue(Database database) {
-		this.database = database;
+	@ManyToOne
+	private Build build;
+
+	private String path;
+
+	public Tab(Build build, String name, String path) {
+		super();
+		this.name = name;
+		this.path = path;
+		this.build = build;
 	}
-
-	void nextPhase(Long jobId, String checkoutResult, String startResult, String stopResult, boolean success,
-			String zipOutput, UploadedFile content) {
-		try {
-			String completeResult = "Checkout:\n" + checkoutResult + "\n\n" + "Start result:\n" + startResult + "\n\n"
-					+ "Stop result:\n" + stopResult;
-			logger.debug("Will try to do next phase for job.id=" + jobId);
-			database.beginTransaction();
-			Jobs jobs = new Jobs(database);
-			Job job = jobs.load(jobId);
-
-			job.finish(completeResult, success, database, zipOutput, content);
-			database.commit();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (database.hasTransaction()) {
-				database.rollback();
-			}
-			database.close();
-		}
+	
+	Tab() {
 	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public String getPath() {
+		return path;
+	}
+	
 
 }

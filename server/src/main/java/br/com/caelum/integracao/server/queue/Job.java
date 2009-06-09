@@ -53,6 +53,7 @@ import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.agent.Agent;
 import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
 
 @Entity
 public class Job {
@@ -108,18 +109,18 @@ public class Job {
 		this.client = at;
 	}
 
-	public void finish(String result, boolean success, Database database, String zipOutput, File zipContent)
+	public void finish(String result, boolean success, Database database, String zipOutput, UploadedFile content)
 			throws IOException {
 
 		Project project = build.getProject();
 		logger.debug("Finishing " + project.getName() + " build " + build.getBuildCount() + " phase "
 				+ command.getPhase().getName() + " command " + command.getId());
 
-		if (zipContent != null) {
+		if (content != null) {
 			getFile(command.getId() + "").mkdir();
 			PrintWriter unzipLog = new PrintWriter(new FileWriter(getFile(command.getId() + "/copy-files.txt")), true);
 			unzipLog.append(zipOutput);
-			int resultValue = new CommandToExecute("unzip", "-qo", zipContent.getAbsolutePath()).at(getFile("")).logTo(
+			int resultValue = new CommandToExecute("unzip", "-qo", content.getFile().getAbsolutePath()).at(getFile("")).logTo(
 					unzipLog).run();
 			if (resultValue != 0) {
 				unzipLog.append("Unzipping resulted in " + resultValue + " --> FAILED");

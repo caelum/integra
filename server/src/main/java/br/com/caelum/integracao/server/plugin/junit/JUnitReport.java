@@ -41,6 +41,8 @@ import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.ExecuteCommandLine;
 import br.com.caelum.integracao.server.Phase;
+import br.com.caelum.integracao.server.Projects;
+import br.com.caelum.integracao.server.build.Tab;
 import br.com.caelum.integracao.server.plugin.Plugin;
 
 /**
@@ -52,9 +54,11 @@ public class JUnitReport implements Plugin {
 
 	private final Logger logger = LoggerFactory.getLogger(JUnitReport.class);
 	private final String dir;
+	private final Projects projects;
 
-	public JUnitReport(String dir) {
+	public JUnitReport(String dir, Projects projects) {
 		this.dir = dir;
+		this.projects = projects;
 	}
 
 	public boolean after(Build build, Phase phase) {
@@ -77,6 +81,9 @@ public class JUnitReport implements Plugin {
 			writer.close();
 			logger.debug("Executing junit task to generate reports on dirs " + reportsDir);
 			int result = new CommandToExecute("ant", "-f", xml.getAbsolutePath()).logTo(build.getFile(phase.getName() + "/junit/report-output.txt")).at(xml.getParentFile()).run();
+			
+			projects.register(new Tab(build, phase.getName() + "-junit", "junit/index.html"));
+			
 			return result==0;
 		} catch (IOException e) {
 			logger.error("Unable to create reports for project " + build.getProject().getName(), e);

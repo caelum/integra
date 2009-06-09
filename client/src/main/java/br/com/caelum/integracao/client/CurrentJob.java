@@ -62,6 +62,9 @@ public class CurrentJob {
 	}
 
 	public Project getProject() {
+		if(execution==null) {
+			return null;
+		}
 		return execution.getProject();
 	}
 

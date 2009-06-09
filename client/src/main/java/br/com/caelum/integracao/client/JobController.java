@@ -79,7 +79,7 @@ public class JobController {
 
 	@Post
 	public synchronized void execute(String jobId, Project project, String revision, List<String> startCommand,
-			List<String> stopCommand, String resultUri, String[] directoryToCopy) {
+			List<String> stopCommand, String resultUri, List<String> directoryToCopy) {
 		JobExecution execution = new JobExecution(projects.get(project.getName()), startCommand, stopCommand,
 				resultUri, revision, directoryToCopy, settings);
 		job.start(jobId, execution);

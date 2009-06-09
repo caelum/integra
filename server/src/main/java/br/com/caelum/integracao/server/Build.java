@@ -44,6 +44,7 @@ import org.hibernate.validator.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.build.Tab;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.queue.Job;
@@ -87,6 +88,9 @@ public class Build {
 
 	@OneToMany(mappedBy = "build")
 	private List<Job> jobs = new ArrayList<Job>();
+	
+	@OneToMany(mappedBy="build")
+	private List<Tab> tabs = new ArrayList<Tab>();
 
 	protected Build() {
 	}
@@ -266,6 +270,10 @@ public class Build {
 			return "unknown";
 		}
 		return revision.getName();
+	}
+	
+	public List<Tab> getTabs() {
+		return tabs;
 	}
 
 }

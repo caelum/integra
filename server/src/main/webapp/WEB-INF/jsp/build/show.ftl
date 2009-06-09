@@ -12,6 +12,14 @@
 </#if>
 </h2>
 
+<div id="tabs">
+     <ul>
+<#list build.tabs as tab>
+         <li><a href="${contextPath }/project/${project.name}/build/${build.buildCount}/view/${tab.path}"><span>${tab.name}</span></a></li>
+</#list>
+     </ul>
+</div>
+
 <div class="box">
 	Log:
 	<#if build.revision??>

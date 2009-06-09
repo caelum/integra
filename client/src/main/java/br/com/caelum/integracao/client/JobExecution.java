@@ -54,12 +54,12 @@ public class JobExecution {
 	private final Command start;
 	private final Command stop;
 	private final String resultUri;
-	private final String[] directoryToCopy;
+	private final List<String> directoryToCopy;
 	private final String revision;
 	private final Settings settings;
 
 	public JobExecution(Project project, List<String> startCommand, List<String> stopCommand, String resultUri,
-			String revision, String[] directoryToCopy, Settings settings) {
+			String revision, List<String> directoryToCopy, Settings settings) {
 		this.project = project;
 		this.settings = settings;
 		this.start = new Command(startCommand);

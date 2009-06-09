@@ -39,12 +39,12 @@ import br.com.caelum.integracao.command.CommandToExecute;
 
 public class CopyFiles {
 
-	private final String[] directoryToCopy;
+	private final List<String> directoryToCopy;
 	private final Settings settings;
 	private final Project project;
 	private final PrintWriter output;
 
-	public CopyFiles(String[] directoryToCopy, Settings settings, Project project, StringWriter zipOutput) {
+	public CopyFiles(List<String> directoryToCopy, Settings settings, Project project, StringWriter zipOutput) {
 		this.directoryToCopy = directoryToCopy;
 		this.settings = settings;
 		this.project = project;
