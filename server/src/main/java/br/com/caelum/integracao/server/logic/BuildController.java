@@ -57,7 +57,7 @@ public class BuildController {
 	@Get
 	@Path("/project/{project.name}/build/{buildId}")
 	public void simpleShow(Project project, Long buildId) {
-		result.use(Results.logic()).forwardTo(BuildController.class).viewDir(project, buildId, "");
+		result.use(Results.logic()).forwardTo(BuildController.class).show(project, buildId, "");
 	}
 	
 	@Get
@@ -83,7 +83,7 @@ public class BuildController {
 	
 	@Get
 	@Path("/project/{project.name}/build/{buildId}/view/{filename*}")
-	public void viewDir(Project project, Long buildId, String filename) {
+	public void show(Project project, Long buildId, String filename) {
 		Build build = getBuild(project, buildId, filename);
 		result.include("build", build);
 		if (filename.equals("")) {

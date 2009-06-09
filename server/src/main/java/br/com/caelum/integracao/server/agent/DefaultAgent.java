@@ -28,6 +28,7 @@
 package br.com.caelum.integracao.server.agent;
 
 import java.io.IOException;
+import java.net.ConnectException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,8 @@ public class DefaultAgent implements Agent {
 		try {
 			try {
 				post.send();
+			} catch (ConnectException e) {
+				return AgentStatus.UNAVAILABLE;
 			} catch (IOException e) {
 				logger.debug("Setting the agent as unavailable.", e);
 				return AgentStatus.UNAVAILABLE;

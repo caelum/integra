@@ -99,8 +99,8 @@ public class Job {
 			if (agent.execute(command, this, config.getUrl())) {
 				useClient(at);
 				this.startTime = Calendar.getInstance();
+				return true;
 			}
-			return true;
 		}
 		return false;
 	}
