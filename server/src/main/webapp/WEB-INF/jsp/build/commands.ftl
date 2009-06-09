@@ -5,6 +5,7 @@ Commands running or already run:<br/>
 	<h2>${phase.name}</h2>
 	<table>
 		<tr>
+			<td>id</td>
 			<td>view</td>
 			<td>status</td>
 			<td>command</td>
@@ -16,9 +17,10 @@ Commands running or already run:<br/>
 	<#assign jobs=build.getJobsFor(phase)>
 	<#list jobs as job>
 		<tr>
+			<td>${job.command.id}</td>
 			<td>
 			<a
-				href="${contextPath }/project/${project.name}/build/${build.buildCount}/view/">view
+				href="${contextPath }/project/${project.name}/build/${build.buildCount}/view/${job.command.id}">view
 			</a>
 			</td>
 			<td>
@@ -34,7 +36,7 @@ Commands running or already run:<br/>
 			<td>${job.schedulingTime.time?datetime}</td>
 			<td>
 			<#if job.client??>
-				${job.client.baseUri}
+				${job.client.host}
 			</#if>
 			</td>
 			<td>

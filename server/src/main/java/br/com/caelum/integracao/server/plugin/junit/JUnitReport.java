@@ -67,7 +67,9 @@ public class JUnitReport implements Plugin {
 			List<File> reportsDir = new ArrayList<File>();
 			for (ExecuteCommandLine command : phase.getCommands()) {
 				File reportDir = build.getFile(phase.getName() + "/" + command.getId() + "/" + dir);
-				reportsDir.add(reportDir);
+				if(reportDir.exists()) {
+					reportsDir.add(reportDir);
+				}
 			}
 			// executes the ant task to generate the junit report from all those
 			// reports
