@@ -49,7 +49,7 @@ public class GitControlTest extends AtDirectoryTest {
 		this.myGitDir = new File(baseDir, "cruise");
 		prepare("git", "init").at(myGitDir).run();
 		File file = new File(myGitDir, "sample-file");
-		givenA(file, "misc content");
+		givenA(file, "misc content\n");
 		prepare("git", "add", file.getAbsolutePath()).at(myGitDir).run();
 		prepare("git", "commit", "-m", "ha").at(myGitDir).run();
 	}
@@ -61,15 +61,15 @@ public class GitControlTest extends AtDirectoryTest {
 	@Test
 	public void shouldCommitAndReceiveUpdate() throws IOException, ScmException {
 
-		File log = new File(this.baseDir, "my-checkout");
+		File log = new File(this.baseDir, "my-checkout.log");
 
 		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "my-cloned-cruise");
 		Assert.assertEquals(0, control1.checkoutOrUpdate(null, log));
 		File file = new File(control1.getDir(), "test-file");
-		givenA(file, "misc content");
+		givenA(file, "second file content\n");
 
 		GitControl control2 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "apostilas-2");
-		Assert.assertEquals(0, control2.checkoutOrUpdate(null, new File(this.baseDir, "my-second-checkout")));
+		Assert.assertEquals(0, control2.checkoutOrUpdate(null, new File(this.baseDir, "my-second-checkout.log")));
 
 		Assert.assertEquals(0, control1.add(file));
 		Assert.assertEquals(0, control1.commit("commiting test file"));
@@ -77,7 +77,7 @@ public class GitControlTest extends AtDirectoryTest {
 		File found = new File(control2.getDir(), "test-file");
 		Assert.assertTrue(found.exists());
 		String content = new BufferedReader(new FileReader(found)).readLine();
-		Assert.assertEquals("misc content", content);
+		Assert.assertEquals("second file content\n", content);
 		control2.remove(found);
 		control2.commit("removed test file");
 		control1.checkoutOrUpdate(null, log);

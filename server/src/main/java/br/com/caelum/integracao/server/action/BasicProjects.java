@@ -59,21 +59,12 @@ public class BasicProjects {
 			projects.register(p);
 		}
 		{
-			Project p = new Project(SvnControl.class, "svn://svn.paranamer.codehaus.org/paranamer/trunk", new File(
-					"/home/integra/build/paranamer"), "paranamer");
-			projects.register(p);
-		}
-		{
-			Project p = new Project(SvnControl.class,
-					"http://seleniumdsl.svn.sourceforge.net/svnroot/seleniumdsl/trunk", new File(
-							"/home/integra/build/selenium-dsl"), "selenium-dsl");
-			projects.register(p);
-		}
-		{
 			Project p = new Project(GitControl.class, "git://github.com/caelum/calopsita.git", new File(
 					"/home/integra/build/calopsita"), "calopsita");
 			projects.register(p);
 		}
+		projects.register(new Project(GitControl.class, "git://github.com/caelum/vraptor.git", new File(
+				"/Users/guilherme/int/vraptor"), "vraptor"));
 		{
 			Project p = new Project(SvnControl.class, "file:///Users/guilherme/Documents/temp/myproject", new File(
 					"/Users/guilherme/int/anted"), "my-anted");

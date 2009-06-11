@@ -28,8 +28,11 @@
 package br.com.caelum.integracao.server.scm.git;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +59,15 @@ public class GitControl implements ScmControl {
 	public int checkoutOrUpdate(String revision, File log) throws ScmException {
 		try {
 			if (new File(new File(baseDirectory, baseName), ".git").exists()) {
-				int partial = prepare("git", "pull").at(getDir()).logTo(log).run();
-				if(partial!=0 || revision==null) {
+				String cmds[][] = new String[][] {new String[] {"git", "checkout", "HEAD"}, new String[] {"git", "checkout", "master"}, new String[] {"git", "pull"}};
+				int partial = 0;
+				for(String cmd[] : cmds) {
+					partial = prepare(cmd).at(getDir()).logTo(log).run();
+					if(partial!=0) {
+						return partial;
+					}
+				}
+				if(revision==null) {
 					return partial;
 				}
 				return prepare("git", "checkout", revision).at(getDir()).logTo(log).run();
@@ -113,8 +123,42 @@ public class GitControl implements ScmControl {
 		return new Revision(name, "", "");
 	}
 
-	public Revision getNextRevision(Revision fromRevision, File log) throws ScmException {
-		return null;
+	private String extract(File log, String... cmd) throws ScmException {
+		try {
+			StringWriter writer = new StringWriter();
+			prepare(cmd).logTo(writer).at(getDir()).run();
+			String content = writer.getBuffer().toString();
+			FileWriter fw = new FileWriter(log);
+			
+			
+			PrintWriter file = new PrintWriter(fw, true);
+			file.println(content);
+			file.close();
+			fw.close();
+			return content;
+		} catch (IOException e) {
+			throw new ScmException("Unable to checkout version from svn using " + Arrays.toString(cmd), e);
+		}
 	}
+
+	public Revision getNextRevision(Revision fromRevision, File log) throws ScmException {
+		String diff = extract(log, "git", "--no-pager", "log", fromRevision.getName() + "..HEAD", "--shortstat");
+		if(diff.indexOf("files changed")==-1) {
+			// there was no change in the content
+			return fromRevision;
+		}
+		
+		int start = diff.lastIndexOf("commit ", diff.lastIndexOf("Author:", diff.indexOf("|"))) +1;
+		int end = diff.indexOf( " ", start);
+		String baseName = diff.substring(start,end);
+		String name = baseName + "^.." + baseName;
+		return new Revision(name, extractInfoForRevision(log, name), "");
+	}
+
+	private String extractInfoForRevision(File log, String revisionRange) throws ScmException {
+		String logContent = extract(log, "git", "--no-pager", "log", revisionRange, "-v", "--non-interactive");
+		return logContent;
+	}
+
 
 }
