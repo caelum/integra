@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- ====================================================================== 
-	Integracao server build
+	Integracao agent build
 	====================================================================== -->
-<project name="Integracao server" default="war" basedir=".">
+<project name="Agent" default="war" basedir=".">
 
-	<description>Integracao server build</description>
+	<description>Integracao agent build</description>
 
 	<property file="build.properties" />
 	<path id="libs.classpath" path=".">
@@ -102,6 +102,9 @@
 
 	<target name="clean-war" depends="clean, war">
 		<echo message="Cleaned and war generated" />
+	</target>
+
+	<target name="all" description="clean, test">
 	</target>
 
 </project>

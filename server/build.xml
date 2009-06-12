@@ -112,13 +112,19 @@
 		</sequential>
 	</macrodef>
 
-	<target name="hsqldb" description="-->starts a hsqldb">
+	<target name="run-hsqldb" description="-->starts a hsqldb">
 		<hsqldb dbport="9999" />
+	</target>
+
+	<target name="hsqldb" description="-->starts a hsqldb" depends="run-hsqldb">
 		<input message="Type enter to stop..." />
 	</target>
 
 	<target name="clean-war" depends="clean, war">
 		<echo message="Cleaned and war generated" />
+	</target>
+	
+	<target name="all" description="clean, run-hsqldb, test">
 	</target>
 
 </project>

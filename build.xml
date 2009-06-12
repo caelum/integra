@@ -24,11 +24,9 @@
 		<ant antfile="build.xml" inheritall="false" dir="client" target="clean-war" />
 	</target>
 	
-	<target name="remote-deploy">
-		<scp file="server/target/integracao-server.war" todir="integra@192.168.0.2:~/"></scp>
-		<scp file="server/target/integracao-client.war" todir="integra@192.168.0.159:~/"></scp>
+	<target name="all" depends="deploy">
+		<ant antfile="build.xml" inheritall="false" dir="server" target="all" />
+		<ant antfile="build.xml" inheritall="false" dir="client" target="all" />
 	</target>
-
-	<target name="all" depends="deploy" />
-
+	
 </project>
