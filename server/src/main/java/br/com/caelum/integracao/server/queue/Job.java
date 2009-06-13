@@ -46,9 +46,9 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.Build;
+import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Config;
-import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.agent.Agent;
@@ -96,7 +96,7 @@ public class Job {
 		logger.debug("Trying to execute " + command.getName() + " @ " + at.getHost() + ":" + at.getPort());
 		Agent agent = at.getAgent();
 		if (agent.register(build.getProject())) {
-			if (agent.execute(command, this, config.getUrl())) {
+			if (agent.execute(command, this, config.getUrl(), build.getRevisionContent())) {
 				useClient(at);
 				this.startTime = Calendar.getInstance();
 				return true;

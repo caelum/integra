@@ -27,13 +27,14 @@
  */
 package br.com.caelum.integracao.server.agent;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.http.DefaultHttp;
+import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.http.Method;
 import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Project;
@@ -54,12 +55,15 @@ public class DefaultAgent implements Agent {
 
 	private final String baseUri;
 
-	public DefaultAgent(String baseUri) {
+	private final Http http;
+
+	public DefaultAgent(String baseUri, Http http) {
 		this.baseUri = baseUri;
+		this.http = http;
 	}
 
 	public AgentStatus getStatus() {
-		Method post = new DefaultHttp().post(baseUri + "/job/current");
+		Method post = http.post(baseUri + "/job/current");
 		try {
 			try {
 				post.send();
@@ -82,7 +86,7 @@ public class DefaultAgent implements Agent {
 	}
 
 	public boolean stop(Job currentJob) {
-		Method post = new DefaultHttp().post(baseUri + "/job/stop");
+		Method post = http.post(baseUri + "/job/stop");
 		post.with("jobId", "" + currentJob.getId());
 		try {
 			try {
@@ -106,7 +110,7 @@ public class DefaultAgent implements Agent {
 	}
 
 	public boolean register(Project project) {
-		Method post = new DefaultHttp().post(baseUri + "/project/register");
+		Method post = http.post(baseUri + "/project/register");
 		post.with("project.name", project.getName());
 		post.with("project.uri", project.getUri());
 		post.with("project.scmType", project.getControlType().getName());
@@ -127,8 +131,8 @@ public class DefaultAgent implements Agent {
 		}
 	}
 
-	public boolean execute(BuildCommand command, Job job, String mySelf) {
-		Method post = new DefaultHttp().post(baseUri + "/job/execute");
+	public boolean execute(BuildCommand command, Job job, String mySelf, File zip) {
+		Method post = http.post(baseUri + "/job/execute");
 		post.with("jobId", "" + job.getId());
 		post.with("revision", job.getBuild().getRevision().getName());
 		post.with("project.name", job.getBuild().getProject().getName());
@@ -144,6 +148,7 @@ public class DefaultAgent implements Agent {
 			post.with("directoryToCopy[" + (k++) + "]",directory);
 		}
 		try {
+			post.with("content", zip);
 			post.send();
 			int result = post.getResult();
 			if (result != 200) {

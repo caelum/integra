@@ -276,4 +276,8 @@ public class Build {
 		return tabs;
 	}
 
+	public File getRevisionContent() {
+		return getFile(".content.zip");
+	}
+
 }
