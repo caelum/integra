@@ -15,6 +15,7 @@
 		<a href="${pageContext.request.contextPath }/project/">list projects</a>
 		<a href="${pageContext.request.contextPath }/settings">settings</a>
 		<a href="${pageContext.request.contextPath }/jobs">jobs</a>
+		<a href="${pageContext.request.contextPath }/admin/stats">statistics</a>
 		<br/>
 	</div>
 	<link rel="stylesheet" type="text/css" media="all" href="/integracao/css/integracao.css" />

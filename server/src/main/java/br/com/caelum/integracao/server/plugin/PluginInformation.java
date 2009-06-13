@@ -43,6 +43,8 @@ import br.com.caelum.integracao.server.dao.Database;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public interface PluginInformation {
 	
+	String getName();
+	
 	List<Parameter> getParameters();
 	
 	Plugin getPlugin(Database database, Map<String, String> parameters) throws PluginException;

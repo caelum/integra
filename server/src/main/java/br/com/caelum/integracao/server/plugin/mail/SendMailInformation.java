@@ -72,4 +72,8 @@ public class SendMailInformation implements PluginInformation {
 		}
 	}
 
+	public String getName() {
+		return "Send mail";
+	}
+
 }

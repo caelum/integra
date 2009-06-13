@@ -50,4 +50,8 @@ public class RemoveOldBuildsInformation implements PluginInformation {
 		return new RemoveOldBuilds(db, Integer.parseInt(parameters.get("keep")));
 	}
 
+	public String getName() {
+		return "Remove old builds";
+	}
+
 }

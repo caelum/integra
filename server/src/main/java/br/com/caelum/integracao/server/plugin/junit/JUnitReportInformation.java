@@ -52,4 +52,8 @@ public class JUnitReportInformation implements PluginInformation {
 		return new JUnitReport(value, new Projects(db));
 	}
 
+	public String getName() {
+		return "Junit Report";
+	}
+
 }

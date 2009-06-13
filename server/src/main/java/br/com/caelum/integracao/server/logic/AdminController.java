@@ -25,12 +25,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.plugin;
+package br.com.caelum.integracao.server.logic;
 
-public enum ParameterType {
-	TEXT, TEXTAREA;
+import org.hibernate.stat.Statistics;
+
+import br.com.caelum.integracao.server.dao.DatabaseFactory;
+import br.com.caelum.vraptor.Resource;
+
+@Resource
+public class AdminController {
 	
-	public String getParameterName() {
-		return name();
+	private final DatabaseFactory factory;
+
+	public AdminController(DatabaseFactory factory) {
+		this.factory = factory;
 	}
+	
+	public Statistics stats() {
+		return factory.getStatistics();
+	}
+
 }

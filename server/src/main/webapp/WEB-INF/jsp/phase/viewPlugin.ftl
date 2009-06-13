@@ -2,11 +2,11 @@
 <form action="plugin/${plugin.id}" method="post">
 	<input type="hidden" name="_method" value="put" />
 <#assign i=0>
-${plugin.information}
+${plugin.information.name}
 <#list plugin.information.parameters as param>
-	<div> <input type="hidden" name="keys[${i}]" value="${param}" />${param}:
-	<#if param.type.name=='TEXTAREA'>
-	 	<textarea name="values[${i}]">${plugin.getParameter(param.name).value}</textarea>
+	<div> <input type="hidden" name="keys[${i}]" value="${param.name}" />${param.name}:
+	<#if param.type.parameterName="TEXTAREA">
+	 	<textarea name="values[${i}]">${plugin.getParameter(param.name).value}</textarea> 
 	<#else>
 	 	<input type="text" name="values[${i}]" value="${plugin.getParameter(param.name).value}" />
 	 </#if>
