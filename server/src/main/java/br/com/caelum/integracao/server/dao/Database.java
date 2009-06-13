@@ -70,4 +70,8 @@ public class Database {
 		transaction = null;
 	}
 
+	public boolean isClosed() {
+		return !session.isOpen();
+	}
+
 }

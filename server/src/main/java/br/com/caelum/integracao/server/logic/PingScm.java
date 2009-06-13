@@ -87,18 +87,30 @@ public class PingScm {
 		try {
 			Config config = new Application(db).getConfig();
 			int time = config.getCheckInterval();
-			if(time<=0) {
+			db.close();
+			if (time <= 0) {
 				// no automatic pinging, thank you
 				Thread.sleep(5 * 60 * 1000);
 				return;
 			}
 			Thread.sleep(time * 1000);
+			buildProjects();
+		} catch (Exception ex) {
+			logger.error("Something really nasty ocurred while pinging the scm servers", ex);
+		} finally {
+			if(!db.isClosed()) {
+				db.close();
+			}
+		}
+	}
+
+	private void buildProjects() {
+		Database db = new Database(factory);
+		try {
 			Projects projects = new Projects(db);
 			for (Project project : projects.all()) {
 				tryToBuild(db, project);
 			}
-		} catch (Exception ex) {
-			logger.error("Something really nasty ocurred while pinging the scm servers", ex);
 		} finally {
 			db.close();
 		}
