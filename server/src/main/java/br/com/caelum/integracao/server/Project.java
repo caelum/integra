@@ -164,7 +164,7 @@ public class Project {
 			throw new ScmException("Unable to instantiate scm controller", e);
 		}
 	}
-
+	
 	public Calendar getLastBuildTime() {
 		return lastBuild;
 	}

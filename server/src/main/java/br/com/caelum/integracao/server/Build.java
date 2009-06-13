@@ -52,6 +52,7 @@ import br.com.caelum.integracao.server.queue.Jobs;
 import br.com.caelum.integracao.server.scm.Revision;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
+import br.com.caelum.integracao.zip.Zipper;
 
 /**
  * Represents an build either in process or already processed.
@@ -88,8 +89,8 @@ public class Build {
 
 	@OneToMany(mappedBy = "build")
 	private List<Job> jobs = new ArrayList<Job>();
-	
-	@OneToMany(mappedBy="build")
+
+	@OneToMany(mappedBy = "build")
 	private List<Tab> tabs = new ArrayList<Tab>();
 
 	protected Build() {
@@ -118,7 +119,11 @@ public class Build {
 	}
 
 	public File getBaseDirectory() {
-		return new File(project.getBuildsDirectory(), "build-" + buildCount);
+		return new File(project.getBuildsDirectory(), directoryName());
+	}
+
+	private String directoryName() {
+		return "build-" + buildCount;
 	}
 
 	public File getFile(String filename) {
@@ -132,6 +137,23 @@ public class Build {
 		try {
 			ScmControl control = project.getControl();
 			this.revision = project.extractNextRevision(this, builds, control);
+			int result = control.checkoutOrUpdate(revision.getName(), getFile("checkout-revision-" + revision.getName()
+					+ ".txt"));
+			if (result != 0) {
+				logger.error("Unable to zip revision for build");
+				finish(false);
+				return;
+			}
+			if (!getRevisionContent().exists()) {
+				try {
+					new Zipper(new File(project.getBaseDir(), project.getName())).ignore(control.getIgnorePattern()).add(".*").zip(getRevisionContent());
+				} catch(IOException ex) {
+					logger.error("Unable to zip revision for build", ex);
+					finish(false);
+					return;
+				}
+			}
+
 		} catch (Exception ex) {
 			logger.error("Unable to retrieve revision for " + project.getName(), ex);
 			finish(false);
@@ -271,13 +293,13 @@ public class Build {
 		}
 		return revision.getName();
 	}
-	
+
 	public List<Tab> getTabs() {
 		return tabs;
 	}
 
 	public File getRevisionContent() {
-		return getFile(".content.zip");
+		return new File(project.getBuildsDirectory(), "revision-" + revision.getName() + ".zip");
 	}
 
 }

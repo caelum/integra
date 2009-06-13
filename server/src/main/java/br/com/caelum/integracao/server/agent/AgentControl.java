@@ -27,6 +27,8 @@
  */
 package br.com.caelum.integracao.server.agent;
 
+import br.com.caelum.integracao.http.DefaultHttp;
+
 
 /**
  * Controls all remote agents through REST calls.
@@ -36,7 +38,7 @@ package br.com.caelum.integracao.server.agent;
 public class AgentControl {
 
 	public Agent to(String baseUri) {
-		return new DefaultAgent(baseUri);
+		return new DefaultAgent(baseUri, new DefaultHttp());
 	}
 
 }

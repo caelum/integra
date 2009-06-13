@@ -36,6 +36,7 @@ import javax.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
@@ -114,7 +115,7 @@ public class QueueThread {
 					.getMaximumTimeForAJob() * 60 * 1000) {
 				Client client = job.getClient();
 				if(client.getCurrentJob()!=null && client.getCurrentJob().equals(job)) {
-					if(client.stop(new DefaultAgent(client.getBaseUri()))) {
+					if(client.stop(new DefaultAgent(client.getBaseUri(), new DefaultHttp()))) {
 						result++;
 					}
 				} else {

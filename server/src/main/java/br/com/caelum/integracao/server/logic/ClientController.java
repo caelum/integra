@@ -30,6 +30,7 @@ package br.com.caelum.integracao.server.logic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.agent.DefaultAgent;
@@ -114,7 +115,7 @@ public class ClientController {
 	public void stop(Client client) {
 		logger.debug("Stopping " + client.getId());
 		client = clients.get(client);
-		client.stop(new DefaultAgent(client.getBaseUri()));
+		client.stop(new DefaultAgent(client.getBaseUri(), new DefaultHttp()));
 		showList();
 	}
 

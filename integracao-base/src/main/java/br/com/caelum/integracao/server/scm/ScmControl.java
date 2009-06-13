@@ -36,7 +36,7 @@ import java.io.File;
  */
 public interface ScmControl {
 
-	public File getDir();
+	File getDir();
 
 	/**
 	 * Returns the information between Revision and the current revision.<br/>
@@ -46,10 +46,19 @@ public interface ScmControl {
 
 	/**
 	 * Returns the next revision after this one.
-	 * @param fromRevision must be different than null
+	 * 
+	 * @param fromRevision
+	 *            must be different than null
 	 */
 	Revision getNextRevision(Revision fromRevision, File log) throws ScmException;
-	
+
 	int checkoutOrUpdate(String revision, File log) throws ScmException;
+
+	/**
+	 * Returns the pattern of files to be ignored when zipping the project's
+	 * content.<br/>
+	 * i.e.: .svn, .git and so on.
+	 */
+	String getIgnorePattern();
 
 }

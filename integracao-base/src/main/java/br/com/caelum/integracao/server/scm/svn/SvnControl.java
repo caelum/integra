@@ -114,8 +114,13 @@ public class SvnControl implements ScmControl {
 		int start = diff.lastIndexOf("r", diff.indexOf("|")) +1;
 		int end = diff.indexOf( " ", start);
 		String name = diff.substring(start,end);
-		return new Revision(name, extractInfoForRevision(log, name), "");
+		Revision nextRevision = new Revision(name, extractInfoForRevision(log, name), "");
+		return nextRevision;
 		
+	}
+
+	public String getIgnorePattern() {
+		return ".*\\.svn";
 	}
 	
 }

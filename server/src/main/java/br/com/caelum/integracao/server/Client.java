@@ -41,6 +41,7 @@ import javax.persistence.ManyToOne;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.server.agent.Agent;
 import br.com.caelum.integracao.server.agent.AgentControl;
 import br.com.caelum.integracao.server.agent.AgentStatus;
@@ -81,7 +82,7 @@ public class Client {
 	}
 
 	public Agent getAgent() throws UnknownHostException, IOException {
-		return new DefaultAgent(this.getBaseUri());
+		return new DefaultAgent(this.getBaseUri(), new DefaultHttp());
 	}
 
 	public String getContext() {

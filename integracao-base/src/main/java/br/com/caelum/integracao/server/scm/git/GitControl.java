@@ -169,4 +169,8 @@ public class GitControl implements ScmControl {
 		return logContent;
 	}
 
+	public String getIgnorePattern() {
+		return ".*\\.git";
+	}
+
 }
