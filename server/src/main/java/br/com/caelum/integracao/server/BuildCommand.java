@@ -48,13 +48,13 @@ import org.slf4j.LoggerFactory;
 import br.com.caelum.integracao.server.label.Label;
 
 @Entity
-public class ExecuteCommandLine {
+public class BuildCommand {
 
 	@Id
 	@GeneratedValue
 	private Long id;
 
-	private static final Logger logger = LoggerFactory.getLogger(ExecuteCommandLine.class);
+	private static final Logger logger = LoggerFactory.getLogger(BuildCommand.class);
 
 	@OneToMany
 	@OrderBy("id")
@@ -77,10 +77,10 @@ public class ExecuteCommandLine {
 	@ManyToMany
 	private List<Label> labels = new ArrayList<Label>();
 
-	ExecuteCommandLine() {
+	BuildCommand() {
 	}
 
-	public ExecuteCommandLine(Phase phase, String[] start, String[] stop, List<Label> labels) {
+	public BuildCommand(Phase phase, String[] start, String[] stop, List<Label> labels) {
 		this.phase = phase;
 		this.labels = labels;
 		for (String command : start) {

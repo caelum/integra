@@ -48,7 +48,7 @@ import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Config;
-import br.com.caelum.integracao.server.ExecuteCommandLine;
+import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.agent.Agent;
@@ -64,7 +64,7 @@ public class Job {
 	private Build build;
 
 	@ManyToOne
-	private ExecuteCommandLine command;
+	private BuildCommand command;
 
 	@ManyToOne
 	private Client client;
@@ -87,7 +87,7 @@ public class Job {
 	Job() {
 	}
 
-	public Job(Build build, ExecuteCommandLine command) {
+	public Job(Build build, BuildCommand command) {
 		this.build = build;
 		this.command = command;
 	}
@@ -161,7 +161,7 @@ public class Job {
 		return client;
 	}
 
-	public ExecuteCommandLine getCommand() {
+	public BuildCommand getCommand() {
 		return command;
 	}
 

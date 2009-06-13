@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.http.Method;
-import br.com.caelum.integracao.server.ExecuteCommandLine;
+import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.queue.Job;
 
@@ -127,7 +127,7 @@ public class DefaultAgent implements Agent {
 		}
 	}
 
-	public boolean execute(ExecuteCommandLine command, Job job, String mySelf) {
+	public boolean execute(BuildCommand command, Job job, String mySelf) {
 		Method post = new DefaultHttp().post(baseUri + "/job/execute");
 		post.with("jobId", "" + job.getId());
 		post.with("revision", job.getBuild().getRevision().getName());

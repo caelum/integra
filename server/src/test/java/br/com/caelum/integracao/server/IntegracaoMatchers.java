@@ -34,7 +34,7 @@ import br.com.caelum.integracao.server.queue.Job;
 
 public class IntegracaoMatchers {
 
-	public static TypeSafeMatcher<Job> jobFor(final Build build, final ExecuteCommandLine command) {
+	public static TypeSafeMatcher<Job> jobFor(final Build build, final BuildCommand command) {
 		return new TypeSafeMatcher<Job>() {
 
 			@Override

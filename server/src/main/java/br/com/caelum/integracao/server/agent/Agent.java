@@ -27,7 +27,7 @@
  */
 package br.com.caelum.integracao.server.agent;
 
-import br.com.caelum.integracao.server.ExecuteCommandLine;
+import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.queue.Job;
 
@@ -47,6 +47,6 @@ public interface Agent {
 	 */
 	boolean register(Project project);
 
-	boolean execute(ExecuteCommandLine command, Job job, String mySelf);
+	boolean execute(BuildCommand command, Job job, String mySelf);
 
 }

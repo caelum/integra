@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.Build;
-import br.com.caelum.integracao.server.ExecuteCommandLine;
+import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.build.Tab;
@@ -65,7 +65,7 @@ public class JUnitReport implements Plugin {
 
 		try {
 			List<File> reportsDir = new ArrayList<File>();
-			for (ExecuteCommandLine command : phase.getCommands()) {
+			for (BuildCommand command : phase.getCommands()) {
 				File reportDir = build.getFile(phase.getName() + "/" + command.getId() + "/" + dir);
 				if(reportDir.exists()) {
 					reportsDir.add(reportDir);

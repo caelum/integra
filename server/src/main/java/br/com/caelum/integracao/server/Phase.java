@@ -62,7 +62,7 @@ public class Phase {
 
 	@OneToMany(mappedBy = "phase")
 	@OrderBy("id")
-	private List<ExecuteCommandLine> commands = new ArrayList<ExecuteCommandLine>();
+	private List<BuildCommand> commands = new ArrayList<BuildCommand>();
 
 	@OneToMany
 	@OrderBy("position")
@@ -83,10 +83,10 @@ public class Phase {
 	@ManyToOne
 	private Project project;
 
-	public Phase(String name, ExecuteCommandLine... cmds) {
+	public Phase(String name, BuildCommand... cmds) {
 		this.name = name;
-		this.commands = new ArrayList<ExecuteCommandLine>();
-		for (ExecuteCommandLine cmd : cmds) {
+		this.commands = new ArrayList<BuildCommand>();
+		for (BuildCommand cmd : cmds) {
 			commands.add(cmd);
 		}
 	}
@@ -100,7 +100,7 @@ public class Phase {
 					+ commands.size() + " parallel commands.");
 		}
 		build.getFile(name).mkdirs();
-		for (ExecuteCommandLine command : commands) {
+		for (BuildCommand command : commands) {
 			jobs.add(new Job(build, command));
 		}
 	}
@@ -117,9 +117,9 @@ public class Phase {
 		return name;
 	}
 
-	public List<ExecuteCommandLine> getCommands() {
-		List<ExecuteCommandLine> active = new ArrayList<ExecuteCommandLine>();
-		for (ExecuteCommandLine cmd : commands) {
+	public List<BuildCommand> getCommands() {
+		List<BuildCommand> active = new ArrayList<BuildCommand>();
+		for (BuildCommand cmd : commands) {
 			if (cmd.isActive()) {
 				active.add(cmd);
 			}
@@ -127,7 +127,7 @@ public class Phase {
 		return active;
 	}
 
-	public void setCommands(List<ExecuteCommandLine> commands) {
+	public void setCommands(List<BuildCommand> commands) {
 		this.commands = commands;
 	}
 

@@ -32,7 +32,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.ExecuteCommandLine;
+import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
@@ -68,7 +68,7 @@ public class PhaseController {
 
 	@Delete
 	@Path("/project/{project.name}/command/{command.id}")
-	public void removeCommand(ExecuteCommandLine command) {
+	public void removeCommand(BuildCommand command) {
 		command = projects.load(command);
 		command.deactivate();
 		showProject(command.getPhase().getProject());
@@ -79,7 +79,7 @@ public class PhaseController {
 	public void addCommand(Phase phase, String startCommand, String stopCommand, String labels) {
 		logger.debug("Adding a new command with " + startCommand + " and " + stopCommand);
 		phase = projects.get(phase);
-		ExecuteCommandLine line = new ExecuteCommandLine(phase, commandsFor(startCommand), commandsFor(stopCommand), this.labels.lookup(labels));
+		BuildCommand line = new BuildCommand(phase, commandsFor(startCommand), commandsFor(stopCommand), this.labels.lookup(labels));
 		projects.register(line);
 		showProject(phase.getProject());
 	}

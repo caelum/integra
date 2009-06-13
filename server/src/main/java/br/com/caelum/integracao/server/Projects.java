@@ -68,19 +68,19 @@ public class Projects {
 		session.save(phase);
 	}
 
-	public void create(ExecuteCommandLine cmd) {
+	public void create(BuildCommand cmd) {
 		session.save(cmd);
 	}
 
-	public ExecuteCommandLine load(ExecuteCommandLine command) {
-		return (ExecuteCommandLine) session.load(ExecuteCommandLine.class, command.getId());
+	public BuildCommand load(BuildCommand command) {
+		return (BuildCommand) session.load(BuildCommand.class, command.getId());
 	}
 
 	public void register(Build build) {
 		session.save(build);
 	}
 
-	public void register(ExecuteCommandLine line) {
+	public void register(BuildCommand line) {
 		session.save(line);
 	}
 

@@ -38,7 +38,7 @@ import org.junit.Test;
 
 import br.com.caelum.integracao.server.label.Label;
 
-public class ExecuteCommandLineTest {
+public class BuildCommandTest {
 	
 	private Phase phase;
 
@@ -49,7 +49,7 @@ public class ExecuteCommandLineTest {
 	
 	@Test
 	public void shouldHaveTheNameAsTheCommand() {
-		ExecuteCommandLine line = new ExecuteCommandLine(phase, new String[] {"hello world"}, new String[]{"stop world"},Arrays.asList(new Label("stop world")));
+		BuildCommand line = new BuildCommand(phase, new String[] {"hello world"}, new String[]{"stop world"},Arrays.asList(new Label("stop world")));
 		assertThat(line.getName(), is(equalTo("hello world ")));
 	}
 

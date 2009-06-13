@@ -137,8 +137,8 @@ public class PhaseTest extends DatabaseBasedTest {
 	
 	@Test
 	public void executionShouldCreateAJobForEachCommand() throws IOException {
-		final ExecuteCommandLine first = mockery.mock(ExecuteCommandLine.class, "firstJob");
-		final ExecuteCommandLine second = mockery.mock(ExecuteCommandLine.class, "secondJob");
+		final BuildCommand first = mockery.mock(BuildCommand.class, "firstJob");
+		final BuildCommand second = mockery.mock(BuildCommand.class, "secondJob");
 		
 		Phase compileTwice = new Phase("compile");
 		compileTwice.getCommands().add(first);
