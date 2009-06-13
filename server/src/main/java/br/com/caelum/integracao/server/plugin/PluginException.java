@@ -27,24 +27,16 @@
  */
 package br.com.caelum.integracao.server.plugin;
 
-import java.util.List;
-import java.util.Map;
 
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+public class PluginException extends Exception {
 
-import br.com.caelum.integracao.server.dao.Database;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1882156222594692002L;
 
-/**
- * Basic plugin info is saved somewhere else
- * 
- * @author guilherme silveira
- */
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public interface PluginInformation {
-	
-	List<Parameter> getParameters();
-	
-	Plugin getPlugin(Database database, Map<String, String> parameters) throws PluginException;
+	public PluginException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 }

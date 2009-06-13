@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server.plugin.mail;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.mail.EmailException;
@@ -37,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.plugin.Plugin;
+import br.com.caelum.integracao.server.template.TextTemplate;
+import freemarker.template.TemplateException;
 
 /**
  * A plugin instance.
@@ -50,15 +53,21 @@ public class SendMail implements Plugin {
 	private final String fromName;
 	private final String[] recipients;
 	private final String host;
+	private final TextTemplate subject;
+	private final TextTemplate content;
 
-	public SendMail(String host, String[] recipients, String fromName, String fromMail) {
+	public SendMail(String host, String[] recipients, String fromName, String fromMail, TextTemplate subject, TextTemplate content) {
 		this.host = host;
 		this.recipients = recipients;
 		this.fromName = fromName;
 		this.fromMail = fromMail;
+		this.subject = subject;
+		this.content = content;
 	}
 
 	public boolean after(Build build, Phase phase) {
+		subject.with("build", build).with("phase", phase);
+		content.with("build", build).with("phase", phase);
 		logger.debug("Preparing to send mail to " + Arrays.toString(recipients));
 		try {
 			SimpleEmail email = new SimpleEmail();
@@ -69,8 +78,8 @@ public class SendMail implements Plugin {
 			email.setFrom(fromMail, fromName);
 			if(build.isSuccessSoFar()) {
 				if(build.buildStatusChangedFromLastBuild()) {
-					email.setSubject(phase.getProject().getName()  + " " + build.getBuildCount() + " was a success.");
-					email.setMsg(phase.getProject().getName()  + " build " + build.getBuildCount() + " was a success.");
+					email.setSubject(subject.value());
+					email.setMsg(content.value());
 				} else {
 					logger.debug("There is no need to send the email...");
 					return true;
@@ -82,6 +91,12 @@ public class SendMail implements Plugin {
 			email.send();
 			return true;
 		} catch (EmailException e) {
+			logger.debug("Unable to send mail", e);
+			return false;
+		} catch (TemplateException e) {
+			logger.debug("Unable to send mail", e);
+			return false;
+		} catch (IOException e) {
 			logger.debug("Unable to send mail", e);
 			return false;
 		}

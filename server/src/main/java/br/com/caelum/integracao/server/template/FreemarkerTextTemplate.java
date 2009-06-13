@@ -25,26 +25,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.plugin;
+package br.com.caelum.integracao.server.template;
 
-import java.util.List;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-
-import br.com.caelum.integracao.server.dao.Database;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
 /**
- * Basic plugin info is saved somewhere else
+ * Freemarker implementation of a text template.<br>
+ * Uses freemarker to customize a text string.
  * 
  * @author guilherme silveira
  */
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public interface PluginInformation {
-	
-	List<Parameter> getParameters();
-	
-	Plugin getPlugin(Database database, Map<String, String> parameters) throws PluginException;
+public class FreemarkerTextTemplate implements TextTemplate {
+
+	private final Template temp;
+	private final Map content;
+
+	public FreemarkerTextTemplate(String content) throws IOException {
+
+		Configuration cfg = new Configuration();
+		cfg.setObjectWrapper(new DefaultObjectWrapper());
+
+		this.temp = new Template("FreemarkerTextTemplate", new StringReader(content), cfg, null);
+		this.content = new HashMap();
+
+	}
+
+	public String value() throws TemplateException, IOException {
+		StringWriter out = new StringWriter();
+		temp.process(content, out);
+		return out.getBuffer().toString();
+	}
+
+	public TextTemplate with(String key, Object value) {
+		content.put(key, value);
+		return this;
+	}
 
 }

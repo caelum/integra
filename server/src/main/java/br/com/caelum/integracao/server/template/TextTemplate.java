@@ -25,26 +25,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.plugin;
+package br.com.caelum.integracao.server.template;
 
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
 
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import freemarker.template.TemplateException;
 
-import br.com.caelum.integracao.server.dao.Database;
 
 /**
- * Basic plugin info is saved somewhere else
- * 
+ * A text template
  * @author guilherme silveira
+ *
  */
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public interface PluginInformation {
-	
-	List<Parameter> getParameters();
-	
-	Plugin getPlugin(Database database, Map<String, String> parameters) throws PluginException;
+public interface TextTemplate {
+
+	TextTemplate with(String key, Object value);
+
+	String value() throws TemplateException, IOException;
 
 }

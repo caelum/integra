@@ -58,23 +58,29 @@ public class GitControl implements ScmControl {
 
 	public int checkoutOrUpdate(String revision, File log) throws ScmException {
 		try {
-			if (new File(new File(baseDirectory, baseName), ".git").exists()) {
-				String cmds[][] = new String[][] {new String[] {"git", "checkout", "HEAD"}, new String[] {"git", "checkout", "master"}, new String[] {"git", "pull"}};
+			File dir = new File(baseDirectory, baseName);
+			File git = new File(dir, ".git");
+			if (dir.exists() && !git.exists()) {
+				dir.delete();
+			}
+			if (git.exists()) {
+				String cmds[][] = new String[][] { new String[] { "git", "checkout", "HEAD" },
+						new String[] { "git", "checkout", "master" }, new String[] { "git", "pull" } };
 				int partial = 0;
-				for(String cmd[] : cmds) {
+				for (String cmd[] : cmds) {
 					partial = prepare(cmd).at(getDir()).logTo(log).run();
-					if(partial!=0) {
+					if (partial != 0) {
 						return partial;
 					}
 				}
-				if(revision==null) {
+				if (revision == null) {
 					return partial;
 				}
 				return prepare("git", "checkout", revision).at(getDir()).logTo(log).run();
 			} else {
 				logger.debug("Cloning the git for the first time at " + log.getAbsolutePath());
 				int partial = prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
-				if(partial!=0 || revision==null) {
+				if (partial != 0 || revision == null) {
 					return partial;
 				}
 				return prepare("git", "checkout", revision).at(getDir()).logTo(log).run();
@@ -129,8 +135,7 @@ public class GitControl implements ScmControl {
 			prepare(cmd).logTo(writer).at(getDir()).run();
 			String content = writer.getBuffer().toString();
 			FileWriter fw = new FileWriter(log);
-			
-			
+
 			PrintWriter file = new PrintWriter(fw, true);
 			file.println(content);
 			file.close();
@@ -142,15 +147,19 @@ public class GitControl implements ScmControl {
 	}
 
 	public Revision getNextRevision(Revision fromRevision, File log) throws ScmException {
+		int result = checkoutOrUpdate(null, log);
+		if (result != 0) {
+			throw new ScmException("Unable to load data and revision information, log at " + log.getAbsolutePath());
+		}
 		String diff = extract(log, "git", "--no-pager", "log", fromRevision.getName() + "..HEAD", "--shortstat");
-		if(diff.indexOf("files changed")==-1) {
+		if (diff.indexOf("files changed") == -1) {
 			// there was no change in the content
 			return fromRevision;
 		}
-		
-		int start = diff.lastIndexOf("commit ", diff.lastIndexOf("Author:", diff.indexOf("|"))) +1;
-		int end = diff.indexOf( " ", start);
-		String baseName = diff.substring(start,end);
+
+		int start = diff.lastIndexOf("commit ", diff.lastIndexOf("Author:", diff.indexOf("|"))) + 1;
+		int end = diff.indexOf(" ", start);
+		String baseName = diff.substring(start, end);
 		String name = baseName + "^.." + baseName;
 		return new Revision(name, extractInfoForRevision(log, name), "");
 	}
@@ -159,6 +168,5 @@ public class GitControl implements ScmControl {
 		String logContent = extract(log, "git", "--no-pager", "log", revisionRange, "-v", "--non-interactive");
 		return logContent;
 	}
-
 
 }
