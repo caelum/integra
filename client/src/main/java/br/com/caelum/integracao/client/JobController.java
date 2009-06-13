@@ -42,6 +42,7 @@ import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
+import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 import br.com.caelum.vraptor.view.Results;
 
@@ -81,10 +82,10 @@ public class JobController {
 
 	@Post
 	public synchronized void execute(String jobId, Project project, String revision, List<String> startCommand,
-			List<String> stopCommand, String resultUri, List<String> directoryToCopy) {
+			List<String> stopCommand, String resultUri, List<String> directoryToCopy, UploadedFile content) {
 		Server server = new Server(resultUri, new DefaultHttp(), settings);
 		JobExecution execution = new JobExecution(projects.get(project.getName()), startCommand, stopCommand, revision,
-				directoryToCopy, settings, server);
+				directoryToCopy, settings, server, content);
 		job.start(jobId, execution);
 	}
 

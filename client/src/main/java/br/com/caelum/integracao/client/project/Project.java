@@ -28,11 +28,9 @@
 package br.com.caelum.integracao.client.project;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Scanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +39,8 @@ import br.com.caelum.integracao.client.Command;
 import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
+import br.com.caelum.integracao.zip.Unzipper;
+import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
 
 public class Project {
 
@@ -93,28 +93,6 @@ public class Project {
 
 	}
 
-	public ProjectRunResult checkout(File baseDirectory, String desiredRevision, StringWriter output) throws IOException,
-			ScmException {
-		logger.debug("Checking out project @ " + uri + ", revision=" + desiredRevision + " to " + baseDirectory + "/"
-				+ name);
-		File checkoutLog = File.createTempFile("checkout-client-", ".txt");
-		ScmControl control = getControl(baseDirectory);
-		int result = control.checkoutOrUpdate(desiredRevision, checkoutLog);
-		return new ProjectRunResult(content(checkoutLog), result);
-
-	}
-
-	private String content(File tmp) throws FileNotFoundException {
-		Scanner sc = new Scanner(new FileInputStream(tmp)).useDelimiter("117473826478234211");
-		String content;
-		if (!sc.hasNext()) {
-			content = "";
-		} else {
-			content = sc.next();
-		}
-		return content;
-	}
-
 	public void stop() {
 		if (this.executing != null) {
 			executing.stop();
@@ -125,6 +103,20 @@ public class Project {
 			return executing.getName();
 		}
 		return "";
+	}
+
+	public ProjectRunResult unzip(File baseDir, String revision, UploadedFile content, StringWriter output) {
+		content.getFile().deleteOnExit();
+		try {
+			File workDirectory = new File(baseDir,name);
+			// TODO remove everything if it exists first...
+			workDirectory.mkdirs();
+			new Unzipper(workDirectory).unzip(content.getFile());
+		} catch (IOException e) {
+			e.printStackTrace(new PrintWriter(output,true));
+			return new ProjectRunResult(output.getBuffer().toString(), -1);
+		}
+		return new ProjectRunResult(output.getBuffer().toString(), 0);
 	}
 
 }

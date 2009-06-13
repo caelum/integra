@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.client.project.Project;
 import br.com.caelum.integracao.client.project.ProjectRunResult;
+import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
 
 /**
  * Executes a job in this client.
@@ -53,12 +54,14 @@ public class JobExecution {
 	private final String revision;
 	private final Settings settings;
 	private final Server server;
+	private final UploadedFile content;
 
 	public JobExecution(Project project, List<String> startCommand, List<String> stopCommand, 
-			String revision, List<String> directoryToCopy, Settings settings, Server server) {
+			String revision, List<String> directoryToCopy, Settings settings, Server server, UploadedFile content) {
 		this.project = project;
 		this.settings = settings;
 		this.server = server;
+		this.content = content;
 		this.start = new Command(startCommand);
 		this.stop = new Command(stopCommand);
 		this.revision = revision;
@@ -73,7 +76,7 @@ public class JobExecution {
 
 		try {
 
-			checkoutResult = project.checkout(settings.getBaseDir(), revision, output);
+			checkoutResult = project.unzip(settings.getBaseDir(), revision, content, output);
 			if (!checkoutResult.failed()) {
 				startResult = project.run(settings.getBaseDir(), start, output);
 			}
