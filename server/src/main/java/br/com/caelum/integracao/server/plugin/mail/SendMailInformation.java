@@ -27,13 +27,19 @@
  */
 package br.com.caelum.integracao.server.plugin.mail;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.plugin.Parameter;
+import br.com.caelum.integracao.server.plugin.ParameterType;
+import br.com.caelum.integracao.server.plugin.PluginException;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
+import br.com.caelum.integracao.server.template.FreemarkerTextTemplate;
+import br.com.caelum.integracao.server.template.TextTemplate;
 
 /**
  * Copies artifacts from the client machine to the server.
@@ -42,18 +48,26 @@ import br.com.caelum.integracao.server.plugin.PluginInformation;
  */
 public class SendMailInformation implements PluginInformation {
 
-	public List<String> getParameters() {
-		return Arrays.asList(new String[] { "host", "recipients", "from.name", "from.mail" });
+	public List<Parameter> getParameters() {
+		return Arrays.asList(new Parameter("host"), new Parameter("recipients"), new Parameter("from.name"),
+				new Parameter("from.mail"), new Parameter("subject"), new Parameter("content",ParameterType.TEXTAREA));
 	}
 
 	public boolean after(Phase phase) {
 		return false;
 	}
 
-	public SendMail getPlugin(Database database, Map<String, String> parameters) {
+	public SendMail getPlugin(Database database, Map<String, String> parameters) throws PluginException {
 		String value = parameters.get("recipients");
 		String[] recipients = value == null ? new String[0] : value.split(",");
-		return new SendMail(parameters.get("host"), recipients, parameters.get("from.name"), parameters.get("from.mail"));
+		try {
+			TextTemplate subject = new FreemarkerTextTemplate(parameters.get("subject"));
+			TextTemplate content = new FreemarkerTextTemplate(parameters.get("content"));
+			return new SendMail(parameters.get("host"), recipients, parameters.get("from.name"), parameters
+					.get("from.mail"), subject, content);
+		} catch (IOException e) {
+			throw new PluginException("Unable to send an email.", e);
+		}
 	}
 
 }

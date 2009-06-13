@@ -25,29 +25,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.plugin.build;
+package br.com.caelum.integracao.server.plugin;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+public class Parameter {
 
-import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.plugin.Parameter;
-import br.com.caelum.integracao.server.plugin.Plugin;
-import br.com.caelum.integracao.server.plugin.PluginInformation;
+	private final String name;
+	private final ParameterType type;
 
-/**
- * Information on the RemoveOldBuilds plugin/
- * @author guilherme silveira
- */
-public class RemoveOldBuildsInformation implements PluginInformation {
-
-	public List<Parameter> getParameters() {
-		return Arrays.asList(new Parameter("keep"));
+	public Parameter(String name) {
+		this(name, ParameterType.TEXT);
+	}
+	
+	public Parameter(String name, ParameterType type) {
+		this.name = name;
+		this.type = type;
 	}
 
-	public Plugin getPlugin(Database db, Map<String, String> parameters) {
-		return new RemoveOldBuilds(db, Integer.parseInt(parameters.get("keep")));
+	public ParameterType getType() {
+		return type;
 	}
 
 }

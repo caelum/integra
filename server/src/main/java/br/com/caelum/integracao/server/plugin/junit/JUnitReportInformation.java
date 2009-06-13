@@ -33,6 +33,7 @@ import java.util.Map;
 
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.plugin.Parameter;
 import br.com.caelum.integracao.server.plugin.PluginInformation;
 
 /**
@@ -42,8 +43,8 @@ import br.com.caelum.integracao.server.plugin.PluginInformation;
  */
 public class JUnitReportInformation implements PluginInformation {
 
-	public List<String> getParameters() {
-		return Arrays.asList(new String[] { "reportDirectory" });
+	public List<Parameter> getParameters() {
+		return Arrays.asList(new Parameter( "reportDirectory" ));
 	}
 
 	public JUnitReport getPlugin(Database db, Map<String, String> parameters) {
