@@ -49,8 +49,10 @@ import br.com.caelum.integracao.server.template.TextTemplate;
 public class SendMailInformation implements PluginInformation {
 
 	public List<Parameter> getParameters() {
-		return Arrays.asList(new Parameter("host"), new Parameter("recipients"), new Parameter("from.name"),
-				new Parameter("from.mail"), new Parameter("subject"), new Parameter("content",ParameterType.TEXTAREA));
+		Parameter content = new Parameter("content", "", ParameterType.TEXTAREA);
+		Parameter subject = new Parameter("subject", "Build ${build.buildCount}");
+		return Arrays.asList(new Parameter("host", "localhost"), new Parameter("recipients", "myself@localhost"),
+				new Parameter("from.name", "myself"), new Parameter("from.mail", "myself@localhost"), subject, content);
 	}
 
 	public boolean after(Phase phase) {

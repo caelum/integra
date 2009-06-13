@@ -31,13 +31,15 @@ public class Parameter {
 
 	private final String name;
 	private final ParameterType type;
+	private final String defaultValue;
 
-	public Parameter(String name) {
-		this(name, ParameterType.TEXT);
+	public Parameter(String name, String defaultValue) {
+		this(name, defaultValue, ParameterType.TEXT);
 	}
 	
-	public Parameter(String name, ParameterType type) {
+	public Parameter(String name, String defaultValue, ParameterType type) {
 		this.name = name;
+		this.defaultValue = defaultValue;
 		this.type = type;
 	}
 
@@ -45,4 +47,12 @@ public class Parameter {
 		return type;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+	
 }

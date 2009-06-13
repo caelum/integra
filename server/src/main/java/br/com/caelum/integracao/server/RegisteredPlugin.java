@@ -27,12 +27,16 @@
  */
 package br.com.caelum.integracao.server;
 
+import java.lang.reflect.InvocationTargetException;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.validator.NotNull;
+
+import br.com.caelum.integracao.server.plugin.PluginInformation;
 
 @Entity
 public class RegisteredPlugin {
@@ -73,6 +77,10 @@ public class RegisteredPlugin {
 
 	public Long getId() {
 		return id;
+	}
+	
+	public PluginInformation getInformation() throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		return (PluginInformation) type.getDeclaredConstructor().newInstance();
 	}
 
 }

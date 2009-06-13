@@ -44,7 +44,7 @@ import br.com.caelum.integracao.server.plugin.PluginInformation;
 public class JUnitReportInformation implements PluginInformation {
 
 	public List<Parameter> getParameters() {
-		return Arrays.asList(new Parameter( "reportDirectory" ));
+		return Arrays.asList(new Parameter( "reportDirectory" , "reports/junit" ));
 	}
 
 	public JUnitReport getPlugin(Database db, Map<String, String> parameters) {

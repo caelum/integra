@@ -43,7 +43,7 @@ import br.com.caelum.integracao.server.plugin.PluginInformation;
 public class RemoveOldBuildsInformation implements PluginInformation {
 
 	public List<Parameter> getParameters() {
-		return Arrays.asList(new Parameter("keep"));
+		return Arrays.asList(new Parameter("keep", "20"));
 	}
 
 	public Plugin getPlugin(Database db, Map<String, String> parameters) {
