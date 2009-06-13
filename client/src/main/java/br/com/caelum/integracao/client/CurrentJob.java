@@ -43,8 +43,6 @@ public class CurrentJob {
 	private final Logger logger = LoggerFactory.getLogger(CurrentJob.class);
 
 	private Thread thread;
-	private final Settings settings;
-
 	private Calendar start;
 
 	private StringWriter output = new StringWriter();
@@ -53,8 +51,7 @@ public class CurrentJob {
 
 	private JobExecution execution;
 
-	public CurrentJob(Settings settings) {
-		this.settings = settings;
+	public CurrentJob() {
 	}
 
 	public boolean isRunning() {
@@ -83,7 +80,7 @@ public class CurrentJob {
 			public void run() {
 				try {
 					output = new StringWriter();
-					execution.executeBuildFor(output, settings);
+					execution.executeBuildFor(output);
 				} finally {
 					clearThemAll();
 				}

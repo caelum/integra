@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.client.project.Project;
 import br.com.caelum.integracao.client.project.Projects;
+import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Resource;
@@ -69,7 +70,8 @@ public class JobController {
 
 	private final Settings settings;
 
-	public JobController(Projects projects, CurrentJob job, Result result, HttpServletResponse response, Settings settings) {
+	public JobController(Projects projects, CurrentJob job, Result result, HttpServletResponse response,
+			Settings settings) {
 		this.projects = projects;
 		this.job = job;
 		this.result = result;
@@ -80,8 +82,9 @@ public class JobController {
 	@Post
 	public synchronized void execute(String jobId, Project project, String revision, List<String> startCommand,
 			List<String> stopCommand, String resultUri, List<String> directoryToCopy) {
-		JobExecution execution = new JobExecution(projects.get(project.getName()), startCommand, stopCommand,
-				resultUri, revision, directoryToCopy, settings);
+		Server server = new Server(resultUri, new DefaultHttp(), settings);
+		JobExecution execution = new JobExecution(projects.get(project.getName()), startCommand, stopCommand, revision,
+				directoryToCopy, settings, server);
 		job.start(jobId, execution);
 	}
 

@@ -27,8 +27,7 @@
  */
 package br.com.caelum.integracao.client;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.File;
 import java.io.StringWriter;
 import java.util.List;
 
@@ -37,76 +36,65 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.client.project.Project;
 import br.com.caelum.integracao.client.project.ProjectRunResult;
+import br.com.caelum.integracao.http.DefaultHttp;
+import br.com.caelum.integracao.http.Http;
+import br.com.caelum.integracao.http.Method;
 
-/**
- * Executes a job in this client.
- * 
- * @author guilherme silveira
- */
-public class JobExecution {
+public class Server {
+	
+	
+	private final Logger logger = LoggerFactory.getLogger(Server.class);
 
-	private final Logger logger = LoggerFactory.getLogger(JobExecution.class);
-	private final Project project;
-	private final Command start;
-	private final Command stop;
-	private final List<String> directoryToCopy;
-	private final String revision;
+	private final String resultUri;
+	private final DefaultHttp http;
 	private final Settings settings;
-	private final Server server;
 
-	public JobExecution(Project project, List<String> startCommand, List<String> stopCommand, 
-			String revision, List<String> directoryToCopy, Settings settings, Server server) {
-		this.project = project;
+	public Server(String resultUri, DefaultHttp http, Settings settings) {
+		this.resultUri = resultUri;
+		this.http = http;
 		this.settings = settings;
-		this.server = server;
-		this.start = new Command(startCommand);
-		this.stop = new Command(stopCommand);
-		this.revision = revision;
-		this.directoryToCopy = directoryToCopy;
 	}
 
-	void executeBuildFor(StringWriter output) {
-
-		ProjectRunResult checkoutResult = null;
-		ProjectRunResult startResult = null;
-		ProjectRunResult stopResult = null;
-
+	public void dispatch(Project project, ProjectRunResult checkoutResult, ProjectRunResult startResult, ProjectRunResult stopResult, List<String> directoryToCopy) {
+		logger.debug("Job " + project.getName() + " has finished");
+		Http http = new DefaultHttp();
+		logger.debug("Acessing uri " + resultUri + " to finish the job");
+		Method post = http.post(resultUri);
 		try {
-
-			checkoutResult = project.checkout(settings.getBaseDir(), revision, output);
-			if (!checkoutResult.failed()) {
-				startResult = project.run(settings.getBaseDir(), start, output);
+			addTo(post, checkoutResult, "checkout");
+			addTo(post, startResult, "start");
+			addTo(post, stopResult, "stop");
+			StringWriter zipOutput = new StringWriter();
+			File zip = new CopyFiles(directoryToCopy, settings, project, zipOutput).zipThemAll();
+			if (zip.exists()) {
+				post.with("content", zip);
 			}
-
+			post.with("zipOutput", zipOutput.getBuffer().toString());
+			post.with("success", "" + !(failed(checkoutResult) || failed(stopResult) || failed(startResult)));
+			post.send();
+			if (post.getResult() != 200) {
+				logger.error(post.getContent());
+				throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
+			}
 		} catch (Exception e) {
-			logger.debug("Something wrong happened during the checkout/build", e);
-			StringWriter errorOutput = new StringWriter();
-			e.printStackTrace(new PrintWriter(errorOutput, true));
-			startResult = new ProjectRunResult(errorOutput.toString(), -1);
+			logger.error("Was unable to notify the server of this request..."
+					+ "maybe the server thinks im still busy.", e);
 		} finally {
-			try {
-				if (stop.containsAnything()) {
-					stopResult = project.run(settings.getBaseDir(), stop, new StringWriter());
-				} else {
-					stopResult = new ProjectRunResult("No command to run.", 0);
-				}
-			} catch (IOException e) {
-				logger.error("Unable to stop command on server!", e);
-			} finally {
-				server.dispatch(project, checkoutResult, startResult, stopResult, directoryToCopy);
-			}
+			post.close();
 		}
 	}
 
-	public Project getProject() {
-		return project;
+	private boolean failed(ProjectRunResult result) {
+		return result == null || result.failed();
 	}
 
-	public String getRevision() {
-		return revision;
+	private void addTo(Method post, ProjectRunResult result, String prefix) {
+		if (result != null) {
+			logger.debug(prefix + "Result success=" + result.getResult());
+			post.with(prefix + "Result", result.getContent());
+		} else {
+			post.with(prefix + "Result", "unable to read result");
+		}
 	}
 
-	public void stop() {
-		this.project.stop();
-	}
 }
