@@ -29,4 +29,8 @@ package br.com.caelum.integracao.server.plugin;
 
 public enum ParameterType {
 	TEXT, TEXTAREA;
+	
+	public String getName() {
+		return name();
+	}
 }

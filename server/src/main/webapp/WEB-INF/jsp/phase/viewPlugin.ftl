@@ -5,7 +5,12 @@
 ${plugin.information}
 <#list plugin.information.parameters as param>
 	<div> <input type="hidden" name="keys[${i}]" value="${param}" />${param}:
-	 <input type="text" name="values[${i}]" value="${plugin.getParameter(param).value}" /> </div>
+	<#if param.type.name=='TEXTAREA'>
+	 	<textarea name="values[${i}]">${plugin.getParameter(param.name).value}</textarea>
+	<#else>
+	 	<input type="text" name="values[${i}]" value="${plugin.getParameter(param.name).value}" />
+	 </#if>
+	 </div>
 	<#assign i=i+1>
 </#list>
 	<div><input type="submit" value="update all" /></div>
