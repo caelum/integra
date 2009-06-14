@@ -29,6 +29,8 @@ package br.com.caelum.integracao.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -85,12 +87,12 @@ public class Build {
 	private int currentPhase = 0;
 
 	private boolean successSoFar = true;
-	
+
 	private boolean finished = false;
 
 	/** when the build started */
 	private Calendar startTime = new GregorianCalendar();
-	
+
 	/** when the build finished */
 	private Calendar finishTime;
 
@@ -99,6 +101,8 @@ public class Build {
 
 	@OneToMany(mappedBy = "build")
 	private List<Tab> tabs = new ArrayList<Tab>();
+
+	private String resultMessage;
 
 	Build() {
 	}
@@ -136,13 +140,13 @@ public class Build {
 	public File getFile(String filename) {
 		return new File(getBaseDirectory(), filename);
 	}
-	
+
 	public void setRevisionAsNextOne(Projects projects, Builds builds) {
 		this.currentPhase = 0;
 		logger.debug("Starting executing build for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
 		File file = getFile("revision-checkout.txt");
-		projects.register(new Tab(this,"Revision checkout", file.getAbsolutePath()));
+		projects.register(new Tab(this, "Revision checkout", file.getAbsolutePath()));
 		LogFile logFile = null;
 		try {
 			logFile = new LogFile(file);
@@ -150,27 +154,26 @@ public class Build {
 			this.revision = project.extractNextRevision(this, builds, control, logFile);
 			int result = control.checkoutOrUpdate(revision.getName(), logFile.getWriter());
 			if (result != 0) {
-				logger.error("Unable to zip revision for build");
-				finish(false);
+				finish(false, "Unable to checkout project from scm.", null);
 				return;
 			}
 			if (!getRevisionContent().exists()) {
 				try {
-					new Zipper(new File(project.getBaseDir(), project.getName())).ignore(control.getIgnorePattern()).add(".*").logTo(logFile.getWriter()).zip(getRevisionContent());
-				} catch(IOException ex) {
-					logger.error("Unable to zip revision for build", ex);
-					finish(false);
+					new Zipper(new File(project.getBaseDir(), project.getName())).ignore(control.getIgnorePattern())
+							.add(".*").logTo(logFile.getWriter()).zip(getRevisionContent());
+				} catch (IOException ex) {
+					finish(false, "Unable to zip files for this revision", ex);
 					return;
 				}
 			}
 
 		} catch (Exception ex) {
-			if(logFile!=null) {
+			finish(false, "Unable to retrieve revision for " + project.getName(), ex);
+			return;
+		} finally {
+			if (logFile != null) {
 				logFile.close();
 			}
-			logger.error("Unable to retrieve revision for " + project.getName(), ex);
-			finish(false);
-			return;
 		}
 	}
 
@@ -179,13 +182,11 @@ public class Build {
 			try {
 				Plugin found = toRun.getPlugin(db);
 				if (!found.before(this)) {
-					logger.debug("Plugin " + toRun.getType().getInformation().getName() + " told us to stop the build");
-					finish(false);
+					finish(false, "Plugin " + toRun.getType().getInformation().getName() + " told us to stop the build", null);
 					return;
 				}
 			} catch (PluginException e) {
-				logger.debug("Plugin " + toRun.getType().getInformation().getName() + " was not instantiated");
-				finish(false);
+				finish(false, "Plugin " + toRun.getType().getInformation().getName() + " was not instantiated", null);
 				return;
 			}
 		}
@@ -193,11 +194,19 @@ public class Build {
 		if (!phases.isEmpty()) {
 			Phase phase = phases.get(0);
 			phase.execute(this, jobs);
+		} else {
+			finish(false, "There were no phases to run.", null);
 		}
 	}
 
-	private void finish(boolean success) {
+	private void finish(boolean success, String cause, Exception ex) {
 		this.finished = true;
+		StringWriter writer = new StringWriter();
+		writer.write(cause + "\n");
+		if (ex != null) {
+			ex.printStackTrace(new PrintWriter(writer, true));
+		}
+		this.resultMessage = writer.getBuffer().toString();
 		this.successSoFar = success;
 		this.finishTime = new GregorianCalendar();
 	}
@@ -296,16 +305,17 @@ public class Build {
 		if (executedAllCommands) {
 			logger.debug("Preparing to execute plugins for " + getProject().getName() + " with success = "
 					+ successSoFar);
-			successSoFar &= actualPhase.runAfter(this, database);
+			boolean thisResult = actualPhase.runAfter(this, database); 
+			successSoFar &= thisResult;
 			if (successSoFar) {
 				currentPhase++;
 				if (project.getPhases().size() != currentPhase) {
 					project.getPhases().get(currentPhase).execute(this, new Jobs(database));
 				} else {
-					finish(true);
+					finish(true, "Well done.", null);
 				}
 			} else {
-				finish(false);
+				finish(false, "One or more commands failed.", null);
 			}
 		}
 	}

@@ -33,6 +33,7 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.com.caelum.integracao.server.Build;
-import br.com.caelum.integracao.server.Builds;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.plugin.Plugin;
@@ -62,11 +62,9 @@ public class BuildTest extends DatabaseBasedTest {
 	private Phase second;
 	private ArrayList<PluginToRun> plugins;
 	private Jobs jobs;
-	private Builds builds;
 
 	@Before
 	public void configProject() throws ScmException {
-		this.builds = mockery.mock(Builds.class);
 		this.jobs = mockery.mock(Jobs.class);
 		this.project = mockery.mock(Project.class);
 		this.phases = new ArrayList<Phase>();
@@ -109,8 +107,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate(null, (File) with(an(File.class)));
-				one(control).getCurrentRevision(null,tmpFile());
+				one(control).checkoutOrUpdate(null, (PrintWriter) with(an(PrintWriter.class)));
+				one(control).getCurrentRevision(null,(PrintWriter) with(an(PrintWriter.class)));
 				will(returnValue("my-revision"));
 			}
 		});
@@ -131,8 +129,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
-				one(control).getCurrentRevision(null,tmpFile());
+				one(control).checkoutOrUpdate(null,(PrintWriter) with(an(PrintWriter.class)));
+				one(control).getCurrentRevision(null,(PrintWriter) with(an(PrintWriter.class)));
 				will(returnValue("my-revision"));
 				one(first).getCommandCount();
 				will(returnValue(1));
@@ -163,8 +161,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
-				one(control).getCurrentRevision(null,tmpFile());
+				one(control).checkoutOrUpdate(null,(PrintWriter) with(an(PrintWriter.class)));
+				one(control).getCurrentRevision(null,(PrintWriter) with(an(PrintWriter.class)));
 				will(returnValue("my-revision"));
 				one(first).getCommandCount();
 				will(returnValue(1));
@@ -194,8 +192,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
-				one(control).getCurrentRevision(null,tmpFile());
+				one(control).checkoutOrUpdate(null,(PrintWriter) with(an(PrintWriter.class)));
+				one(control).getCurrentRevision(null,(PrintWriter) with(an(PrintWriter.class)));
 				will(returnValue("my-revision"));
 				one(first).getCommandCount();
 				will(returnValue(2));
@@ -223,8 +221,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
-				one(control).getCurrentRevision(null,tmpFile());
+				one(control).checkoutOrUpdate(null,(PrintWriter) with(an(PrintWriter.class)));
+				one(control).getCurrentRevision(null,(PrintWriter) with(an(PrintWriter.class)));
 				will(returnValue("my-revision"));
 				one(first).getCommandCount();
 				will(returnValue(1));
@@ -274,8 +272,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
-				one(control).getCurrentRevision(null,tmpFile());
+				one(control).checkoutOrUpdate(null,(PrintWriter) with(an(PrintWriter.class)));
+				one(control).getCurrentRevision(null,(PrintWriter) with(an(PrintWriter.class)));
 				will(returnValue("my-revision"));
 				one(firstPlugin).getPlugin(database);
 				will(returnValue(firstImplementation));
@@ -306,8 +304,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate(null,(File) with(an(File.class)));
-				one(control).getCurrentRevision(null,tmpFile());
+				one(control).checkoutOrUpdate(null,(PrintWriter) with(an(PrintWriter.class)));
+				one(control).getCurrentRevision(null,(PrintWriter) with(an(PrintWriter.class)));
 				will(returnValue("my-revision"));
 				one(firstPlugin).getPlugin(database);
 				will(returnValue(firstImplementation));

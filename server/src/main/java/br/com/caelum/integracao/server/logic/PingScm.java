@@ -44,6 +44,7 @@ import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
+import br.com.caelum.integracao.server.log.LogFile;
 import br.com.caelum.integracao.server.scm.Revision;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
@@ -129,7 +130,7 @@ public class PingScm {
 			Revision lastRevision = lastBuild.getRevision();
 			try {
 				File log = File.createTempFile(Files.CHECK_REVISION, ".txt");
-				Revision nextRevision = project.extractRevisionAfter(lastBuild, project.getControl(), builds, log);
+				Revision nextRevision = project.extractRevisionAfter(lastBuild, project.getControl(), builds, new LogFile(log));
 				if (lastRevision == null || !lastRevision.getName().equals(nextRevision.getName())) {
 					logger.debug("Project " + project.getName() + " has a revision '" + nextRevision.getName()
 							+ "', therefore we will start the build.");

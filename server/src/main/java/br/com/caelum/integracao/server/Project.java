@@ -283,9 +283,9 @@ public class Project {
 
 		Revision revision;
 		if (lastRevision != null && isBuildEveryRevision()) {
-			revision = control.getNextRevision(lastRevision, log);
+			revision = control.getNextRevision(lastRevision, log.getWriter());
 		} else {
-			revision = control.getCurrentRevision(lastRevision, log);
+			revision = control.getCurrentRevision(lastRevision, log.getWriter());
 		}
 
 		Revision found = builds.contains(this, revision.getName());

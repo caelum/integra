@@ -110,8 +110,9 @@ public class Zipper {
 		return this;
 	}
 	
-	public void logTo(PrintWriter log) {
+	public Zipper logTo(PrintWriter log) {
 		this.log = log;
+		return this;
 	}
 
 }

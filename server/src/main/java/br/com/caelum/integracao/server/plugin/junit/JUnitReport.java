@@ -43,6 +43,7 @@ import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.build.Tab;
+import br.com.caelum.integracao.server.log.LogFile;
 import br.com.caelum.integracao.server.plugin.Plugin;
 
 /**
@@ -82,7 +83,8 @@ public class JUnitReport implements Plugin {
 			out.close();
 			writer.close();
 			logger.debug("Executing junit task to generate reports on dirs " + reportsDir);
-			int result = new CommandToExecute("ant", "-f", xml.getAbsolutePath()).logTo(build.getFile(phase.getName() + "/junit/report-output.txt")).at(xml.getParentFile()).run();
+			File report = build.getFile(phase.getName() + "/junit/report-output.txt");
+			int result = new CommandToExecute("ant", "-f", xml.getAbsolutePath()).logTo(new LogFile(report).getWriter()).at(xml.getParentFile()).run();
 			
 			projects.register(new Tab(build, phase.getName() + "-junit", phase.getName() + "/junit/index.html"));
 			
