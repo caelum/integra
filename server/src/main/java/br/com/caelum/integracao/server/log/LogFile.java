@@ -32,14 +32,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class LogFile {
+
+	private final Logger logger = LoggerFactory.getLogger(LogFile.class);
 
 	private final FileWriter output;
 	private final PrintWriter writer;
+	private boolean closed = false;
 
 	public LogFile(File file) throws IOException {
 		this.output = new FileWriter(file);
-		this.writer = new PrintWriter(output,true );
+		this.writer = new PrintWriter(output, true);
 	}
 
 	public void error(String msg, Throwable ex) {
@@ -47,13 +53,28 @@ public class LogFile {
 		ex.printStackTrace(writer);
 	}
 
-	public void close() throws IOException {
+	synchronized public void close() {
 		writer.close();
-		output.close();
+		try {
+			output.close();
+		} catch (IOException e) {
+			logger.error("Unable to close log file", e);
+		}
+		closed = true;
 	}
 
 	public void error(String msg) {
 		writer.write("[error]" + msg);
+	}
+
+	synchronized protected void finalize() throws Throwable {
+		if (!closed) {
+			close();
+		}
+	}
+
+	public PrintWriter getWriter() {
+		return writer;
 	}
 
 }

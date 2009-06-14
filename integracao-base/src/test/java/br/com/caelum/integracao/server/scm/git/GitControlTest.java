@@ -31,6 +31,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -61,7 +63,7 @@ public class GitControlTest extends AtDirectoryTest {
 	@Test
 	public void shouldCommitAndReceiveUpdate() throws IOException, ScmException {
 
-		File log = new File(this.baseDir, "my-checkout.log");
+		PrintWriter log = new PrintWriter(new StringWriter());
 
 		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "my-cloned-cruise");
 		Assert.assertEquals(0, control1.checkoutOrUpdate(null, log));
@@ -69,7 +71,7 @@ public class GitControlTest extends AtDirectoryTest {
 		givenA(file, "second file content\n");
 
 		GitControl control2 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "apostilas-2");
-		Assert.assertEquals(0, control2.checkoutOrUpdate(null, new File(this.baseDir, "my-second-checkout.log")));
+		Assert.assertEquals(0, control2.checkoutOrUpdate(null, log));
 
 		Assert.assertEquals(0, control1.add(file));
 		Assert.assertEquals(0, control1.commit("commiting test file"));

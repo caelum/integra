@@ -51,6 +51,7 @@ import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.log.LogFile;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.scm.Revision;
 import br.com.caelum.integracao.server.scm.ScmControl;
@@ -266,19 +267,17 @@ public class Project {
 		this.buildEveryRevision = buildEveryRevision;
 	}
 
-	public Revision extractNextRevision(Build forBuild, Builds builds, ScmControl control) throws IOException,
+	public Revision extractNextRevision(Build forBuild, Builds builds, ScmControl control, LogFile file) throws IOException,
 			ScmException {
 		logger.debug("Checking revision for " + getName() + ", build = " + buildCount);
 		Build lastBuild = getBuild(forBuild.getBuildCount() - 1);
 
-		File log = File.createTempFile(Files.CHECK_REVISION, ".txt");
-		Revision revision = extractRevisionAfter(lastBuild, control, builds, log);
-		log.renameTo(forBuild.getFile("revision-check.txt"));
+		Revision revision = extractRevisionAfter(lastBuild, control, builds, file);
 		return revision;
 
 	}
 
-	public Revision extractRevisionAfter(Build lastBuild, ScmControl control, Builds builds, File log)
+	public Revision extractRevisionAfter(Build lastBuild, ScmControl control, Builds builds, LogFile log)
 			throws IOException, ScmException {
 		Revision lastRevision = lastBuild == null ? null : lastBuild.getRevision();
 

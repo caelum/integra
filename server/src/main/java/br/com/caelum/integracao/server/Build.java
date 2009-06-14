@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.build.Tab;
 import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.log.LogFile;
 import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.plugin.PluginException;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
@@ -140,14 +141,14 @@ public class Build {
 		this.currentPhase = 0;
 		logger.debug("Starting executing build for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
-		File file = getFile("server-output.txt");
-		Tab tab = new Tab(this,"Server output", file.getAbsolutePath());
-		projects.register(tab);
+		File file = getFile("revision-checkout.txt");
+		projects.register(new Tab(this,"Revision checkout", file.getAbsolutePath()));
+		LogFile logFile = null;
 		try {
+			logFile = new LogFile(file);
 			ScmControl control = project.getControl();
-			this.revision = project.extractNextRevision(this, builds, control);
-			int result = control.checkoutOrUpdate(revision.getName(), getFile(Files.CHECK_REVISION + revision.getName()
-					+ ".txt"));
+			this.revision = project.extractNextRevision(this, builds, control, logFile);
+			int result = control.checkoutOrUpdate(revision.getName(), logFile.getWriter());
 			if (result != 0) {
 				logger.error("Unable to zip revision for build");
 				finish(false);
@@ -155,7 +156,7 @@ public class Build {
 			}
 			if (!getRevisionContent().exists()) {
 				try {
-					new Zipper(new File(project.getBaseDir(), project.getName())).ignore(control.getIgnorePattern()).add(".*").zip(getRevisionContent());
+					new Zipper(new File(project.getBaseDir(), project.getName())).ignore(control.getIgnorePattern()).add(".*").logTo(logFile.getWriter()).zip(getRevisionContent());
 				} catch(IOException ex) {
 					logger.error("Unable to zip revision for build", ex);
 					finish(false);
@@ -164,6 +165,9 @@ public class Build {
 			}
 
 		} catch (Exception ex) {
+			if(logFile!=null) {
+				logFile.close();
+			}
 			logger.error("Unable to retrieve revision for " + project.getName(), ex);
 			finish(false);
 			return;

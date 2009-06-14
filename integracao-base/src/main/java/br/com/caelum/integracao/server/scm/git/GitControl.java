@@ -28,11 +28,8 @@
 package br.com.caelum.integracao.server.scm.git;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,38 +53,33 @@ public class GitControl implements ScmControl {
 		this.baseName = name;
 	}
 
-	public int checkoutOrUpdate(String revision, File log) throws ScmException {
-		try {
-			File dir = new File(baseDirectory, baseName);
-			File git = new File(dir, ".git");
-			if (dir.exists() && !git.exists()) {
-				dir.delete();
-			}
-			if (git.exists()) {
-				String cmds[][] = new String[][] { new String[] { "git", "checkout", "HEAD" },
-						new String[] { "git", "checkout", "master" }, new String[] { "git", "pull" } };
-				int partial = 0;
-				for (String cmd[] : cmds) {
-					partial = prepare(cmd).at(getDir()).logTo(log).run();
-					if (partial != 0) {
-						return partial;
-					}
-				}
-				if (revision == null) {
+	public int checkoutOrUpdate(String revision, PrintWriter log) throws ScmException {
+		File dir = new File(baseDirectory, baseName);
+		File git = new File(dir, ".git");
+		if (dir.exists() && !git.exists()) {
+			dir.delete();
+		}
+		if (git.exists()) {
+			String cmds[][] = new String[][] { new String[] { "git", "checkout", "HEAD" },
+					new String[] { "git", "checkout", "master" }, new String[] { "git", "pull" } };
+			int partial = 0;
+			for (String cmd[] : cmds) {
+				partial = prepare(cmd).at(getDir()).logTo(log).run();
+				if (partial != 0) {
 					return partial;
 				}
-				return prepare("git", "checkout", revision).at(getDir()).logTo(log).run();
-			} else {
-				logger.debug("Cloning the git for the first time at " + log.getAbsolutePath());
-				int partial = prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
-				if (partial != 0 || revision == null) {
-					return partial;
-				}
-				return prepare("git", "checkout", revision).at(getDir()).logTo(log).run();
 			}
-		} catch (IOException ex) {
-			throw new ScmException("Unable to retrieve info from git " + uri + " but logged data to "
-					+ log.getAbsolutePath(), ex);
+			if (revision == null) {
+				return partial;
+			}
+			return prepare("git", "checkout", revision).at(getDir()).logTo(log).run();
+		} else {
+			logger.debug("Cloning the git for the first time.");
+			int partial = prepare("git", "clone", uri, baseName).at(baseDirectory).logTo(log).run();
+			if (partial != 0 || revision == null) {
+				return partial;
+			}
+			return prepare("git", "checkout", revision).at(getDir()).logTo(log).run();
 		}
 	}
 
@@ -116,10 +108,10 @@ public class GitControl implements ScmControl {
 		return prepare("git", "rm", file.getAbsolutePath()).at(file.getParentFile()).run();
 	}
 
-	public Revision getCurrentRevision(Revision fromRevision, File log) throws ScmException {
+	public Revision getCurrentRevision(Revision fromRevision, PrintWriter log) throws ScmException {
 		int result = checkoutOrUpdate(null, log);
 		if (result != 0) {
-			throw new ScmException("Unable to load data and revision information, log at " + log.getAbsolutePath());
+			throw new ScmException("Unable to load data and revision information");
 		}
 		StringWriter writer = new StringWriter();
 		prepare("git", "--no-pager", "log").logTo(writer).at(getDir()).run();
@@ -129,27 +121,18 @@ public class GitControl implements ScmControl {
 		return new Revision(name, "", "");
 	}
 
-	private String extract(File log, String... cmd) throws ScmException {
-		try {
-			StringWriter writer = new StringWriter();
-			prepare(cmd).logTo(writer).at(getDir()).run();
-			String content = writer.getBuffer().toString();
-			FileWriter fw = new FileWriter(log);
-
-			PrintWriter file = new PrintWriter(fw, true);
-			file.println(content);
-			file.close();
-			fw.close();
-			return content;
-		} catch (IOException e) {
-			throw new ScmException("Unable to checkout version from svn using " + Arrays.toString(cmd), e);
-		}
+	private String extract(PrintWriter log, String... cmd) {
+		StringWriter writer = new StringWriter();
+		prepare(cmd).logTo(writer).at(getDir()).run();
+		String content = writer.getBuffer().toString();
+		log.println(content);
+		return content;
 	}
 
-	public Revision getNextRevision(Revision fromRevision, File log) throws ScmException {
+	public Revision getNextRevision(Revision fromRevision, PrintWriter log) throws ScmException {
 		int result = checkoutOrUpdate(null, log);
 		if (result != 0) {
-			throw new ScmException("Unable to load data and revision information, log at " + log.getAbsolutePath());
+			throw new ScmException("Unable to load data and revision information.");
 		}
 		String diff = extract(log, "git", "--no-pager", "log", fromRevision.getName() + "..HEAD", "--shortstat");
 		if (diff.indexOf("files changed") == -1) {
@@ -164,7 +147,7 @@ public class GitControl implements ScmControl {
 		return new Revision(name, extractInfoForRevision(log, name), "");
 	}
 
-	private String extractInfoForRevision(File log, String revisionRange) throws ScmException {
+	private String extractInfoForRevision(PrintWriter log, String revisionRange) throws ScmException {
 		String logContent = extract(log, "git", "--no-pager", "log", revisionRange, "-v", "--non-interactive");
 		return logContent;
 	}

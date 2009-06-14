@@ -28,6 +28,7 @@
 package br.com.caelum.integracao.server.scm;
 
 import java.io.File;
+import java.io.PrintWriter;
 
 /**
  * An scm implementation.
@@ -42,7 +43,7 @@ public interface ScmControl {
 	 * Returns the information between Revision and the current revision.<br/>
 	 * If fromRevision is null, returns the log message "first checkout".
 	 */
-	Revision getCurrentRevision(Revision fromRevision, File log) throws ScmException;
+	Revision getCurrentRevision(Revision fromRevision, PrintWriter log) throws ScmException;
 
 	/**
 	 * Returns the next revision after this one.
@@ -50,9 +51,9 @@ public interface ScmControl {
 	 * @param fromRevision
 	 *            must be different than null
 	 */
-	Revision getNextRevision(Revision fromRevision, File log) throws ScmException;
+	Revision getNextRevision(Revision fromRevision, PrintWriter log) throws ScmException;
 
-	int checkoutOrUpdate(String revision, File log) throws ScmException;
+	int checkoutOrUpdate(String revision, PrintWriter log) throws ScmException;
 
 	/**
 	 * Returns the pattern of files to be ignored when zipping the project's

@@ -28,7 +28,6 @@
 package br.com.caelum.integracao.command;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -123,10 +122,6 @@ public class CommandToExecute {
 				this.outputWriter.close();
 			}
 		}
-	}
-
-	public CommandToExecute logTo(File build) throws IOException {
-		return logTo(new FileWriter(build));
 	}
 
 	public CommandToExecute logTo(Writer writer) {

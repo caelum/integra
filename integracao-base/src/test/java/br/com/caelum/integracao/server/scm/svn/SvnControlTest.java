@@ -31,6 +31,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -42,13 +44,13 @@ public class SvnControlTest extends AtDirectoryTest {
 
 	@Test
 	public void shouldCommitAndReceiveUpdate() throws IOException, ScmException {
-		File log = new File(this.baseDir, "control1-checkout");
+		PrintWriter log = new PrintWriter(new StringWriter());
 
 		SvnControl control1 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1");
 		Assert.assertEquals(0,control1.checkoutOrUpdate(null,log));
 		
 		SvnControl control2 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-2");
-		Assert.assertEquals(0,control2.checkoutOrUpdate(null,new File(this.baseDir, "control2-checkout")));
+		Assert.assertEquals(0,control2.checkoutOrUpdate(null,log));
 		
 		File file = new File(control1.getDir(), "test-file");
 		givenA(file, "misc content");

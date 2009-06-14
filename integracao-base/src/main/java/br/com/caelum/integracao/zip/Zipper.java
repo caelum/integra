@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -48,6 +49,8 @@ public class Zipper {
 	private final List<Pattern> content = new ArrayList<Pattern>();
 	private final List<Pattern> ignore = new ArrayList<Pattern>();
 
+	private PrintWriter log;
+	
 	public Zipper(File workDirectory) {
 		this.workDirectory = workDirectory;
 	}
@@ -95,6 +98,7 @@ public class Zipper {
 		}
 		for(Pattern include : content) {
 			if(include.matcher(filePath).matches()) {
+				log.println("[a] " + filePath);
 				return false;
 			}
 		}
@@ -104,6 +108,10 @@ public class Zipper {
 	public Zipper ignore(String pattern) {
 		this.ignore.add(Pattern.compile(pattern));
 		return this;
+	}
+	
+	public void logTo(PrintWriter log) {
+		this.log = log;
 	}
 
 }

@@ -1,11 +1,10 @@
 package br.com.caelum.integracao.server.scm.svn;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
+import java.io.Writer;
 
 import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.scm.Revision;
@@ -26,20 +25,19 @@ public class SvnControl implements ScmControl {
 		this.baseDirectory = new File(baseDir, baseName);
 	}
 
-	public int checkoutOrUpdate(String revision, File log) throws ScmException {
+	public int checkoutOrUpdate(String revision, PrintWriter writer) throws ScmException {
 		if (revision == null) {
 			revision = "HEAD";
 		}
 		try {
 			if (new File(baseDirectory, ".svn").exists()) {
-				return update(revision, log);
+				return update(revision, writer);
 			} else {
-				return prepare("svn", "co", uri, baseName, "-r", revision, "--non-interactive").at(baseDir).logTo(log)
+				return prepare("svn", "co", uri, baseName, "-r", revision, "--non-interactive").at(baseDir).logTo(writer)
 						.run();
 			}
 		} catch (IOException e) {
-			throw new ScmException("Unable to checkout or update from svn " + uri + " but logged to "
-					+ log.getAbsolutePath(), e);
+			throw new ScmException("Unable to checkout or update from svn " + uri, e);
 		}
 	}
 
@@ -59,15 +57,15 @@ public class SvnControl implements ScmControl {
 		return prepare("svn", "commit", "-m", message).at(getDir()).run();
 	}
 
-	public int update(String revision, File log) throws IOException {
-		return prepare("svn", "update", "-r", revision, "--non-interactive").at(getDir()).logTo(log).run();
+	public int update(String revision, Writer writer) throws IOException {
+		return prepare("svn", "update", "-r", revision, "--non-interactive").at(getDir()).logTo(writer).run();
 	}
 
 	public int remove(File file) {
 		return prepare("svn", "remove", file.getAbsolutePath()).at(file.getParentFile()).run();
 	}
 
-	public Revision getCurrentRevision(Revision fromRevision, File log) throws ScmException {
+	public Revision getCurrentRevision(Revision fromRevision, PrintWriter log) throws ScmException {
 		String content = extract(log, "svn", "info", uri, "--non-interactive");
 		int pos = content.indexOf("Last Changed Rev: ");
 		String name = content.substring(pos + "Last Changed Rev: ".length(), content.indexOf("\n", pos));
@@ -81,28 +79,20 @@ public class SvnControl implements ScmControl {
 		return new Revision(name, logContent, "");
 	}
 
-	private String extractInfoForRevision(File log, String revisionRange) throws ScmException {
+	private String extractInfoForRevision(PrintWriter log, String revisionRange) throws ScmException {
 		String logContent = extract(log, "svn", "log", uri, "-r", revisionRange, "-v", "--non-interactive");
 		return logContent;
 	}
 
-	private String extract(File log, String... cmd) throws ScmException {
-		try {
-			StringWriter writer = new StringWriter();
-			prepare(cmd).logTo(writer).at(getDir()).run();
-			String content = writer.getBuffer().toString();
-			FileWriter fw = new FileWriter(log);
-			PrintWriter file = new PrintWriter(fw, true);
-			file.println(content);
-			file.close();
-			fw.close();
-			return content;
-		} catch (IOException e) {
-			throw new ScmException("Unable to checkout version from svn using " + Arrays.toString(cmd), e);
-		}
+	private String extract(PrintWriter log, String... cmd) throws ScmException {
+		StringWriter writer = new StringWriter();
+		prepare(cmd).logTo(writer).at(getDir()).run();
+		String content = writer.getBuffer().toString();
+		log.print(content);
+		return content;
 	}
 
-	public Revision getNextRevision(Revision fromRevision, File log) throws ScmException {
+	public Revision getNextRevision(Revision fromRevision, PrintWriter log) throws ScmException {
 		
 		String checkRange = (Long.parseLong(fromRevision.getName())+1)+ ":HEAD";
 		String diff = extract(log, "svn", "log", uri, "-r", checkRange, "-v", "--non-interactive");
