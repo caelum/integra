@@ -115,7 +115,7 @@ public class BuildTest extends DatabaseBasedTest {
 			}
 		});
 		Build build = new Build(project);
-		build.start(jobs, database, builds);
+		build.start(jobs, database);
 		assertThat(build.getRevision().getName(), is(equalTo("my-revision")));
 		File checkout = new File(baseDir, "build-3/checkout.txt");
 		assertThat(checkout.exists(), is(equalTo(true)));
@@ -146,7 +146,7 @@ public class BuildTest extends DatabaseBasedTest {
 				will(returnValue(true));
 			}
 		});
-		build.start(jobs, database, builds);
+		build.start(jobs, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		build.failed();
 		build.proceed(first, database);
@@ -178,7 +178,7 @@ public class BuildTest extends DatabaseBasedTest {
 				will(returnValue(false));
 			}
 		});
-		build.start(jobs, database, builds);
+		build.start(jobs, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		build.proceed(first, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
@@ -207,7 +207,7 @@ public class BuildTest extends DatabaseBasedTest {
 				one(first).execute(build, jobs);
 			}
 		});
-		build.start(jobs, database, builds);
+		build.start(jobs, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		build.proceed(first, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
@@ -239,7 +239,7 @@ public class BuildTest extends DatabaseBasedTest {
 				will(returnValue(true));
 			}
 		});
-		build.start(jobs, database, builds);
+		build.start(jobs, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(0)));
 		build.proceed(first, database);
 		assertThat(build.getCurrentPhase(), is(equalTo(1)));
@@ -289,7 +289,7 @@ public class BuildTest extends DatabaseBasedTest {
 				one(first).execute(build, jobs);
 			}
 		});
-		build.start(jobs, database, builds);
+		build.start(jobs, database);
 		mockery.assertIsSatisfied();
 	}
 
@@ -320,7 +320,7 @@ public class BuildTest extends DatabaseBasedTest {
 				one(firstImplementation).before(build); will(returnValue(false));
 			}
 		});
-		build.start(jobs, database, builds);
+		build.start(jobs, database);
 		assertThat(build.isFinished(), is(equalTo(true)));
 		assertThat(build.isSuccessSoFar(), is(equalTo(false)));
 		mockery.assertIsSatisfied();

@@ -84,9 +84,13 @@ public class Build {
 	private int currentPhase = 0;
 
 	private boolean successSoFar = true;
+	
 	private boolean finished = false;
 
+	/** when the build started */
 	private Calendar startTime = new GregorianCalendar();
+	
+	/** when the build finished */
 	private Calendar finishTime;
 
 	@OneToMany(mappedBy = "build")
@@ -95,7 +99,7 @@ public class Build {
 	@OneToMany(mappedBy = "build")
 	private List<Tab> tabs = new ArrayList<Tab>();
 
-	protected Build() {
+	Build() {
 	}
 
 	public Build(Project project) {
@@ -131,15 +135,18 @@ public class Build {
 	public File getFile(String filename) {
 		return new File(getBaseDirectory(), filename);
 	}
-
-	public void start(Jobs jobs, Database db, Builds builds) throws ScmException {
+	
+	public void setRevisionAsNextOne(Projects projects, Builds builds) {
 		this.currentPhase = 0;
 		logger.debug("Starting executing build for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
+		File file = getFile("server-output.txt");
+		Tab tab = new Tab(this,"Server output", file.getAbsolutePath());
+		projects.register(tab);
 		try {
 			ScmControl control = project.getControl();
 			this.revision = project.extractNextRevision(this, builds, control);
-			int result = control.checkoutOrUpdate(revision.getName(), getFile("checkout-revision-" + revision.getName()
+			int result = control.checkoutOrUpdate(revision.getName(), getFile(Files.CHECK_REVISION + revision.getName()
 					+ ".txt"));
 			if (result != 0) {
 				logger.error("Unable to zip revision for build");
@@ -161,6 +168,9 @@ public class Build {
 			finish(false);
 			return;
 		}
+	}
+
+	public void start(Jobs jobs, Database db) throws ScmException {
 		for (PluginToRun toRun : project.getPlugins()) {
 			try {
 				Plugin found = toRun.getPlugin(db);
