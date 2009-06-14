@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Clients;
+import br.com.caelum.integracao.server.agent.Clients;
 import br.com.caelum.integracao.server.agent.DefaultAgent;
 import br.com.caelum.integracao.server.label.Labels;
 import br.com.caelum.vraptor.Get;

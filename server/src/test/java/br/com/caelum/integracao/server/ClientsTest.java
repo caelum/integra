@@ -34,6 +34,7 @@ import static org.hamcrest.Matchers.is;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.com.caelum.integracao.server.agent.Clients;
 import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;

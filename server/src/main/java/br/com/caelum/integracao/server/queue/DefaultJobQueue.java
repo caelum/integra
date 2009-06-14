@@ -31,9 +31,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.agent.AgentControl;
+import br.com.caelum.integracao.server.agent.Clients;
 
 public class DefaultJobQueue implements JobQueue{
 	

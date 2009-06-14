@@ -39,9 +39,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.com.caelum.integracao.server.Client;
-import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.agent.AgentControl;
+import br.com.caelum.integracao.server.agent.Clients;
 import br.com.caelum.integracao.server.project.BaseTest;
 
 public class DefaultJobQueueTest extends BaseTest{

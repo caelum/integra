@@ -25,12 +25,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
+package br.com.caelum.integracao.server.agent;
 
 import java.util.List;
 
 import org.hibernate.Session;
 
+import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 

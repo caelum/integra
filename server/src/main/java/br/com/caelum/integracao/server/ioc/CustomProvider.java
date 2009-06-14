@@ -28,8 +28,8 @@
 package br.com.caelum.integracao.server.ioc;
 
 import br.com.caelum.integracao.server.Builds;
-import br.com.caelum.integracao.server.Clients;
 import br.com.caelum.integracao.server.Projects;
+import br.com.caelum.integracao.server.agent.Clients;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
 import br.com.caelum.integracao.server.label.Labels;
 import br.com.caelum.integracao.server.logic.PingScm;
