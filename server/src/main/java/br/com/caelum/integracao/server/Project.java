@@ -29,6 +29,7 @@ package br.com.caelum.integracao.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -72,30 +73,30 @@ public class Project {
 	private Long id;
 
 	private static final Logger logger = LoggerFactory.getLogger(Project.class);
-	
+
 	@NotNull
 	private Class<?> controlType;
-	
+
 	@NotEmpty
 	private String uri;
-	
+
 	@NotEmpty
 	private String name;
-	
+
 	@OneToMany(mappedBy = "project")
 	@OrderBy("position")
 	private List<Phase> phases = new ArrayList<Phase>();
-	
+
 	@NotNull
 	private File baseDir;
-	
+
 	private boolean buildEveryRevision;
-	
+
 	private boolean allowAutomaticStartNextRevisionWhileBuildingPrevious;
 
 	private Long buildCount = 0L;
-	
-	@OneToMany(mappedBy="project")
+
+	@OneToMany(mappedBy = "project")
 	@OrderBy("buildCount desc")
 	private final List<Build> builds = new ArrayList<Build>();
 	@NotNull
@@ -105,7 +106,6 @@ public class Project {
 	@OrderBy("position")
 	@Cascade(CascadeType.ALL)
 	private List<PluginToRun> plugins = new ArrayList<PluginToRun>();
-
 
 	protected Project() {
 	}
@@ -163,13 +163,14 @@ public class Project {
 	public ScmControl getControl() throws ScmException {
 		logger.debug("Creating scm control " + getControlType().getName() + " for project " + getName());
 		try {
-			return (ScmControl) getControlType().getDeclaredConstructor(String.class, File.class, String.class).newInstance(uri,
-					baseDir, name);
+			Constructor<?> constructor = getControlType()
+					.getDeclaredConstructor(String.class, File.class, String.class);
+			return (ScmControl) constructor.newInstance(uri, baseDir, name);
 		} catch (Exception e) {
 			throw new ScmException("Unable to instantiate scm controller", e);
 		}
 	}
-	
+
 	public Calendar getLastBuildTime() {
 		return lastBuild;
 	}
@@ -236,23 +237,23 @@ public class Project {
 	}
 
 	public void add(PluginToRun plugin) {
-		plugin.setPosition(getPlugins().size()+1);
+		plugin.setPosition(getPlugins().size() + 1);
 		getPlugins().add(plugin);
 	}
-	
+
 	public List<PluginToRun> getPlugins() {
 		return plugins;
 	}
 
 	public Phase getPhase(long phasePosition) {
-		for(Phase p : getPhases()) {
-			if(p.getPosition()==phasePosition) {
+		for (Phase p : getPhases()) {
+			if (p.getPosition() == phasePosition) {
 				return p;
 			}
 		}
 		return null;
 	}
-	
+
 	public Build getLastBuild() {
 		return getBuild(getBuildCount());
 	}
@@ -260,12 +261,13 @@ public class Project {
 	public boolean isBuildEveryRevision() {
 		return buildEveryRevision;
 	}
-	
+
 	public void setBuildEveryRevision(boolean buildEveryRevision) {
 		this.buildEveryRevision = buildEveryRevision;
 	}
 
-	public Revision extractNextRevision(Build forBuild,Builds builds, ScmControl control) throws IOException, ScmException {
+	public Revision extractNextRevision(Build forBuild, Builds builds, ScmControl control) throws IOException,
+			ScmException {
 		logger.debug("Checking revision for " + getName() + ", build = " + buildCount);
 		Build lastBuild = getBuild(forBuild.getBuildCount() - 1);
 
@@ -273,19 +275,20 @@ public class Project {
 		Revision revision = extractRevisionAfter(lastBuild, control, builds, log);
 		log.renameTo(forBuild.getFile("revision-check.txt"));
 		return revision;
-		
+
 	}
 
-	public Revision extractRevisionAfter(Build lastBuild, ScmControl control, Builds builds, File log) throws IOException, ScmException {
+	public Revision extractRevisionAfter(Build lastBuild, ScmControl control, Builds builds, File log)
+			throws IOException, ScmException {
 		Revision lastRevision = lastBuild == null ? null : lastBuild.getRevision();
-		
+
 		Revision revision;
-		if(lastRevision!=null && isBuildEveryRevision()) {
+		if (lastRevision != null && isBuildEveryRevision()) {
 			revision = control.getNextRevision(lastRevision, log);
 		} else {
 			revision = control.getCurrentRevision(lastRevision, log);
 		}
-		
+
 		Revision found = builds.contains(this, revision.getName());
 		if (found != null) {
 			revision = found;
@@ -303,6 +306,5 @@ public class Project {
 	public boolean isAllowAutomaticStartNextRevisionWhileBuildingPrevious() {
 		return allowAutomaticStartNextRevisionWhileBuildingPrevious;
 	}
-
 
 }

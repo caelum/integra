@@ -31,6 +31,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import java.io.File;
+
 import org.junit.Test;
 
 import br.com.caelum.integracao.server.project.BaseTest;
@@ -81,6 +83,15 @@ public class ProjectTest extends BaseTest{
 		assertThat(p.getBuild(first.getBuildCount()), is(equalTo(first)));
 		assertThat(p.getBuild(second.getBuildCount()), is(equalTo(second)));
 		assertThat(p.getBuild(first.getBuildCount()+5), is(equalTo(null)));
+	}
+	
+	@Test
+	public void useBuildsDirectoryAndBuildsIt() {
+		Project p =new Project();
+		p.setBaseDir(baseDir);
+		File builds = p.getBuildsDirectory();
+		assertThat(builds, is(equalTo(new File(baseDir, "builds"))));
+		assertThat(builds.exists(), is(equalTo(true)));
 	}
 	
 
