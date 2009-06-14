@@ -35,6 +35,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import br.com.caelum.integracao.server.plugin.RegisteredPlugin;
+
 @Entity
 public class Config {
 	

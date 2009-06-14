@@ -27,7 +27,6 @@
 		<mapping class="br.com.caelum.integracao.server.BuildCommand"/>
 		<mapping class="br.com.caelum.integracao.server.Build"/>
 		<mapping class="br.com.caelum.integracao.server.Config"/>
-		<mapping class="br.com.caelum.integracao.server.RegisteredPlugin"/>
 
 		<mapping class="br.com.caelum.integracao.server.build.Tab"/>
 		<mapping class="br.com.caelum.integracao.server.label.Label"/>
@@ -36,6 +35,7 @@
 
 		<mapping class="br.com.caelum.integracao.server.queue.Job"/>
 
+		<mapping class="br.com.caelum.integracao.server.plugin.RegisteredPlugin"/>
 		<mapping class="br.com.caelum.integracao.server.plugin.PluginParameter"/>
 		<mapping class="br.com.caelum.integracao.server.plugin.PluginToRun"/>
 		

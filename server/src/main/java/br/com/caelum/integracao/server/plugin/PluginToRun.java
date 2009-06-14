@@ -27,7 +27,6 @@
  */
 package br.com.caelum.integracao.server.plugin;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +36,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.Cascade;
@@ -59,21 +59,22 @@ public class PluginToRun {
 	@Column(name = "pos")
 	private int position;
 
+	@ManyToOne
 	@NotNull
-	private Class<? extends PluginInformation> type;
+	private RegisteredPlugin type;
 
 	@OneToMany(mappedBy = "plugin")
 	@Cascade(CascadeType.ALL)
 	private List<PluginParameter> config = new ArrayList<PluginParameter>();
 
-	public PluginToRun(Class<? extends PluginInformation> type) {
+	public PluginToRun(RegisteredPlugin type) {
 		this.type = type;
 	}
 
 	protected PluginToRun() {
 	}
 
-	public Class<? extends PluginInformation> getType() {
+	public RegisteredPlugin getType() {
 		return type;
 	}
 
@@ -87,10 +88,10 @@ public class PluginToRun {
 
 	public Plugin getPlugin(Database db) {
 		try {
-			PluginInformation plugin = type.getDeclaredConstructor().newInstance();
-			return plugin.getPlugin(db, createParameters());
+			PluginInformation information = type.getInformation();
+			return information.getPlugin(db, createParameters());
 		} catch (Exception e) {
-			logger.error("Unable to instantiate the plugin " + type.getName(), e);
+			logger.error("Unable to instantiate the plugin " + type.getType().getName(), e);
 			return null;
 		}
 	}
@@ -101,11 +102,6 @@ public class PluginToRun {
 			map.put(param.getKey(), param.getValue());
 		}
 		return map;
-	}
-
-	public PluginInformation getInformation() throws IllegalArgumentException, SecurityException,
-			InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		return type.getConstructor().newInstance();
 	}
 
 	public PluginParameter getParameter(String key) {

@@ -25,18 +25,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server;
-
-import java.lang.reflect.InvocationTargetException;
+package br.com.caelum.integracao.server.plugin;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import net.vidageek.mirror.dsl.Mirror;
+
 import org.hibernate.validator.NotNull;
 
-import br.com.caelum.integracao.server.plugin.PluginInformation;
+import br.com.caelum.integracao.server.Config;
 
 @Entity
 public class RegisteredPlugin {
@@ -46,7 +46,7 @@ public class RegisteredPlugin {
 	private Long id;
 	
 	@NotNull
-	private Class<?> type;
+	private Class<? extends PluginInformation> type;
 	
 	@ManyToOne
 	private Config config;
@@ -54,17 +54,13 @@ public class RegisteredPlugin {
 	protected RegisteredPlugin() {
 	}
 	
-	public RegisteredPlugin(Config config,Class<?> type) {
-		this.setConfig(config);
+	public RegisteredPlugin(Config config,Class<? extends PluginInformation> type) {
+		this.config = config;
 		this.type = type;
 	}
 
 	public Class<?> getType() {
 		return type;
-	}
-
-	public void setConfig(Config config) {
-		this.config = config;
 	}
 
 	public Config getConfig() {
@@ -79,8 +75,8 @@ public class RegisteredPlugin {
 		return id;
 	}
 	
-	public PluginInformation getInformation() throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		return (PluginInformation) type.getDeclaredConstructor().newInstance();
+	public PluginInformation getInformation() {
+		return new Mirror().on(type).invoke().constructor().withoutArgs();
 	}
 
 }

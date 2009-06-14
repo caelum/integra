@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Config;
-import br.com.caelum.integracao.server.RegisteredPlugin;
+import br.com.caelum.integracao.server.plugin.RegisteredPlugin;
 import br.com.caelum.integracao.server.plugin.build.RemoveOldBuildsInformation;
 import br.com.caelum.integracao.server.plugin.junit.JUnitReportInformation;
 import br.com.caelum.integracao.server.plugin.mail.SendMailInformation;

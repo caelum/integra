@@ -144,7 +144,7 @@ public class Client {
 		if (status.equals(AgentStatus.UNAVAILABLE)) {
 			weirdJobMightNotBeThere();
 			return false;
-		}
+		}	
 		if (status.equals(AgentStatus.FREE)) {
 			weirdJobMightNotBeThere();
 			return true;
