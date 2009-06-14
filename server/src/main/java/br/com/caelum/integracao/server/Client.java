@@ -119,7 +119,7 @@ public class Client {
 
 	public boolean work(Job job, Config config) {
 		try {
-			if(job.executeAt(this, config)) {
+			if (job.executeAt(this, config)) {
 				this.currentJob = job;
 				return true;
 			}
@@ -141,11 +141,11 @@ public class Client {
 	public boolean isAlive(AgentControl control) {
 		Agent agent = control.to(getBaseUri());
 		AgentStatus status = agent.getStatus();
-		if(status.equals(AgentStatus.UNAVAILABLE)) {
+		if (status.equals(AgentStatus.UNAVAILABLE)) {
 			weirdJobMightNotBeThere();
 			return false;
 		}
-		if(status.equals(AgentStatus.FREE)) {
+		if (status.equals(AgentStatus.FREE)) {
 			weirdJobMightNotBeThere();
 			return true;
 		}
@@ -153,9 +153,10 @@ public class Client {
 	}
 
 	private void weirdJobMightNotBeThere() {
-		if(currentJob!=null) {
+		if (currentJob != null) {
 			logger.error("Leaving the job because the server just told me there is nothing running there..."
 					+ "Did the client break or was it sending me the info right now?");
+			currentJob.reschedule();
 			currentJob = null;
 		}
 	}
@@ -185,7 +186,7 @@ public class Client {
 	 * suposed to call the server back telling what hapenned to the job.
 	 */
 	public boolean stop(Agent agent) {
-		if(agent.stop(currentJob)) {
+		if (agent.stop(currentJob)) {
 			logger.debug("Successfully stopped the job after being requested to do so.");
 			this.currentJob = null;
 			return true;
@@ -196,7 +197,7 @@ public class Client {
 	public boolean canHandle(BuildCommand command, AgentControl control) {
 		return isAlive(control) && this.labels.containsAll(command.getLabels());
 	}
-	
+
 	public boolean isAlive() {
 		return isAlive(new AgentControl());
 	}

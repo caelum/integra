@@ -28,6 +28,17 @@
 package br.com.caelum.integracao.server.agent;
 
 public enum AgentStatus {
-	UNAVAILABLE, FREE, BUSY;
+	/**
+	 * Offline or something wrong happened.
+	 */
+	UNAVAILABLE, 
+	/**
+	 * Not doing anything so far.
+	 */
+	FREE, 
+	/**
+	 * Currently workingon something.
+	 */
+	BUSY;
 
 }

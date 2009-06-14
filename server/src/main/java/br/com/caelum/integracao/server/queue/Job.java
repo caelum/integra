@@ -205,4 +205,10 @@ public class Job {
 		this.finished = true;
 	}
 
+	public void reschedule() {
+		logger.debug("Rescheduling job " + getId());
+		this.client = null;
+		this.startTime = null;
+	}
+
 }
