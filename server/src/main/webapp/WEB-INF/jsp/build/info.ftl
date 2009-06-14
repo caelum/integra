@@ -1,5 +1,6 @@
 <#compress>
 <h2>build-${build.buildCount } - revision '${build.revisionName}'</h2>
+<pre>${build.resultMessage!''}</pre>
 
 <div id="tabs">
      <ul>

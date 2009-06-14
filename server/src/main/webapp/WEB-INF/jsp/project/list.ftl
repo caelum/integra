@@ -39,9 +39,6 @@
 		<td><input type="checkbox" name="project.allowAutomaticStartNextRevisionWhileBuildingPrevious" checked="true" /> allow automatic start of the next revision while building the previous one</td>
 	</tr>
 	<tr>
-		<td><input type="checkbox" name="project.doServerCheckout" checked="true" /> checkout the project at the server and zip it to the client</td>
-	</tr>
-	<tr>
 		<td>Uri: <input name="project.uri" /></td>
 	</tr>
 	<tr>

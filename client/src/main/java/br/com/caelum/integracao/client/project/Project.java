@@ -111,7 +111,7 @@ public class Project {
 			File workDirectory = new File(baseDir,name);
 			// TODO remove everything if it exists first...
 			workDirectory.mkdirs();
-			new Unzipper(workDirectory).unzip(content.getFile());
+			new Unzipper(workDirectory).logTo(new PrintWriter(output,true)).unzip(content.getFile());
 		} catch (IOException e) {
 			e.printStackTrace(new PrintWriter(output,true));
 			return new ProjectRunResult(output.getBuffer().toString(), -1);

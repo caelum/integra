@@ -54,9 +54,9 @@ public class ProjectStart {
 			database.beginTransaction();
 			Project toBuild = new Projects(database).get(name);
 			Build build = toBuild.build();
+			new Projects(database).register(build);
 			build.setRevisionAsNextOne(new Projects(database), new Builds(database));
 			build.start(new Jobs(database), database);
-			new Projects(database).register(build);
 			database.commit();
 		} catch (Exception e) {
 			logger.error("Unable to start project build", e);

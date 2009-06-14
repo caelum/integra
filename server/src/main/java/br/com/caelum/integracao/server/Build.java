@@ -146,7 +146,7 @@ public class Build {
 		logger.debug("Starting executing build for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
 		File file = getFile("revision-checkout.txt");
-		projects.register(new Tab(this, "Revision checkout", file.getAbsolutePath()));
+		projects.register(new Tab(this, "Checkout commands and log", "revision-checkout.txt"));
 		LogFile logFile = null;
 		try {
 			logFile = new LogFile(file);
@@ -333,6 +333,10 @@ public class Build {
 
 	public File getRevisionContent() {
 		return new File(project.getBuildsDirectory(), "revision-" + revision.getName() + ".zip");
+	}
+	
+	public String getResultMessage() {
+		return resultMessage;
 	}
 
 }
