@@ -40,8 +40,8 @@ import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.action.BasicProjects;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
-import br.com.caelum.integracao.server.plugin.PluginInformation;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
+import br.com.caelum.integracao.server.plugin.RegisteredPlugin;
 import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;
 import br.com.caelum.integracao.server.queue.QueueThread;
@@ -154,12 +154,11 @@ public class ProjectController {
 		result.use(Results.logic()).redirectTo(ProjectController.class).list();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Post
 	@Path("/project/{project.name}/plugin")
-	public void addPlugin(Project project, String pluginType) throws ClassNotFoundException {
+	public void addPlugin(Project project, RegisteredPlugin registered) throws ClassNotFoundException {
 		project = projects.get(project.getName());
-		PluginToRun plugin = new PluginToRun((Class<? extends PluginInformation>) Class.forName(pluginType));
+		PluginToRun plugin = new PluginToRun(registered);
 		project.add(plugin);
 		showProject(project);
 	}

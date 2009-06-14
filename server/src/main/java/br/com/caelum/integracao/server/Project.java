@@ -75,17 +75,22 @@ public class Project {
 	
 	@NotNull
 	private Class<?> controlType;
+	
 	@NotEmpty
 	private String uri;
+	
 	@NotEmpty
 	private String name;
+	
 	@OneToMany(mappedBy = "project")
 	@OrderBy("position")
 	private List<Phase> phases = new ArrayList<Phase>();
+	
 	@NotNull
 	private File baseDir;
 	
 	private boolean buildEveryRevision;
+	
 	private boolean allowAutomaticStartNextRevisionWhileBuildingPrevious;
 
 	private Long buildCount = 0L;

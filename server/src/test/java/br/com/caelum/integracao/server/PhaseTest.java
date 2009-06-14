@@ -39,6 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.com.caelum.integracao.server.plugin.Plugin;
+import br.com.caelum.integracao.server.plugin.PluginException;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 import br.com.caelum.integracao.server.queue.Jobs;
@@ -76,7 +77,7 @@ public class PhaseTest extends DatabaseBasedTest {
 	}
 	
 	@Test
-	public void shouldInvokeAfterPhaseOnAllPlugins() {
+	public void shouldInvokeAfterPhaseOnAllPlugins() throws PluginException {
 		final PluginToRun run = mockery.mock(PluginToRun.class);
 		final PluginToRun second = mockery.mock(PluginToRun.class, "second");
 		final Phase test = new Phase();
@@ -97,7 +98,7 @@ public class PhaseTest extends DatabaseBasedTest {
 	}
 	
 	@Test
-	public void shouldNotInvokeNextPluginIfPreviousOneWasntCreated() {
+	public void shouldNotInvokeNextPluginIfPreviousOneWasntCreated() throws PluginException {
 		final PluginToRun run = mockery.mock(PluginToRun.class);
 		final PluginToRun second = mockery.mock(PluginToRun.class, "second");
 		final Phase test = new Phase();
@@ -115,7 +116,7 @@ public class PhaseTest extends DatabaseBasedTest {
 	}
 
 	@Test
-	public void shouldNotInvokeNextPluginIfPreviousOneReturnedFalse() {
+	public void shouldNotInvokeNextPluginIfPreviousOneReturnedFalse() throws PluginException {
 		final PluginToRun run = mockery.mock(PluginToRun.class);
 		final PluginToRun second = mockery.mock(PluginToRun.class, "second");
 		final Phase test = new Phase();

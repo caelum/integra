@@ -37,8 +37,8 @@ import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.label.Labels;
-import br.com.caelum.integracao.server.plugin.PluginInformation;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
+import br.com.caelum.integracao.server.plugin.RegisteredPlugin;
 import br.com.caelum.vraptor.Delete;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
@@ -107,9 +107,9 @@ public class PhaseController {
 	@SuppressWarnings("unchecked")
 	@Post
 	@Path("/project/{project.name}/phase/plugin")
-	public void addPlugin(Phase phase, String pluginType) throws ClassNotFoundException {
+	public void addPlugin(Phase phase, RegisteredPlugin registered) throws ClassNotFoundException {
 		phase = projects.get(phase);
-		PluginToRun plugin = new PluginToRun((Class<? extends PluginInformation>) Class.forName(pluginType));
+		PluginToRun plugin = new PluginToRun(registered);
 		phase.add(plugin);
 		showProject(phase.getProject());
 	}

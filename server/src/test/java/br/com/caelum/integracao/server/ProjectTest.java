@@ -33,9 +33,9 @@ import static org.hamcrest.Matchers.is;
 
 import org.junit.Test;
 
-import br.com.caelum.integracao.AtDirectoryTest;
+import br.com.caelum.integracao.server.project.BaseTest;
 
-public class ProjectTest extends AtDirectoryTest{
+public class ProjectTest extends BaseTest{
 	
 	@Test
 	public void newlyCreatedProjectsHaveBuildCountZero() {
@@ -71,6 +71,16 @@ public class ProjectTest extends AtDirectoryTest{
 		Phase first = new Phase();
 		p.add(first);
 		assertThat(first.getProject(), is(equalTo(p)));
+	}
+	
+	@Test
+	public void findsABuildByItsBuildCount() {
+		Project p = new Project();
+		Build first = p.build();
+		Build second = p.build();
+		assertThat(p.getBuild(first.getBuildCount()), is(equalTo(first)));
+		assertThat(p.getBuild(second.getBuildCount()), is(equalTo(second)));
+		assertThat(p.getBuild(first.getBuildCount()+5), is(equalTo(null)));
 	}
 	
 

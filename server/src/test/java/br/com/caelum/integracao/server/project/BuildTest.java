@@ -47,6 +47,7 @@ import br.com.caelum.integracao.server.Builds;
 import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.plugin.Plugin;
+import br.com.caelum.integracao.server.plugin.PluginException;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.queue.Jobs;
 import br.com.caelum.integracao.server.scm.ScmControl;
@@ -265,7 +266,7 @@ public class BuildTest extends DatabaseBasedTest {
 
 	@Test
 	public void invokesTheBeforeMethodOfAPlugin() throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException, IOException, ScmException {
+			InvocationTargetException, NoSuchMethodException, IOException, ScmException, PluginException {
 		phases.add(first);
 		final PluginToRun firstPlugin = mockery.mock(PluginToRun.class, "firstPlugin");
 		final Plugin firstImplementation = mockery.mock(Plugin.class, "firstImplementation");
@@ -294,7 +295,7 @@ public class BuildTest extends DatabaseBasedTest {
 
 	@Test
 	public void doesntContinueTheStartProcessIfAPluginTellsItToStop() throws InstantiationException,
-			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException, ScmException {
+			IllegalAccessException, InvocationTargetException, NoSuchMethodException, IOException, ScmException, PluginException {
 		phases.add(first);
 		final PluginToRun firstPlugin = mockery.mock(PluginToRun.class, "firstPlugin");
 		final Plugin firstImplementation = mockery.mock(Plugin.class, "firstImplementation");

@@ -46,6 +46,8 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.build.Tab;
 import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.server.plugin.Plugin;
+import br.com.caelum.integracao.server.plugin.PluginException;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;
@@ -159,9 +161,16 @@ public class Build {
 			finish(false);
 			return;
 		}
-		for (PluginToRun plugin : project.getPlugins()) {
-			if (!plugin.getPlugin(db).before(this)) {
-				logger.debug("Plugin " + plugin.getType().getName() + " told us to stop the build");
+		for (PluginToRun toRun : project.getPlugins()) {
+			try {
+				Plugin found = toRun.getPlugin(db);
+				if (!found.before(this)) {
+					logger.debug("Plugin " + toRun.getType().getInformation().getName() + " told us to stop the build");
+					finish(false);
+					return;
+				}
+			} catch (PluginException e) {
+				logger.debug("Plugin " + toRun.getType().getInformation().getName() + " was not instantiated");
 				finish(false);
 				return;
 			}

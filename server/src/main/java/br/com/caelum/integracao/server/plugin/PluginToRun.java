@@ -71,7 +71,7 @@ public class PluginToRun {
 		this.type = type;
 	}
 
-	protected PluginToRun() {
+	PluginToRun() {
 	}
 
 	public RegisteredPlugin getType() {
@@ -86,14 +86,9 @@ public class PluginToRun {
 		this.position = position;
 	}
 
-	public Plugin getPlugin(Database db) {
-		try {
-			PluginInformation information = type.getInformation();
-			return information.getPlugin(db, createParameters());
-		} catch (Exception e) {
-			logger.error("Unable to instantiate the plugin " + type.getType().getName(), e);
-			return null;
-		}
+	public Plugin getPlugin(Database db) throws PluginException {
+		PluginInformation information = type.getInformation();
+		return information.getPlugin(db, createParameters());
 	}
 
 	private Map<String, String> createParameters() {

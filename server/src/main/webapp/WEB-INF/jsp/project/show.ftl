@@ -19,9 +19,9 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 	</#list>
 	<form action="plugin" method="post">
 		<input type="hidden" name="project.name" value="${project.name }" />
-		<select name="pluginType">
+		<select name="registered.id">
 			<#list plugins as plugin>
-				<option value="${plugin.type.name }">${plugin.type.simpleName }</option>
+				<option value="${plugin.id }">${plugin.information.name }</option>
 			</#list>
 		</select>
 		<input type="submit" value="add" />
@@ -64,10 +64,10 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 				<div class="plugin, formulario">
 					<form action="phase/plugin" method="post">
 						<input type="hidden" name="phase.id" value="${phase.id }" />
-						<select name="pluginType">
-						<#list plugins as plugin>
-							<option value="${plugin.type.name }">${plugin.type.simpleName }</option>
-						</#list>
+						<select name="registered.id">
+							<#list plugins as plugin>
+								<option value="${plugin.id }">${plugin.information.name }</option>
+							</#list>
 						</select>
 						<input type="submit" value="add" />
 					</form>

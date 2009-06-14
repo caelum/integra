@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.Plugin;
+import br.com.caelum.integracao.server.plugin.PluginException;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;
@@ -170,13 +171,18 @@ public class Phase {
 	 */
 	public boolean runAfter(Build build, Database database) {
 		for (PluginToRun toRun : getPlugins()) {
-			Plugin plugin = toRun.getPlugin(database);
-			if (plugin == null) {
-				return false;
-			} else {
-				if (!plugin.after(build, this)) {
+			try {
+				Plugin plugin = toRun.getPlugin(database);
+				if (plugin == null) {
 					return false;
+				} else {
+					if (!plugin.after(build, this)) {
+						return false;
+					}
 				}
+			} catch (PluginException e) {
+				e.printStackTrace();
+				return false;
 			}
 		}
 		return true;
