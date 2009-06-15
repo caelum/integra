@@ -96,6 +96,7 @@ public class Project {
 	public void stop() {
 		if (this.executing != null) {
 			executing.stop();
+			executing = null;
 		}
 	}
 	public String getExecutingCommand() {

@@ -66,6 +66,7 @@ public class Server {
 			addTo(post, stopResult, "stop");
 			StringWriter zipOutput = new StringWriter();
 			File zip = new CopyFiles(directoryToCopy, settings, project, zipOutput).zipThemAll();
+			logger.debug("After zipping, resulted in exists=" + zip.exists());
 			if (zip.exists()) {
 				post.with("content", zip);
 			}

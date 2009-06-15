@@ -1,5 +1,6 @@
 scp server/target/integracao-server.war integra@192.168.0.159:~/ & scp client/target/integracao-client.war integra@192.168.0.159:~/
-scp client/target/integracao-client.war integra@192.168.0.66:~/        & scp client/target/integracao-client.war integra@192.168.0.2:~/
+scp client/target/integracao-client.war integra@192.168.0.66:~/ 
+scp client/target/integracao-client.war integra@192.168.0.2:~/
 scp client/target/integracao-client.war integra@192.168.0.160:~/        & scp client/target/integracao-client.war integra@192.168.0.163:~/
 scp client/target/integracao-client.war integra@192.168.0.161:~/        
 scp client/target/integracao-client.war integra@192.168.0.164:~/
@@ -9,6 +10,9 @@ scp client/target/integracao-client.war integra@192.168.0.165:~/
 
 
 ssh integra@192.168.0.159 ./deploy.sh
+
+echo
+echo Restarting 66
 ssh integra@192.168.0.66 ./deploy.sh
 
 echo

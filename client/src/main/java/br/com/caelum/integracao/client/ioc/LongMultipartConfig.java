@@ -27,22 +27,13 @@
  */
 package br.com.caelum.integracao.client.ioc;
 
-import br.com.caelum.integracao.client.CurrentJob;
-import br.com.caelum.integracao.client.Settings;
-import br.com.caelum.integracao.client.project.Projects;
-import br.com.caelum.vraptor.ComponentRegistry;
-import br.com.caelum.vraptor.interceptor.multipart.MultipartConfig;
-import br.com.caelum.vraptor.ioc.pico.PicoProvider;
+import br.com.caelum.vraptor.interceptor.multipart.DefaultMultipartConfig;
 
-public class CustomProvider extends PicoProvider {
+public class LongMultipartConfig extends DefaultMultipartConfig{
 	
 	@Override
-	protected void registerComponents(ComponentRegistry container) {
-		super.registerComponents(container);
-		container.register(Projects.class, Projects.class);
-		container.register(Settings.class, Settings.class);
-		container.register(CurrentJob.class, CurrentJob.class);
-		container.register(MultipartConfig.class, LongMultipartConfig.class);
+	public long getSizeLimit() {
+		return 100 * 1024 * 1024;
 	}
 
 }

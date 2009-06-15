@@ -83,8 +83,10 @@ public class JobController {
 	@Post
 	public synchronized void execute(String jobId, Project project, String revision, List<String> startCommand,
 			List<String> stopCommand, String resultUri, List<String> directoryToCopy, UploadedFile content) {
+		logger.debug("Will start execution for " + jobId + "/" + project + "@" + revision);
 		Server server = new Server(resultUri, new DefaultHttp(), settings);
-		JobExecution execution = new JobExecution(projects.get(project.getName()), startCommand, stopCommand, revision,
+		Project projectFound = projects.get(project.getName());
+		JobExecution execution = new JobExecution(projectFound, startCommand, stopCommand, revision,
 				directoryToCopy, settings, server, content);
 		job.start(jobId, execution);
 	}

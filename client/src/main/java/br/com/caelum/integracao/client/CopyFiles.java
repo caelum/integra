@@ -31,11 +31,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 import br.com.caelum.integracao.client.project.Project;
-import br.com.caelum.integracao.command.CommandToExecute;
+import br.com.caelum.integracao.zip.Zipper;
 
 public class CopyFiles {
 
@@ -60,26 +59,17 @@ public class CopyFiles {
 
 			File baseDirectory = new File(settings.getBaseDir(), project.getName());
 
+			Zipper zipper = new Zipper(baseDirectory).logTo(output);
+			boolean added = false;
 			for (String resourceToCopy : directoryToCopy) {
 				if (!resourceToCopy.trim().equals("")) {
 					output.println("Zipping files " + resourceToCopy);
-
-					List<String> cmds = new ArrayList<String>();
-					cmds.add("zip");
-					cmds.add("-q9ro");
-					cmds.add(result.getAbsolutePath());
-
-					File fileToCopy = new File(baseDirectory, resourceToCopy);
-					cmds.add(fileToCopy.getName());
-
-					CommandToExecute command = new CommandToExecute(cmds.toArray(new String[0])).at(fileToCopy
-							.getParentFile());
-
-					int cmdResult = command.logTo(output).run();
-					if (cmdResult != 0) {
-						output.println("\tFailed zipping this one.");
-					}
+					zipper.add(resourceToCopy);
 				}
+				added = true;
+			}
+			if (added) {
+				zipper.zip(result);
 			}
 		}
 
