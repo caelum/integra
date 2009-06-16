@@ -209,6 +209,15 @@ public class Build {
 		this.resultMessage = writer.getBuffer().toString();
 		this.successSoFar = success;
 		this.finishTime = new GregorianCalendar();
+		/*for (PluginToRun toRun : project.getPlugins()) {
+			try {
+				Plugin found = toRun.getPlugin(db);
+				found.after(this);
+			} catch (PluginException e) {
+				cause += " (plugin error: "+toRun.getType().getInformation().getName() + ")";
+				logger.error("plugin error", e);
+			}
+		}*/
 	}
 
 	public Project getProject() {

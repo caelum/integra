@@ -85,8 +85,7 @@ public class Project {
 		logger.debug("Executing " + command + " to " + baseDirectory + "/" + name);
 
 		File workDir = new File(baseDirectory, name);
-		logger.debug("Ready to execute " + command + " @ " + workDir.getAbsolutePath()
-				+ " using log=" + output);
+		logger.debug("Ready to execute " + command + " @ " + workDir.getAbsolutePath() + " using log=" + output);
 		this.executing = new CommandToExecute(command.toArray()).at(workDir).logTo(output);
 		int result = this.executing.run();
 		return new ProjectRunResult(output.getBuffer().toString(), result);
@@ -99,8 +98,9 @@ public class Project {
 			executing = null;
 		}
 	}
+
 	public String getExecutingCommand() {
-		if(executing!=null) {
+		if (executing != null) {
 			return executing.getName();
 		}
 		return "";
@@ -109,15 +109,29 @@ public class Project {
 	public ProjectRunResult unzip(File baseDir, String revision, UploadedFile content, StringWriter output) {
 		content.getFile().deleteOnExit();
 		try {
-			File workDirectory = new File(baseDir,name);
-			// TODO remove everything if it exists first...
+			File workDirectory = new File(baseDir, name);
+			clear(workDirectory);
 			workDirectory.mkdirs();
-			new Unzipper(workDirectory).logTo(new PrintWriter(output,true)).unzip(content.getFile());
+			new Unzipper(workDirectory).logTo(new PrintWriter(output, true)).unzip(content.getFile());
 		} catch (IOException e) {
-			e.printStackTrace(new PrintWriter(output,true));
+			e.printStackTrace(new PrintWriter(output, true));
 			return new ProjectRunResult(output.getBuffer().toString(), -1);
 		}
 		return new ProjectRunResult(output.getBuffer().toString(), 0);
+	}
+
+	private void clear(File base) {
+		if (!base.exists()) {
+			return;
+		}
+		for (File child : base.listFiles()) {
+			if (child.isDirectory()) {
+				clear(child);
+			} else {
+				child.delete();
+			}
+		}
+		base.delete();
 	}
 
 }

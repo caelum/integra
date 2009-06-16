@@ -62,4 +62,7 @@ public class RemoveOldBuilds implements Plugin {
 		return true;
 	}
 
+	public void after(Build build) {
+	}
+
 }

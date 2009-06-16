@@ -44,7 +44,6 @@ import javax.persistence.TemporalType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Client;
@@ -53,6 +52,7 @@ import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.agent.Agent;
 import br.com.caelum.integracao.server.dao.Database;
+import br.com.caelum.integracao.zip.Unzipper;
 import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
 
 @Entity
@@ -119,14 +119,9 @@ public class Job {
 		if (content != null) {
 			File baseDir = getFile(command.getId() + "");
 			baseDir.mkdir();
-			PrintWriter unzipLog = new PrintWriter(new FileWriter(getFile(command.getId() + "/copy-files.txt")), true);
+			PrintWriter unzipLog = new PrintWriter(new FileWriter(getFile(command.getId() + "/zip-unzip.txt")), true);
 			unzipLog.append(zipOutput);
-			int resultValue = new CommandToExecute("unzip", "-qo", content.getFile().getAbsolutePath()).at(baseDir)
-					.logTo(unzipLog).run();
-			if (resultValue != 0) {
-				unzipLog.append("Unzipping resulted in " + resultValue + " --> FAILED");
-				success = false;
-			}
+			new Unzipper(baseDir).logTo(unzipLog).unzip(content.getFile());
 			unzipLog.close();
 		}
 

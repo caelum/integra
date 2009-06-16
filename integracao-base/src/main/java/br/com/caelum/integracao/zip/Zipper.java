@@ -110,7 +110,7 @@ public class Zipper {
 	private boolean shouldIgnore(String filePath) {
 		for(Pattern exclude :ignore) {
 			if(exclude.matcher(filePath).matches()) {
-				log.println("[i]" + filePath);
+				// log.println("[i]" + filePath);
 				return true;
 			}
 		}

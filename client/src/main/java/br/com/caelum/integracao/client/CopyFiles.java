@@ -68,7 +68,7 @@ public class CopyFiles {
 				zipper.addExactly(resourceToCopy);
 			}
 		}
-		if (zipper.zip(result) != 0) {
+		if (zipper.zip(result) == 0) {
 			output.println("Did not zip any files using patterns " + directoryToCopy + " based at "
 					+ baseDirectory.getAbsolutePath());
 			return null;

@@ -96,4 +96,7 @@ public class SendMail implements Plugin {
 		return true;
 	}
 
+	public void after(Build build) {
+	}
+
 }

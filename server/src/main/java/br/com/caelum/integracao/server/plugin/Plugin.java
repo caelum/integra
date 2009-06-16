@@ -48,4 +48,6 @@ public interface Plugin {
 	 */
 	boolean before(Build build);
 
+	void after(Build build);
+
 }
