@@ -59,6 +59,7 @@ public class ZipperTest extends AtDirectoryTest{
 		File content = new File(miscDir, "content.txt");
 		this.expected = "my content within the file";
 		givenA(content, expected);
+		givenA(new File(miscDir, "ignore.txt"), "ignore this file");
 		this.zipFile = File.createTempFile("test", ".zip");
 		zipFile.deleteOnExit();
 	}
@@ -81,7 +82,7 @@ public class ZipperTest extends AtDirectoryTest{
 	public void zipsASingleFileWhenSayingAPattern() throws IOException {
 
 		int zipped = new Zipper(miscDir).addPattern(Pattern.compile(".*")).logTo(writer).zip(zipFile);
-		Assert.assertEquals(1, zipped);
+		Assert.assertEquals(2, zipped);
 		
 		File output = new File(baseDir, "output");
 		output.mkdirs();
@@ -95,7 +96,7 @@ public class ZipperTest extends AtDirectoryTest{
 	public void zipsASingleDirectoryWhenSayingAPattern() throws IOException {
 		
 		int zipped = new Zipper(contentDir).addPattern(Pattern.compile(".*")).logTo(writer).zip(zipFile);
-		Assert.assertEquals(1, zipped);
+		Assert.assertEquals(2, zipped);
 		
 		File output = new File(baseDir, "output");
 		output.mkdirs();
@@ -109,6 +110,20 @@ public class ZipperTest extends AtDirectoryTest{
 	public void zipsASingleDirectoryWhenSayingItsName() throws IOException {
 		
 		int zipped = new Zipper(contentDir).addExactly("misc").logTo(writer).zip(zipFile);
+		Assert.assertEquals(2, zipped);
+		
+		File output = new File(baseDir, "output");
+		output.mkdirs();
+		new Unzipper(output).logTo(writer).unzip(zipFile);
+		
+		Assert.assertEquals(expected, contentOf(new File(output, "misc/content.txt")));
+		
+	}
+
+	@Test
+	public void zipsASingleDirectoryIgnoringAFileWhenSayingItsName() throws IOException {
+		
+		int zipped = new Zipper(contentDir).addExactly("misc").ignore(".*/ignore\\.txt").logTo(writer).zip(zipFile);
 		Assert.assertEquals(1, zipped);
 		
 		File output = new File(baseDir, "output");
@@ -116,6 +131,24 @@ public class ZipperTest extends AtDirectoryTest{
 		new Unzipper(output).logTo(writer).unzip(zipFile);
 		
 		Assert.assertEquals(expected, contentOf(new File(output, "misc/content.txt")));
+		
+	}
+	
+	@Test
+	public void canIgnoreADirectoryAndItsContent() throws IOException {
+		File ignoreDir = new File(miscDir, ".svn");
+		ignoreDir.mkdirs();
+		givenA(new File(ignoreDir, "myIgnored.txt"), "to ignore based on this dir");
+		int zipped = new Zipper(contentDir).addExactly("").ignore(".*\\.svn").logTo(writer).zip(zipFile);
+		Assert.assertEquals(2, zipped);
+		
+		File output = new File(baseDir, "output");
+		output.mkdirs();
+		new Unzipper(output).logTo(writer).unzip(zipFile);
+		
+		Assert.assertEquals(expected, contentOf(new File(output, "misc/content.txt")));
+		Assert.assertEquals(false, new File(output, ".svn").exists());
+		
 		
 	}
 

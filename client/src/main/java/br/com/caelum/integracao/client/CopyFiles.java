@@ -55,21 +55,23 @@ public class CopyFiles {
 		File result = File.createTempFile("integra-copy-files-", ".zip");
 		result.delete();
 
-		if (directoryToCopy != null) {
+		if (directoryToCopy == null) {
+			return null;
+		}
 
-			File baseDirectory = new File(settings.getBaseDir(), project.getName());
+		File baseDirectory = new File(settings.getBaseDir(), project.getName());
 
-			Zipper zipper = new Zipper(baseDirectory).logTo(output);
-			for (String resourceToCopy : directoryToCopy) {
-				if (!resourceToCopy.trim().equals("")) {
-					output.println("Zipping files " + resourceToCopy);
-					zipper.addExactly(resourceToCopy);
-				}
+		Zipper zipper = new Zipper(baseDirectory).logTo(output);
+		for (String resourceToCopy : directoryToCopy) {
+			if (!resourceToCopy.trim().equals("")) {
+				output.println("Zipping files " + resourceToCopy);
+				zipper.addExactly(resourceToCopy);
 			}
-			if (zipper.zip(result)!=0) {
-				output.println("Did not zip any files using patterns " + directoryToCopy + " based at " + baseDirectory.getAbsolutePath());
-			}
-			return result;
+		}
+		if (zipper.zip(result) != 0) {
+			output.println("Did not zip any files using patterns " + directoryToCopy + " based at "
+					+ baseDirectory.getAbsolutePath());
+			return null;
 		}
 
 		return result;

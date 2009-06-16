@@ -68,8 +68,8 @@ public class Server {
 				addTo(post, stopResult, "stop");
 				StringWriter zipOutput = new StringWriter();
 				File zip = new CopyFiles(directoryToCopy, settings, project, zipOutput).zipThemAll();
-				logger.debug("After zipping, resulted in exists=" + zip.exists());
-				if (zip.exists()) {
+				if (zip != null) {
+					logger.debug("After zipping, resulted in =" + zip.getAbsolutePath());
 					post.with("content", zip);
 				}
 				post.with("zipOutput", zipOutput.getBuffer().toString());

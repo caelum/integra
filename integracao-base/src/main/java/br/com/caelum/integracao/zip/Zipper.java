@@ -70,7 +70,7 @@ public class Zipper {
 		FileOutputStream target = new FileOutputStream(zipFile);
 		ZipOutputStream output = new ZipOutputStream(new BufferedOutputStream(target));
 		byte data[] = new byte[BUFFER];
-		int count = zip(data, output, workDirectory, "", false);
+		int count = zip(data, output, workDirectory, "", this.fixedContent.contains(""));
 		if(count!=0) {
 			output.close();
 		}
@@ -79,13 +79,18 @@ public class Zipper {
 
 	private int zip(byte[] data, ZipOutputStream output, File base, String currentPath, boolean matched) throws IOException {
 		int total = 0;
+		// log.println("For " + currentPath + " we will matched=" + matched);
 		for (File file : base.listFiles()) {
 			String completeName = (currentPath.equals("")? "" : currentPath + "/") + file.getName();
+			boolean ignoreThisOne = shouldIgnore(completeName);
+			boolean addThisOne = shouldInclude(completeName);
+			boolean include = (matched || addThisOne) && !ignoreThisOne;
 			if(file.isDirectory()) {
-				total += zip(data, output, file, completeName, matched || !shouldIgnore(completeName));
+				total += zip(data, output, file, completeName, include);
 				continue;
 			}
-			if(!matched && shouldIgnore(completeName)) {
+			// log.println("For " + completeName + " we will ignore=" + ignoreThisOne);
+			if(ignoreThisOne || (!matched && !addThisOne)) {
 				continue;
 			}
 			total++;
@@ -105,22 +110,27 @@ public class Zipper {
 	private boolean shouldIgnore(String filePath) {
 		for(Pattern exclude :ignore) {
 			if(exclude.matcher(filePath).matches()) {
+				log.println("[i]" + filePath);
 				return true;
 			}
 		}
+		return false;
+	}
+
+	private boolean shouldInclude(String filePath) {
 		for(Pattern include : content) {
 			if(include.matcher(filePath).matches()) {
 				log.println("[a] " + filePath);
-				return false;
+				return true;
 			}
 		}
 		for(String include : fixedContent) {
 			if(include.equals(filePath)) {
 				log.println("[a] " + filePath);
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	public Zipper ignore(String pattern) {
