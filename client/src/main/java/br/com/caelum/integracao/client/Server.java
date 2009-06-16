@@ -28,6 +28,7 @@
 package br.com.caelum.integracao.client;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
@@ -41,8 +42,7 @@ import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.http.Method;
 
 public class Server {
-	
-	
+
 	private final Logger logger = LoggerFactory.getLogger(Server.class);
 
 	private final String resultUri;
@@ -55,31 +55,36 @@ public class Server {
 		this.settings = settings;
 	}
 
-	public void dispatch(Project project, ProjectRunResult checkoutResult, ProjectRunResult startResult, ProjectRunResult stopResult, List<String> directoryToCopy) {
+	public void dispatch(Project project, ProjectRunResult checkoutResult, ProjectRunResult startResult,
+			ProjectRunResult stopResult, List<String> directoryToCopy) {
 		logger.debug("Job " + project.getName() + " has finished");
 		Http http = new DefaultHttp();
 		logger.debug("Acessing uri " + resultUri + " to finish the job");
 		Method post = http.post(resultUri);
 		try {
-			addTo(post, checkoutResult, "checkout");
-			addTo(post, startResult, "start");
-			addTo(post, stopResult, "stop");
-			StringWriter zipOutput = new StringWriter();
-			File zip = new CopyFiles(directoryToCopy, settings, project, zipOutput).zipThemAll();
-			logger.debug("After zipping, resulted in exists=" + zip.exists());
-			if (zip.exists()) {
-				post.with("content", zip);
+			try {
+				addTo(post, checkoutResult, "checkout");
+				addTo(post, startResult, "start");
+				addTo(post, stopResult, "stop");
+				StringWriter zipOutput = new StringWriter();
+				File zip = new CopyFiles(directoryToCopy, settings, project, zipOutput).zipThemAll();
+				logger.debug("After zipping, resulted in exists=" + zip.exists());
+				if (zip.exists()) {
+					post.with("content", zip);
+				}
+				post.with("zipOutput", zipOutput.getBuffer().toString());
+				post.with("success", "" + !(failed(checkoutResult) || failed(stopResult) || failed(startResult)));
+				post.send();
+			} catch (Exception e) {
+				logger.error("Was unable to notify the server of this request..."
+						+ "maybe the server thinks im still busy.", e);
 			}
-			post.with("zipOutput", zipOutput.getBuffer().toString());
-			post.with("success", "" + !(failed(checkoutResult) || failed(stopResult) || failed(startResult)));
-			post.send();
 			if (post.getResult() != 200) {
 				logger.error(post.getContent());
 				throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
 			}
-		} catch (Exception e) {
-			logger.error("Was unable to notify the server of this request..."
-					+ "maybe the server thinks im still busy.", e);
+		} catch (IOException e) {
+			throw new RuntimeException("The server returned a problematic answer", e);
 		} finally {
 			post.close();
 		}

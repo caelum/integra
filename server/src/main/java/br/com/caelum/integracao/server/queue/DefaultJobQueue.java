@@ -58,6 +58,7 @@ public class DefaultJobQueue implements JobQueue{
 			for (Iterator<Client> iterator = freeFound.iterator(); iterator.hasNext();) {
 				Client client = iterator.next();
 				if(client.canHandle(job.getCommand(), control) && client.work(job, config)) {
+					iterator.remove();
 					completed++;
 					break;
 				}

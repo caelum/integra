@@ -53,25 +53,34 @@ public class Unzipper {
 		ZipEntry entry;
 		ZipFile zipfile = new ZipFile(zipFile);
 		Enumeration e = zipfile.entries();
-		while (e.hasMoreElements()) {
-			entry = (ZipEntry) e.nextElement();
-			log.println("[x] " + entry);
-			BufferedInputStream is = new BufferedInputStream(zipfile.getInputStream(entry));
-			int count;
-			byte data[] = new byte[BUFFER];
-			File target = new File(workDirectory, entry.getName());
-			target.getParentFile().mkdirs();
-			FileOutputStream fos = new FileOutputStream(target);
-			BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
-			while ((count = is.read(data, 0, BUFFER)) != -1) {
-				dest.write(data, 0, count);
+		int entries = 0;
+		try {
+			while (e.hasMoreElements()) {
+				entries++;
+				entry = (ZipEntry) e.nextElement();
+				BufferedInputStream is = new BufferedInputStream(zipfile.getInputStream(entry));
+				int count;
+				byte data[] = new byte[BUFFER];
+				String name = entry.getName();
+				log.println("writing to " + name);
+				File target = new File(workDirectory, name);
+				target.getParentFile().mkdirs();
+				FileOutputStream fos = new FileOutputStream(target);
+				BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
+				while ((count = is.read(data, 0, BUFFER)) != -1) {
+					dest.write(data, 0, count);
+				}
+				dest.flush();
+				dest.close();
+				fos.flush();
+				fos.close();
+				is.close();
 			}
-			dest.flush();
-			dest.close();
-			is.close();
+		} finally {
+			log.println("[x] " + entries + " entries unzipped.");
 		}
 	}
-	
+
 	public Unzipper logTo(PrintWriter log) {
 		this.log = log;
 		return this;

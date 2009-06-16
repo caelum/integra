@@ -60,20 +60,20 @@ public class CopyFiles {
 			File baseDirectory = new File(settings.getBaseDir(), project.getName());
 
 			Zipper zipper = new Zipper(baseDirectory).logTo(output);
-			boolean added = false;
 			for (String resourceToCopy : directoryToCopy) {
 				if (!resourceToCopy.trim().equals("")) {
 					output.println("Zipping files " + resourceToCopy);
 					zipper.add(resourceToCopy);
 				}
-				added = true;
 			}
-			if (added) {
-				zipper.zip(result);
+			if (!zipper.zip(result)) {
+				output.println("Did not zip any files using patterns " + directoryToCopy + " based at " + baseDirectory.getAbsolutePath());
 			}
+			return result;
 		}
 
 		return result;
+
 	}
 
 }

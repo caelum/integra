@@ -48,6 +48,7 @@ public class Zipper {
 
 	private final List<Pattern> content = new ArrayList<Pattern>();
 	private final List<Pattern> ignore = new ArrayList<Pattern>();
+	private final List<String> fixedContent = new ArrayList<String>();
 
 	private PrintWriter log;
 	
@@ -55,32 +56,43 @@ public class Zipper {
 		this.workDirectory = workDirectory;
 	}
 
-	public Zipper add(String content) {
-		this.content.add(Pattern.compile(content));
+	public Zipper addExactly(String content) {
+		this.fixedContent.add(content);
 		return this;
 	}
 
-	public void zip(File zipFile) throws IOException {
+	public Zipper addPattern(Pattern content) {
+		this.content.add(content);
+		return this;
+	}
+
+	public int zip(File zipFile) throws IOException {
 		FileOutputStream target = new FileOutputStream(zipFile);
 		ZipOutputStream output = new ZipOutputStream(new BufferedOutputStream(target));
 		byte data[] = new byte[BUFFER];
-		zip(data, output, workDirectory, "");
-		output.close();
+		int count = zip(data, output, workDirectory, "", false);
+		if(count!=0) {
+			output.close();
+		}
+		return count;
 	}
 
-	private void zip(byte[] data, ZipOutputStream output, File base, String currentPath) throws IOException {
+	private int zip(byte[] data, ZipOutputStream output, File base, String currentPath, boolean matched) throws IOException {
+		int total = 0;
 		for (File file : base.listFiles()) {
 			String completeName = (currentPath.equals("")? "" : currentPath + "/") + file.getName();
-			if(shouldIgnore(completeName)) {
-				continue;
-			}
 			if(file.isDirectory()) {
-				zip(data, output, file, currentPath + "/" + file.getName());
+				total += zip(data, output, file, completeName, matched || !shouldIgnore(completeName));
 				continue;
 			}
+			if(!matched && shouldIgnore(completeName)) {
+				continue;
+			}
+			total++;
 			FileInputStream input = new FileInputStream(file);
 			BufferedInputStream origin = new BufferedInputStream(input, BUFFER);
 			ZipEntry entry = new ZipEntry(completeName);
+			log.println("[adding] " + completeName);
 			output.putNextEntry(entry);
 			int count;
 			while ((count = origin.read(data, 0, BUFFER)) != -1) {
@@ -88,6 +100,7 @@ public class Zipper {
 			}
 			origin.close();
 		}
+		return total;
 	}
 
 	private boolean shouldIgnore(String filePath) {
@@ -98,6 +111,12 @@ public class Zipper {
 		}
 		for(Pattern include : content) {
 			if(include.matcher(filePath).matches()) {
+				log.println("[a] " + filePath);
+				return false;
+			}
+		}
+		for(String include : fixedContent) {
+			if(include.equals(filePath)) {
 				log.println("[a] " + filePath);
 				return false;
 			}

@@ -27,7 +27,10 @@
  */
 package br.com.caelum.integracao;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -39,7 +42,7 @@ public abstract class AtDirectoryTest {
 	protected File baseDir;
 
 	@Before
-	public void setupDir() {
+	public void setupDir() throws IOException {
 		this.baseDir = new File(".tmp");
 		clear(baseDir);
 		this.baseDir.mkdirs();
@@ -68,6 +71,11 @@ public abstract class AtDirectoryTest {
 		FileWriter writer = new FileWriter(file);
 		writer.write(content);
 		writer.close();
+	}
+	
+	protected String contentOf(File f) throws FileNotFoundException, IOException {
+		String content = new BufferedReader(new FileReader(f)).readLine();
+		return content;
 	}
 
 }

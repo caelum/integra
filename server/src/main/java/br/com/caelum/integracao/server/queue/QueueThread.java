@@ -40,6 +40,7 @@ import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.agent.AgentControl;
+import br.com.caelum.integracao.server.agent.AgentStatus;
 import br.com.caelum.integracao.server.agent.Clients;
 import br.com.caelum.integracao.server.agent.DefaultAgent;
 import br.com.caelum.integracao.server.dao.Database;
@@ -110,10 +111,23 @@ public class QueueThread {
 		db.beginTransaction();
 		List<Job> jobs = new Jobs(db).runningJobs();
 		int result = 0;
+		AgentControl control  =new AgentControl();
 		for (Job job : jobs) {
-			if (System.currentTimeMillis() - job.getStartTime().getTimeInMillis() > new Application(db).getConfig()
-					.getMaximumTimeForAJob() * 60 * 1000) {
-				Client client = job.getClient();
+			long timeSpent = System.currentTimeMillis() - job.getStartTime().getTimeInMillis();
+			int minutes = new Application(db).getConfig()
+					.getMaximumTimeForAJob();
+			Client client = job.getClient();
+			AgentStatus status = control.to(client.getBaseUri()).getStatus();
+			if (status.equals(AgentStatus.UNAVAILABLE) || status.equals(AgentStatus.FREE)) {
+				job.reschedule();
+				if (client.getCurrentJob().equals(job)) {
+					logger.error("Leaving the job because the server just told me there is nothing running there..."
+							+ "Did the client break or was it sending me the info right now?");
+					client.leaveJob();
+				}
+				continue;
+			}	
+			if (timeSpent > minutes * 60 * 1000) {
 				if(client.getCurrentJob()!=null && client.getCurrentJob().equals(job)) {
 					if(client.stop(new DefaultAgent(client.getBaseUri(), new DefaultHttp()))) {
 						result++;

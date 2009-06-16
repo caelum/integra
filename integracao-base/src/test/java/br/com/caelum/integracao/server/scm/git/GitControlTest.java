@@ -27,9 +27,7 @@
  */
 package br.com.caelum.integracao.server.scm.git;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -78,8 +76,7 @@ public class GitControlTest extends AtDirectoryTest {
 		control2.checkoutOrUpdate(null, log);
 		File found = new File(control2.getDir(), "test-file");
 		Assert.assertTrue(found.exists());
-		String content = new BufferedReader(new FileReader(found)).readLine();
-		Assert.assertEquals("second file content\n", content);
+		Assert.assertEquals("second file content\n", contentOf(found));
 		control2.remove(found);
 		control2.commit("removed test file");
 		control1.checkoutOrUpdate(null, log);

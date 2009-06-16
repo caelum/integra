@@ -141,24 +141,14 @@ public class Client {
 	public boolean isAlive(AgentControl control) {
 		Agent agent = control.to(getBaseUri());
 		AgentStatus status = agent.getStatus();
+		logger.debug("Agent " + host + " is " + status);
 		if (status.equals(AgentStatus.UNAVAILABLE)) {
-			weirdJobMightNotBeThere();
 			return false;
 		}	
 		if (status.equals(AgentStatus.FREE)) {
-			weirdJobMightNotBeThere();
 			return true;
 		}
 		return true;
-	}
-
-	private void weirdJobMightNotBeThere() {
-		if (currentJob != null) {
-			logger.error("Leaving the job because the server just told me there is nothing running there..."
-					+ "Did the client break or was it sending me the info right now?");
-			currentJob.reschedule();
-			currentJob = null;
-		}
 	}
 
 	public void leaveJob() {
