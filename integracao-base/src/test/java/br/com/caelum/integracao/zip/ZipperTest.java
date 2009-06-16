@@ -115,8 +115,6 @@ public class ZipperTest extends AtDirectoryTest{
 		output.mkdirs();
 		new Unzipper(output).logTo(writer).unzip(zipFile);
 		
-		System.out.println(this.content.toString());
-		
 		Assert.assertEquals(expected, contentOf(new File(output, "misc/content.txt")));
 		
 	}

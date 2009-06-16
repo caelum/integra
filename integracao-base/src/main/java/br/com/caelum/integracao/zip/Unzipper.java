@@ -62,7 +62,6 @@ public class Unzipper {
 				int count;
 				byte data[] = new byte[BUFFER];
 				String name = entry.getName();
-				log.println("writing to " + name);
 				File target = new File(workDirectory, name);
 				target.getParentFile().mkdirs();
 				FileOutputStream fos = new FileOutputStream(target);

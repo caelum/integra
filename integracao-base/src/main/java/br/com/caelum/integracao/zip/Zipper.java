@@ -92,7 +92,6 @@ public class Zipper {
 			FileInputStream input = new FileInputStream(file);
 			BufferedInputStream origin = new BufferedInputStream(input, BUFFER);
 			ZipEntry entry = new ZipEntry(completeName);
-			log.println("[adding] " + completeName);
 			output.putNextEntry(entry);
 			int count;
 			while ((count = origin.read(data, 0, BUFFER)) != -1) {

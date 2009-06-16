@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -160,7 +161,7 @@ public class Build {
 			if (!getRevisionContent().exists()) {
 				try {
 					new Zipper(new File(project.getBaseDir(), project.getName())).ignore(control.getIgnorePattern())
-							.add(".*").logTo(logFile.getWriter()).zip(getRevisionContent());
+							.addPattern(Pattern.compile(".*")).logTo(logFile.getWriter()).zip(getRevisionContent());
 				} catch (IOException ex) {
 					finish(false, "Unable to zip files for this revision", ex);
 					return;

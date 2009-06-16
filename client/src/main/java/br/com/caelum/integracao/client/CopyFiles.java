@@ -63,10 +63,10 @@ public class CopyFiles {
 			for (String resourceToCopy : directoryToCopy) {
 				if (!resourceToCopy.trim().equals("")) {
 					output.println("Zipping files " + resourceToCopy);
-					zipper.add(resourceToCopy);
+					zipper.addExactly(resourceToCopy);
 				}
 			}
-			if (!zipper.zip(result)) {
+			if (zipper.zip(result)!=0) {
 				output.println("Did not zip any files using patterns " + directoryToCopy + " based at " + baseDirectory.getAbsolutePath());
 			}
 			return result;
