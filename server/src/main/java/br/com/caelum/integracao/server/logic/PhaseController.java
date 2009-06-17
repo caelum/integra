@@ -106,11 +106,10 @@ public class PhaseController {
 
 	@Post
 	@Path("/project/{project.name}/phase/plugin")
-	public void addPlugin(Phase phase, RegisteredPlugin registered,List<String> keys, List<String> values ) {
+	public void addPlugin(Phase phase, RegisteredPlugin registered) {
 		phase = projects.get(phase);
-		PluginToRun plugin = new PluginToRun(registered);
+		PluginToRun plugin = new PluginToRun(projects.get(registered));
 		phase.add(plugin);
-		plugin.updateParameters(keys, values);
 		projects.registerOrUpdate(plugin.getConfig());
 		showProject(phase.getProject());
 	}

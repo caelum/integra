@@ -69,6 +69,9 @@ public class PluginToRun {
 
 	public PluginToRun(RegisteredPlugin type) {
 		this.type = type;
+		for(Parameter param : type.getInformation().getParameters()) {
+			config.add(new PluginParameter(this, param.getName(), param.getDefaultValue()));
+		}
 	}
 
 	PluginToRun() {
