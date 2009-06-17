@@ -107,6 +107,26 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 				</#if>
 			</#if>
 			</td>
+			<td>
+				<#list project.phases as phase>
+					<div class="phase" style="
+						<#if build.hasRun(phase)>
+							<#if build.hasSucceeded(phase)>
+								background-color: green;
+							<#else>
+								background-color: red;
+							</#if>
+						<#elseif build.isRunning(phase)>
+							background-color: orange;
+						<#else>
+							background-color: gray;
+						</#if>
+						float: left;
+						">
+						<div class="phase_title">${phase.name}</div>
+					</div>
+				</#list>
+			</td>
 		</tr>
 	</#list>
 </table>

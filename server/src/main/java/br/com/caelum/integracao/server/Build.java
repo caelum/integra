@@ -141,7 +141,7 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
-	public void setRevisionAsNextOne(Projects projects, Builds builds) {
+	public void setRevisionAsNextOne(Projects projects, Builds builds, Database database) {
 		this.currentPhase = 0;
 		logger.debug("Starting executing build for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
@@ -154,7 +154,7 @@ public class Build {
 			this.revision = project.extractNextRevision(this, builds, control, logFile);
 			int result = control.checkoutOrUpdate(revision.getName(), logFile.getWriter());
 			if (result != 0) {
-				finish(false, "Unable to checkout project from scm.", null);
+				finish(false, "Unable to checkout project from scm.", null, database);
 				return;
 			}
 			if (!getRevisionContent().exists()) {
@@ -162,13 +162,13 @@ public class Build {
 					new Zipper(new File(project.getBaseDir(), project.getName())).ignore(control.getIgnorePattern())
 							.addExactly("").logTo(logFile.getWriter()).zip(getRevisionContent());
 				} catch (IOException ex) {
-					finish(false, "Unable to zip files for this revision", ex);
+					finish(false, "Unable to zip files for this revision", ex, database);
 					return;
 				}
 			}
 
 		} catch (Exception ex) {
-			finish(false, "Unable to retrieve revision for " + project.getName(), ex);
+			finish(false, "Unable to retrieve revision for " + project.getName(), ex, database);
 			return;
 		} finally {
 			if (logFile != null) {
@@ -182,11 +182,14 @@ public class Build {
 			try {
 				Plugin found = toRun.getPlugin(db);
 				if (!found.before(this)) {
-					finish(false, "Plugin " + toRun.getType().getInformation().getName() + " told us to stop the build", null);
+					finish(false,
+							"Plugin " + toRun.getType().getInformation().getName() + " told us to stop the build",
+							null, db);
 					return;
 				}
 			} catch (PluginException e) {
-				finish(false, "Plugin " + toRun.getType().getInformation().getName() + " was not instantiated", null);
+				finish(false, "Plugin " + toRun.getType().getInformation().getName() + " was not instantiated", null,
+						db);
 				return;
 			}
 		}
@@ -195,11 +198,11 @@ public class Build {
 			Phase phase = phases.get(0);
 			phase.execute(this, jobs);
 		} else {
-			finish(false, "There were no phases to run.", null);
+			finish(false, "There were no phases to run.", null, db);
 		}
 	}
 
-	private void finish(boolean success, String cause, Exception ex) {
+	private void finish(boolean success, String cause, Exception ex, Database db) {
 		this.finished = true;
 		StringWriter writer = new StringWriter();
 		writer.write(cause + "\n");
@@ -209,15 +212,15 @@ public class Build {
 		this.resultMessage = writer.getBuffer().toString();
 		this.successSoFar = success;
 		this.finishTime = new GregorianCalendar();
-		/*for (PluginToRun toRun : project.getPlugins()) {
+		for (PluginToRun toRun : project.getPlugins()) {
 			try {
 				Plugin found = toRun.getPlugin(db);
 				found.after(this);
 			} catch (PluginException e) {
-				cause += " (plugin error: "+toRun.getType().getInformation().getName() + ")";
+				cause += " (plugin error: " + toRun.getType().getInformation().getName() + ")";
 				logger.error("plugin error", e);
 			}
-		}*/
+		}
 	}
 
 	public Project getProject() {
@@ -314,17 +317,17 @@ public class Build {
 		if (executedAllCommands) {
 			logger.debug("Preparing to execute plugins for " + getProject().getName() + " with success = "
 					+ successSoFar);
-			boolean thisResult = actualPhase.runAfter(this, database); 
+			boolean thisResult = actualPhase.runAfter(this, database);
 			successSoFar &= thisResult;
 			if (successSoFar) {
 				currentPhase++;
 				if (project.getPhases().size() != currentPhase) {
 					project.getPhases().get(currentPhase).execute(this, new Jobs(database));
 				} else {
-					finish(true, "Well done.", null);
+					finish(true, "Well done.", null, database);
 				}
 			} else {
-				finish(false, "One or more commands failed.", null);
+				finish(false, "One or more commands failed.", null, database);
 			}
 		}
 	}
@@ -343,9 +346,32 @@ public class Build {
 	public File getRevisionContent() {
 		return new File(project.getBuildsDirectory(), "revision-" + revision.getName() + ".zip");
 	}
-	
+
 	public String getResultMessage() {
 		return resultMessage;
+	}
+
+	public boolean hasRun(Phase phase) {
+		int position = phase.getProject().getPhases().indexOf(phase);
+		if((currentPhase==position) && isFinished()) {
+			return true;
+		}
+		return currentPhase > position;
+	}
+
+	public boolean isRunning(Phase phase) {
+		int position = phase.getProject().getPhases().indexOf(phase);
+		return currentPhase == position;
+	}
+
+	public boolean hasSucceeded(Phase phase) {
+		List<Job> jobs = getJobsFor(phase);
+		for (Job j : jobs) {
+			if (!j.isSuccess()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

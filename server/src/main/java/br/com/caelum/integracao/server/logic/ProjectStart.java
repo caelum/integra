@@ -37,6 +37,11 @@ import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.queue.Jobs;
 
+/**
+ * Few commands together for starting up the project.
+ * 
+ * @author guilherme silveira
+ */
 public class ProjectStart {
 
 	private final Logger logger = LoggerFactory.getLogger(ProjectStart.class);
@@ -55,7 +60,7 @@ public class ProjectStart {
 			Project toBuild = new Projects(database).get(name);
 			Build build = toBuild.build();
 			new Projects(database).register(build);
-			build.setRevisionAsNextOne(new Projects(database), new Builds(database));
+			build.setRevisionAsNextOne(new Projects(database), new Builds(database), database);
 			build.start(new Jobs(database), database);
 			database.commit();
 		} catch (Exception e) {

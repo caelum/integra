@@ -66,6 +66,10 @@ public class SendMail implements Plugin {
 	}
 
 	public boolean after(Build build, Phase phase) {
+		return sendMail(build,phase);
+	}
+
+	private boolean sendMail(Build build, Phase phase) {
 		subject.with("build", build).with("phase", phase);
 		content.with("build", build).with("phase", phase);
 		logger.debug("Preparing to send mail to " + Arrays.toString(recipients));
@@ -97,6 +101,7 @@ public class SendMail implements Plugin {
 	}
 
 	public void after(Build build) {
+		sendMail(build, null);
 	}
 
 }
