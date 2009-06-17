@@ -104,25 +104,35 @@ public class PhaseController {
 		showProject(project);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Post
 	@Path("/project/{project.name}/phase/plugin")
-	public void addPlugin(Phase phase, RegisteredPlugin registered) throws ClassNotFoundException {
+	public void addPlugin(Phase phase, RegisteredPlugin registered,List<String> keys, List<String> values ) {
 		phase = projects.get(phase);
 		PluginToRun plugin = new PluginToRun(registered);
 		phase.add(plugin);
+		plugin.updateParameters(keys, values);
+		projects.registerOrUpdate(plugin.getConfig());
 		showProject(phase.getProject());
 	}
 
 	@Get
 	@Path("/project/{project.name}/plugin/{plugin.id}")
-	public void viewPlugin(PluginToRun plugin) throws ClassNotFoundException {
-		result.include("plugin", projects.get(plugin));
+	public void viewPlugin(PluginToRun plugin) {
+		plugin = projects.get(plugin);
+		result.include("plugin", plugin);
+		result.include("information", plugin.getType().getInformation());
+	}
+
+	@Get
+	@Path("/project/{project.name}/pluginPrepare")
+	public void prepareNewPlugin(RegisteredPlugin registered) {
+		registered = projects.get(registered);
+		result.include("information", registered.getInformation());
 	}
 
 	@Delete
 	@Path("/project/{project.name}/plugin/{plugin.id}")
-	public void remove(PluginToRun plugin, Project project) throws ClassNotFoundException {
+	public void remove(PluginToRun plugin, Project project)  {
 		project = projects.get(project.getName());	
 		plugin = projects.get(plugin);
 		project.getPlugins().remove(plugin);
@@ -132,7 +142,7 @@ public class PhaseController {
 
 	@Delete
 	@Path("/project/{project.name}/phase/{phase.id}/plugin/{plugin.id}")
-	public void remove(PluginToRun plugin, Phase phase, Project project) throws ClassNotFoundException {
+	public void remove(PluginToRun plugin, Phase phase, Project project) {
 		phase = projects.get(phase);
 		plugin = projects.get(plugin);
 		phase.getPlugins().remove(plugin);
@@ -142,7 +152,7 @@ public class PhaseController {
 
 	@Put
 	@Path("/project/{project.name}/plugin/{plugin.id}")
-	public void updatePlugin(Project project, PluginToRun plugin, List<String> keys, List<String> values) throws ClassNotFoundException {
+	public void updatePlugin(Project project, PluginToRun plugin, List<String> keys, List<String> values)  {
 		logger.debug("Updating " + plugin.getId());
 		plugin = projects.get(plugin);
 		plugin.updateParameters(keys, values);

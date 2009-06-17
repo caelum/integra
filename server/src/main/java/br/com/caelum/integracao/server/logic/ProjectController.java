@@ -72,8 +72,10 @@ public class ProjectController {
 
 	private final QueueThread queue;
 
+	private final PhaseController phaseControl;
+
 	public ProjectController(Projects projects, Validator validator, Result result, DatabaseFactory factory,
-			Application app, Jobs jobs, QueueThread queue) {
+			Application app, Jobs jobs, QueueThread queue, PhaseController phaseControl) {
 		this.projects = projects;
 		this.validator = validator;
 		this.result = result;
@@ -81,6 +83,7 @@ public class ProjectController {
 		this.app = app;
 		this.jobs = jobs;
 		this.queue = queue;
+		this.phaseControl = phaseControl;
 	}
 
 	public void addAll() {
@@ -156,10 +159,12 @@ public class ProjectController {
 
 	@Post
 	@Path("/project/{project.name}/plugin")
-	public void addPlugin(Project project, RegisteredPlugin registered) throws ClassNotFoundException {
+	public void addPlugin(Project project, RegisteredPlugin registered, List<String> keys, List<String> values)  {
 		project = projects.get(project.getName());
 		PluginToRun plugin = new PluginToRun(registered);
 		project.add(plugin);
+		plugin.updateParameters(keys, values);
+		projects.registerOrUpdate(plugin.getConfig());
 		showProject(project);
 	}
 

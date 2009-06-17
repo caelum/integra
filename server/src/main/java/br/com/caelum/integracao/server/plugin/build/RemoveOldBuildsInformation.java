@@ -54,4 +54,12 @@ public class RemoveOldBuildsInformation implements PluginInformation {
 		return "Remove old builds";
 	}
 
+	public boolean appliesForAPhase() {
+		return false;
+	}
+
+	public boolean appliesForAProject() {
+		return true;
+	}
+
 }

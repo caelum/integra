@@ -36,6 +36,7 @@ import br.com.caelum.integracao.server.build.Tab;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginParameter;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
+import br.com.caelum.integracao.server.plugin.RegisteredPlugin;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
 /**
@@ -111,6 +112,10 @@ public class Projects {
 
 	public void register(Tab tab) {
 		session.save(tab);
+	}
+
+	public RegisteredPlugin get(RegisteredPlugin registered) {
+		return (RegisteredPlugin) session.load(RegisteredPlugin.class, registered.getId());
 	}
 
 }

@@ -21,7 +21,7 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 		<input type="hidden" name="project.name" value="${project.name }" />
 		<select name="registered.id">
 			<#list plugins as plugin>
-				<option value="${plugin.id }">${plugin.information.name }</option>
+				<#if plugin.information.appliesForAProject()><option value="${plugin.id }">${plugin.information.name }</option></#if>
 			</#list>
 		</select>
 		<input type="submit" value="add" />
@@ -66,7 +66,7 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 						<input type="hidden" name="phase.id" value="${phase.id }" />
 						<select name="registered.id">
 							<#list plugins as plugin>
-								<option value="${plugin.id }">${plugin.information.name }</option>
+								<#if plugin.information.appliesForAPhase()><option value="${plugin.id }">${plugin.information.name }</option></#if>
 							</#list>
 						</select>
 						<input type="submit" value="add" />

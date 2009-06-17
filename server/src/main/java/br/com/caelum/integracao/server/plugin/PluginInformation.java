@@ -48,5 +48,9 @@ public interface PluginInformation {
 	List<Parameter> getParameters();
 	
 	Plugin getPlugin(Database database, Map<String, String> parameters) throws PluginException;
+	
+	boolean appliesForAProject();
+	
+	boolean appliesForAPhase();
 
 }

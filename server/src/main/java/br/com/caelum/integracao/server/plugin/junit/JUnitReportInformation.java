@@ -56,4 +56,12 @@ public class JUnitReportInformation implements PluginInformation {
 		return "Junit Report";
 	}
 
+	public boolean appliesForAPhase() {
+		return true;
+	}
+
+	public boolean appliesForAProject() {
+		return false;
+	}
+
 }

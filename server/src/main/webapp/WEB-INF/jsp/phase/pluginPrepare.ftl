@@ -6,9 +6,9 @@ ${information.name}
 <#list information.parameters as param>
 	<div> <input type="hidden" name="keys[${i}]" value="${param.name}" />${param.name}:
 	<#if param.type.parameterName="TEXTAREA">
-	 	<textarea name="values[${i}]">${plugin.getParameter(param.name).value?html}</textarea> 
+	 	<textarea name="values[${i}]">${param.defaultValue}</textarea> 
 	<#else>
-	 	<input type="text" name="values[${i}]" value="${plugin.getParameter(param.name).value?html}" />
+	 	<input type="text" name="values[${i}]" value="${param.defaultValue}" />
 	 </#if>
 	 </div>
 	<#assign i=i+1>

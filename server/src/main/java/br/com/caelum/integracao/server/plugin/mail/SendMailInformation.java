@@ -76,4 +76,12 @@ public class SendMailInformation implements PluginInformation {
 		return "Send mail";
 	}
 
+	public boolean appliesForAPhase() {
+		return true;
+	}
+
+	public boolean appliesForAProject() {
+		return true;
+	}
+
 }

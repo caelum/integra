@@ -111,10 +111,12 @@ public class PluginToRun {
 	}
 
 	public void updateParameters(List<String> keys, List<String> values) {
-		for (int i = 0; i < keys.size(); i++) {
-			String key = keys.get(i);
-			PluginParameter param = getParameter(key);
-			param.setValue(values.get(i));
+		if (keys != null) {
+			for (int i = 0; i < keys.size(); i++) {
+				String key = keys.get(i);
+				PluginParameter param = getParameter(key);
+				param.setValue(values.get(i));
+			}
 		}
 	}
 
@@ -125,5 +127,5 @@ public class PluginToRun {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
+
 }
