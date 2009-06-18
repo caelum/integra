@@ -9,7 +9,10 @@
 .phase {
 	width: 300px;
 }
-.phase, .plugin {
+.build_phase {
+	width: 100px;
+}
+.build_phase, .phase, .plugin {
 	border: 2px solid gray;
 	margin: 5px;
 	padding: 5px;

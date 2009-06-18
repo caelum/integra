@@ -73,6 +73,15 @@ public class QueueThread {
 					Database db = new Database(factory);
 					try {
 						stopOldJobs(db);
+					} catch (Exception ex) {
+						logger.error("Something really nasty ocurred while stopping jobs", ex);
+					} finally {
+						if (db.hasTransaction()) {
+							db.rollback();
+						}
+						db.close();
+					}
+					try {
 						startJobs(db);
 					} catch (Exception ex) {
 						logger.error("Something really nasty ocurred while executing the job queue", ex);
@@ -118,9 +127,10 @@ public class QueueThread {
 					.getMaximumTimeForAJob();
 			Client client = job.getClient();
 			AgentStatus status = control.to(client.getBaseUri()).getStatus();
+			Job currentJob = client.getCurrentJob();
 			if (status.equals(AgentStatus.UNAVAILABLE) || status.equals(AgentStatus.FREE)) {
 				job.reschedule();
-				if (client.getCurrentJob().equals(job)) {
+				if (currentJob!=null && currentJob.equals(job)) {
 					logger.error("Leaving the job because the server just told me there is nothing running there..."
 							+ "Did the client break or was it sending me the info right now?");
 					client.leaveJob();
@@ -128,7 +138,7 @@ public class QueueThread {
 				continue;
 			}	
 			if (timeSpent > minutes * 60 * 1000) {
-				if(client.getCurrentJob()!=null && client.getCurrentJob().equals(job)) {
+				if(currentJob!=null && currentJob.equals(job)) {
 					if(client.stop(new DefaultAgent(client.getBaseUri(), new DefaultHttp()))) {
 						result++;
 					}

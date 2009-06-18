@@ -361,7 +361,7 @@ public class Build {
 
 	public boolean isRunning(Phase phase) {
 		int position = phase.getProject().getPhases().indexOf(phase);
-		return currentPhase == position;
+		return currentPhase == position && !isFinished();
 	}
 
 	public boolean hasSucceeded(Phase phase) {

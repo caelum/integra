@@ -88,7 +88,7 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 </table>
 <table>
 	<#list project.builds as build>
-		<tr>
+		<tr id="build_${build.id}">
 			<td><a
 				href="build/${build.buildCount}/info">results</a>
 			</td>
@@ -109,7 +109,7 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 			</td>
 			<td>
 				<#list project.phases as phase>
-					<div class="phase" style="
+					<div class="build_phase" style="
 						<#if build.hasRun(phase)>
 							<#if build.hasSucceeded(phase)>
 								background-color: green;
@@ -123,7 +123,30 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 						</#if>
 						float: left;
 						">
-						<div class="phase_title">${phase.name}</div>
+						<div class="phase_title">
+						<#if build.isRunning(phase) || !build.hasSucceeded(phase)>
+							<a href="#build_${build.id}" onclick="$('#build_${build.id}_${phase.id}').toggle();">${phase.name}</a>
+						<#else>
+							${phase.name}
+						</#if>
+						</div><br/>
+						<div id="build_${build.id}_${phase.id}" style="display: none;">
+						<#list build.getJobsFor(phase) as job>
+							<#if !build.hasRun(phase) & build.isRunning(phase)>
+								<#if !job.finished>
+									<#if job.client??>
+										${job.command.name} @ ${job.client.host}<br/>
+									<#else>
+										${job.command.name} @ waiting for a client<br/>
+									</#if>
+								</#if>
+							<#else>
+								<#if job.finished & (!job.success)>
+										${job.command.name} @ ${job.client.host} failed<br/>
+								</#if>
+							</#if>
+						</#list>
+						</div>
 					</div>
 				</#list>
 			</td>
