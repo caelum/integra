@@ -79,7 +79,6 @@ public class QueueThread {
 						if (db.hasTransaction()) {
 							db.rollback();
 						}
-						db.close();
 					}
 					try {
 						startJobs(db);
