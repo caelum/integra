@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -102,6 +103,7 @@ public class Build {
 	@OneToMany(mappedBy = "build")
 	private List<Tab> tabs = new ArrayList<Tab>();
 
+	@Column(length=10000)
 	private String resultMessage;
 
 	Build() {

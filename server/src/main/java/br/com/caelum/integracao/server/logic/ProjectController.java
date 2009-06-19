@@ -142,9 +142,14 @@ public class ProjectController {
 		}
 		new Thread(new Runnable() {
 			public void run() {
-				new ProjectContinue(new Database(factory)).nextPhase(job.getId(), checkoutResult, startResult,
-						stopResult, success, zipOutput, content);
-				queue.wakeup();
+				Database database = new Database(factory);
+				try {
+					new ProjectContinue(database).nextPhase(job.getId(), checkoutResult, startResult,
+							stopResult, success, zipOutput, content);
+					queue.wakeup();
+				} finally {
+					database.close();
+				}
 			}
 		}).start();
 		this.result.use(Results.nothing());

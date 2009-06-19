@@ -10,12 +10,15 @@ echo Restarting 66
 ssh integra@192.168.0.66 ./deploy.sh > /dev/null
 
 scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.2:~/
-scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.160:~/        & scp client/target/integracao-client.war integra@192.168.0.163:~/
+scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.123:~/
+
+
+scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.160:~/        
+scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.163:~/
 scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.161:~/        
 scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.164:~/
 scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.162:~/        
 scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.165:~/
-scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.123:~/
 
 
 echo Restarting 66

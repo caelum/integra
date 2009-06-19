@@ -37,6 +37,8 @@ import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
 
 public class ProjectContinue {
 
+	private final static Object protectTwoJobsFinishingAtTheSameTime = new Object();
+
 	private final Logger logger = LoggerFactory.getLogger(ProjectContinue.class);
 
 	private final Database database;
@@ -47,23 +49,24 @@ public class ProjectContinue {
 
 	void nextPhase(Long jobId, String checkoutResult, String startResult, String stopResult, boolean success,
 			String zipOutput, UploadedFile content) {
-		try {
-			String completeResult = "Checkout:\n" + checkoutResult + "\n\n" + "Start result:\n" + startResult + "\n\n"
-					+ "Stop result:\n" + stopResult;
-			logger.debug("Will try to do next phase for job.id=" + jobId);
-			database.beginTransaction();
-			Jobs jobs = new Jobs(database);
-			Job job = jobs.load(jobId);
+		synchronized (protectTwoJobsFinishingAtTheSameTime) {
+			try {
+				String completeResult = "Checkout:\n" + checkoutResult + "\n\n" + "Start result:\n" + startResult
+						+ "\n\n" + "Stop result:\n" + stopResult;
+				logger.debug("Will try to do next phase for job.id=" + jobId);
+				database.beginTransaction();
+				Jobs jobs = new Jobs(database);
+				Job job = jobs.load(jobId);
 
-			job.finish(completeResult, success, database, zipOutput, content);
-			database.commit();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (database.hasTransaction()) {
-				database.rollback();
+				job.finish(completeResult, success, database, zipOutput, content);
+				database.commit();
+			} catch (Exception e) {
+				logger.error("Unable to proceeed with project for job" + jobId, e);
+			} finally {
+				if (database.hasTransaction()) {
+					database.rollback();
+				}
 			}
-			database.close();
 		}
 	}
 

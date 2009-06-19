@@ -56,7 +56,7 @@ public class DatabaseFactory {
 	@PostConstruct
 	public void startup() {
 		logger.debug("Starting up database");
-		this.factory = new AnnotationConfiguration().configure().buildSessionFactory();
+		this.factory = getConfiguration().buildSessionFactory();
 		Database db = new Database(this);
 		try {
 			if (new Application(db).getConfig() == null) {
@@ -83,6 +83,10 @@ public class DatabaseFactory {
 		}
 	}
 
+	private AnnotationConfiguration getConfiguration() {
+		return new AnnotationConfiguration().configure();
+	}
+
 	@PreDestroy
 	public void destroy() {
 		if (factory != null) {
@@ -97,7 +101,7 @@ public class DatabaseFactory {
 
 	public void clear() {
 		// TODO  DANGER DANGER!!
-		AnnotationConfiguration cfg = new AnnotationConfiguration().configure();
+		AnnotationConfiguration cfg = getConfiguration();
 		new SchemaExport(cfg).create(false, true);
 	}
 

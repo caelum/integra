@@ -44,6 +44,8 @@ import br.com.caelum.integracao.server.queue.Jobs;
  */
 public class ProjectStart {
 
+	private final static Object protectTwoBuildsOfStartingAtTheSameTime = new Object();
+
 	private final Logger logger = LoggerFactory.getLogger(ProjectStart.class);
 	private final Database database;
 
@@ -52,22 +54,25 @@ public class ProjectStart {
 	}
 
 	void runProject(String name) {
-		// TODO we probably dont need a new database connection, we can probably
-		// work out with the original one
-		logger.debug("Starting building project id=" + name);
-		try {
-			database.beginTransaction();
-			Project toBuild = new Projects(database).get(name);
-			Build build = toBuild.build();
-			new Projects(database).register(build);
-			build.setRevisionAsNextOne(new Projects(database), new Builds(database), database);
-			build.start(new Jobs(database), database);
-			database.commit();
-		} catch (Exception e) {
-			logger.error("Unable to start project build", e);
-		} finally {
-			if (database.hasTransaction()) {
-				database.rollback();
+		synchronized (protectTwoBuildsOfStartingAtTheSameTime) {
+			// TODO we probably dont need a new database connection, we can
+			// probably
+			// work out with the original one
+			logger.debug("Starting building project id=" + name);
+			try {
+				database.beginTransaction();
+				Project toBuild = new Projects(database).get(name);
+				Build build = toBuild.build();
+				new Projects(database).register(build);
+				build.setRevisionAsNextOne(new Projects(database), new Builds(database), database);
+				build.start(new Jobs(database), database);
+				database.commit();
+			} catch (Exception e) {
+				logger.error("Unable to start project build", e);
+			} finally {
+				if (database.hasTransaction()) {
+					database.rollback();
+				}
 			}
 		}
 	}

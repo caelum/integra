@@ -54,7 +54,7 @@ public class CurrentJob {
 	public CurrentJob() {
 	}
 
-	public boolean isRunning() {
+	public synchronized boolean isRunning() {
 		return execution != null;
 	}
 
@@ -90,7 +90,7 @@ public class CurrentJob {
 		thread.start();
 	}
 
-	private void clearThemAll() {
+	private synchronized void clearThemAll() {
 		output.getBuffer().delete(0, output.getBuffer().length());
 		CurrentJob.this.jobId = null;
 		CurrentJob.this.execution = null;
