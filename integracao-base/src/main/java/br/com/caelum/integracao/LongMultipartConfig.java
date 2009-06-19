@@ -25,7 +25,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.client.ioc;
+package br.com.caelum.integracao;
 
 import br.com.caelum.vraptor.interceptor.multipart.DefaultMultipartConfig;
 
