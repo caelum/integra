@@ -32,19 +32,25 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.jmock.Expectations;
 import org.junit.Test;
 
+import br.com.caelum.integracao.server.log.LogFile;
 import br.com.caelum.integracao.server.project.BaseTest;
+import br.com.caelum.integracao.server.scm.Revision;
+import br.com.caelum.integracao.server.scm.ScmException;
+import br.com.caelum.integracao.server.scm.svn.SvnControl;
 
-public class ProjectTest extends BaseTest{
-	
+public class ProjectTest extends BaseTest {
+
 	@Test
 	public void newlyCreatedProjectsHaveBuildCountZero() {
 		Project p = new Project();
 		assertThat(p.getBuildCount(), is(equalTo(0L)));
 	}
-	
+
 	@Test
 	public void buildCreatesANewBuild() {
 		Project p = new Project();
@@ -54,11 +60,10 @@ public class ProjectTest extends BaseTest{
 		assertThat(p.getBuildCount(), is(equalTo(11L)));
 		assertThat(build.getProject(), is(equalTo(p)));
 	}
-	
-	
+
 	@Test
 	public void setsAPhaseCountWhenAddingANewPhase() {
-		Project p  =new Project();
+		Project p = new Project();
 		Phase first = new Phase();
 		p.add(first);
 		assertThat(first.getPosition(), is(equalTo(0L)));
@@ -69,12 +74,12 @@ public class ProjectTest extends BaseTest{
 
 	@Test
 	public void setsTheProjectWhenAddingANewPhase() {
-		Project p  =new Project();
+		Project p = new Project();
 		Phase first = new Phase();
 		p.add(first);
 		assertThat(first.getProject(), is(equalTo(p)));
 	}
-	
+
 	@Test
 	public void findsABuildByItsBuildCount() {
 		Project p = new Project();
@@ -82,17 +87,86 @@ public class ProjectTest extends BaseTest{
 		Build second = p.build();
 		assertThat(p.getBuild(first.getBuildCount()), is(equalTo(first)));
 		assertThat(p.getBuild(second.getBuildCount()), is(equalTo(second)));
-		assertThat(p.getBuild(first.getBuildCount()+5), is(equalTo(null)));
+		assertThat(p.getBuild(first.getBuildCount() + 5), is(equalTo(null)));
 	}
-	
+
 	@Test
 	public void useBuildsDirectoryAndBuildsIt() {
-		Project p =new Project();
+		Project p = new Project();
 		p.setBaseDir(baseDir);
 		File builds = p.getBuildsDirectory();
 		assertThat(builds, is(equalTo(new File(baseDir, "builds"))));
 		assertThat(builds.exists(), is(equalTo(true)));
 	}
-	
+
+	@Test
+	public void returnsTheSameRevisionIfThereIsNoNewRevision() throws IOException, ScmException {
+		final Revision old = mockery.mock(Revision.class);
+		final Build previous = mockery.mock(Build.class);
+		final SvnControl control = mockery.mock(SvnControl.class);
+		final Builds builds = mockery.mock(Builds.class);
+		final LogFile log = new LogFile(new File(baseDir, "tmp.log"));
+		final Project p = new Project();
+		mockery.checking(new Expectations() {
+			{
+				one(previous).getRevision(); will(returnValue(old));
+				one(control).getNextRevision(old, log.getWriter()); will(returnValue(old));
+				allowing(old).getName(); will(returnValue("revision-name"));
+				one(builds).contains(p, "revision-name"); will(returnValue(old));
+			}
+		});
+		Revision found = p.extractRevisionAfter(previous, control, builds, log);
+		assertThat(found, is(equalTo(old)));
+		mockery.assertIsSatisfied();
+	}
+
+
+	@Test
+	public void savesTheNewRevisionIfThereIsANewRevision() throws IOException, ScmException {
+		final Revision old = mockery.mock(Revision.class);
+		final Revision next = mockery.mock(Revision.class, "next");
+		final Build previous = mockery.mock(Build.class);
+		final SvnControl control = mockery.mock(SvnControl.class);
+		final Builds builds = mockery.mock(Builds.class);
+		final LogFile log = new LogFile(new File(baseDir, "tmp.log"));
+		final Project p = new Project();
+		mockery.checking(new Expectations() {
+			{
+				one(previous).getRevision(); will(returnValue(old));
+				one(control).getNextRevision(old, log.getWriter()); will(returnValue(next));
+				allowing(next).getName(); will(returnValue("revision-name"));
+				one(builds).contains(p, "revision-name"); will(returnValue(null));
+				one(builds).register(next);
+			}
+		});
+		Revision found = p.extractRevisionAfter(previous, control, builds, log);
+		assertThat(found, is(equalTo(next)));
+		mockery.assertIsSatisfied();
+	}
+
+
+	@Test
+	public void asksForCurrentRevisionIfNotSupposedToBuildEveryRevision() throws IOException, ScmException {
+		final Revision old = mockery.mock(Revision.class);
+		final Revision next = mockery.mock(Revision.class, "next");
+		final Build previous = mockery.mock(Build.class);
+		final SvnControl control = mockery.mock(SvnControl.class);
+		final Builds builds = mockery.mock(Builds.class);
+		final LogFile log = new LogFile(new File(baseDir, "tmp.log"));
+		final Project p = new Project();
+		p.setBuildEveryRevision(false);
+		mockery.checking(new Expectations() {
+			{
+				one(previous).getRevision(); will(returnValue(old));
+				one(control).getCurrentRevision(old, log.getWriter()); will(returnValue(next));
+				allowing(next).getName(); will(returnValue("revision-name"));
+				one(builds).contains(p, "revision-name"); will(returnValue(null));
+				one(builds).register(next);
+			}
+		});
+		Revision found = p.extractRevisionAfter(previous, control, builds, log);
+		assertThat(found, is(equalTo(next)));
+		mockery.assertIsSatisfied();
+	}
 
 }

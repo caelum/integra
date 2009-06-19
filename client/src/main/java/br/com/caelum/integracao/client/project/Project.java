@@ -82,8 +82,6 @@ public class Project {
 	}
 
 	public ProjectRunResult run(File baseDirectory, Command command, StringWriter output) throws IOException {
-		logger.debug("Executing " + command + " to " + baseDirectory + "/" + name);
-
 		File workDir = new File(baseDirectory, name);
 		logger.debug("Ready to execute " + command + " @ " + workDir.getAbsolutePath() + " using log=" + output);
 		this.executing = new CommandToExecute(command.toArray()).at(workDir).logTo(output);
@@ -106,8 +104,11 @@ public class Project {
 		return "";
 	}
 
-	public ProjectRunResult unzip(File baseDir, String revision, UploadedFile content, StringWriter output,
+	public ProjectRunResult unzip(File baseDir, UploadedFile content, StringWriter output,
 			ProjectRunResult result, boolean delete) {
+		if(content==null) {
+			return result;
+		}
 		content.getFile().deleteOnExit();
 		try {
 			File workDirectory = new File(baseDir, name);
