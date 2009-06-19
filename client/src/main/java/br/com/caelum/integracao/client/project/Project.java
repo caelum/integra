@@ -106,18 +106,21 @@ public class Project {
 		return "";
 	}
 
-	public ProjectRunResult unzip(File baseDir, String revision, UploadedFile content, StringWriter output) {
+	public ProjectRunResult unzip(File baseDir, String revision, UploadedFile content, StringWriter output,
+			ProjectRunResult result, boolean delete) {
 		content.getFile().deleteOnExit();
 		try {
 			File workDirectory = new File(baseDir, name);
-			clear(workDirectory);
+			if (delete) {
+				clear(workDirectory);
+			}
 			workDirectory.mkdirs();
 			new Unzipper(workDirectory).logTo(new PrintWriter(output, true)).unzip(content.getFile());
 		} catch (IOException e) {
 			e.printStackTrace(new PrintWriter(output, true));
-			return new ProjectRunResult(output.getBuffer().toString(), -1);
+			return result.append(output.getBuffer().toString(), -1);
 		}
-		return new ProjectRunResult(output.getBuffer().toString(), 0);
+		return result.append(output.getBuffer().toString(), 0);
 	}
 
 	private void clear(File base) {

@@ -28,50 +28,35 @@
 package br.com.caelum.integracao.zip;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
-public class Unzipper {
+public class FileStrategy implements Strategy {
 
-	private PrintWriter log;
-	
-	private final Strategy output;
+	private static final int BUFFER = 4096;
 
-	public Unzipper(File workDirectory) {
-		this.output = new FileStrategy(workDirectory);
+	private final File workDirectory;
+
+	public FileStrategy(File workDirectory) {
+		this.workDirectory = workDirectory;
 	}
 
-	public Unzipper(ZipOutputStream output) {
-		this.output = new ZipStrategy(output);
-	}
-
-	public int unzip(File zipFile) throws IOException {
-		ZipEntry entry;
-		ZipFile zipfile = new ZipFile(zipFile);
-		Enumeration e = zipfile.entries();
-		int entries = 0;
-		try {
-			while (e.hasMoreElements()) {
-				entries++;
-				entry = (ZipEntry) e.nextElement();
-				BufferedInputStream is = new BufferedInputStream(zipfile.getInputStream(entry));
-				String name = entry.getName();
-				this.output.create(name, is);
-				is.close();
-			}
-		} finally {
-			log.println("[x] " + entries + " entries unzipped.");
+	public void create(String name, BufferedInputStream is) throws IOException {
+		int count;
+		byte data[] = new byte[BUFFER];
+		File target = new File(workDirectory, name);
+		target.getParentFile().mkdirs();
+		FileOutputStream fos = new FileOutputStream(target);
+		BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
+		while ((count = is.read(data, 0, BUFFER)) != -1) {
+			dest.write(data, 0, count);
 		}
-		return entries;
+		dest.flush();
+		dest.close();
+		fos.flush();
+		fos.close();
 	}
 
-	public Unzipper logTo(PrintWriter log) {
-		this.log = log;
-		return this;
-	}
 }

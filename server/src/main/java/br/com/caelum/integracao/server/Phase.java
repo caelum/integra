@@ -197,9 +197,15 @@ public class Phase {
 		this.directoriesToCopy = directoriesToCopy;
 	}
 
-	public String[] getDirectoriesToCopy() {
+	public List<String> getDirectoriesToCopy() {
 		String[] vals = directoriesToCopy.split("\\s*,\\s*");
-		return vals;
+		List<String> list = new ArrayList<String>();
+		for(String val : vals) {
+			if(!val.trim().equals("")) {
+				list.add(val);
+			}
+		}
+		return list;
 	}
 
 }

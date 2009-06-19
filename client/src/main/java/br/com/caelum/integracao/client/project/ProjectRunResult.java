@@ -48,7 +48,9 @@ public class ProjectRunResult {
 	public boolean failed() {
 		return result!=0;
 	}
-	
-	
+
+	public ProjectRunResult append(String content, int result) {
+		return new ProjectRunResult(this.content + "\n" + content, (result!=0? result : this.result));
+	}
 
 }

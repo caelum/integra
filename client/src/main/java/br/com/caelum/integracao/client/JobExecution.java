@@ -55,13 +55,17 @@ public class JobExecution {
 	private final Settings settings;
 	private final Server server;
 	private final UploadedFile content;
+	private final List<String> artifactsToPush;
+	private final UploadedFile artifacts;
 
 	public JobExecution(Project project, List<String> startCommand, List<String> stopCommand, 
-			String revision, List<String> directoryToCopy, Settings settings, Server server, UploadedFile content) {
+			String revision, List<String> directoryToCopy, Settings settings, Server server, UploadedFile content, List<String> artifactsToPush, UploadedFile artifacts) {
 		this.project = project;
 		this.settings = settings;
 		this.server = server;
 		this.content = content;
+		this.artifactsToPush = artifactsToPush;
+		this.artifacts = artifacts;
 		this.start = new Command(startCommand);
 		this.stop = new Command(stopCommand);
 		this.revision = revision;
@@ -70,14 +74,15 @@ public class JobExecution {
 
 	void executeBuildFor(StringWriter output) {
 
-		ProjectRunResult checkoutResult = null;
+		ProjectRunResult unzipResult = null;
 		ProjectRunResult startResult = null;
 		ProjectRunResult stopResult = null;
 
 		try {
 
-			checkoutResult = project.unzip(settings.getBaseDir(), revision, content, output);
-			if (!checkoutResult.failed()) {
+			unzipResult = project.unzip(settings.getBaseDir(), revision, content, output, new ProjectRunResult("",0), true);
+			unzipResult = project.unzip(settings.getBaseDir(), revision, artifacts, output, unzipResult, false);
+			if (!unzipResult.failed()) {
 				startResult = project.run(settings.getBaseDir(), start, output);
 			}
 
@@ -96,7 +101,7 @@ public class JobExecution {
 			} catch (IOException e) {
 				logger.error("Unable to stop command on server!", e);
 			} finally {
-				server.dispatch(project, checkoutResult, startResult, stopResult, directoryToCopy);
+				server.dispatch(project, unzipResult, startResult, stopResult, directoryToCopy, artifactsToPush);
 			}
 		}
 	}

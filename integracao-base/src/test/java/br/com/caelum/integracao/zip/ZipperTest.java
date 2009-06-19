@@ -78,6 +78,23 @@ public class ZipperTest extends AtDirectoryTest{
 		
 	}
 
+
+	@Test
+	public void appendsAFile() throws IOException {
+		
+		givenA(new File(miscDir, "second.txt"), "content");
+		int zipped = new Zipper(miscDir).addExactly("content.txt").logTo(writer).zip(zipFile);
+		Assert.assertEquals(1, zipped);
+		zipped = new Zipper(miscDir).addExactly("second.txt").logTo(writer).zip(zipFile, true);
+		Assert.assertEquals(2, zipped);
+		
+		File output = new File(baseDir, "output");
+		output.mkdirs();
+		new Unzipper(output).logTo(writer).unzip(zipFile);
+		
+		Assert.assertEquals(expected, contentOf(new File(output, "content.txt")));
+		
+	}
 	@Test
 	public void zipsASingleFileWhenSayingAPattern() throws IOException {
 

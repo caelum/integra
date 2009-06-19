@@ -376,4 +376,12 @@ public class Build {
 		return true;
 	}
 
+	public File getArtifactsToPush() {
+		return getFile("artifactsToPush.zip");
+	}
+
+	public void publishArtifact(File file) throws IOException {
+		new Zipper(file).addExactly("").logTo(new PrintWriter(System.out)).zip(getArtifactsToPush(), true);
+	}
+
 }

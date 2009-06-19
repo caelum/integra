@@ -28,50 +28,10 @@
 package br.com.caelum.integracao.zip;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
-public class Unzipper {
+public interface Strategy {
 
-	private PrintWriter log;
-	
-	private final Strategy output;
+	void create(String name, BufferedInputStream is) throws IOException;
 
-	public Unzipper(File workDirectory) {
-		this.output = new FileStrategy(workDirectory);
-	}
-
-	public Unzipper(ZipOutputStream output) {
-		this.output = new ZipStrategy(output);
-	}
-
-	public int unzip(File zipFile) throws IOException {
-		ZipEntry entry;
-		ZipFile zipfile = new ZipFile(zipFile);
-		Enumeration e = zipfile.entries();
-		int entries = 0;
-		try {
-			while (e.hasMoreElements()) {
-				entries++;
-				entry = (ZipEntry) e.nextElement();
-				BufferedInputStream is = new BufferedInputStream(zipfile.getInputStream(entry));
-				String name = entry.getName();
-				this.output.create(name, is);
-				is.close();
-			}
-		} finally {
-			log.println("[x] " + entries + " entries unzipped.");
-		}
-		return entries;
-	}
-
-	public Unzipper logTo(PrintWriter log) {
-		this.log = log;
-		return this;
-	}
 }

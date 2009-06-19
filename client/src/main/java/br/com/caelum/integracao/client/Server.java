@@ -28,6 +28,7 @@
 package br.com.caelum.integracao.client;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
@@ -56,7 +57,7 @@ public class Server {
 	}
 
 	public void dispatch(Project project, ProjectRunResult checkoutResult, ProjectRunResult startResult,
-			ProjectRunResult stopResult, List<String> directoryToCopy) {
+			ProjectRunResult stopResult, List<String> directoryToCopy, List<String> artifactsToPush) {
 		logger.debug("Job " + project.getName() + " has finished");
 		Http http = new DefaultHttp();
 		logger.debug("Acessing uri " + resultUri + " to finish the job");
@@ -66,13 +67,8 @@ public class Server {
 				addTo(post, checkoutResult, "checkout");
 				addTo(post, startResult, "start");
 				addTo(post, stopResult, "stop");
-				StringWriter zipOutput = new StringWriter();
-				File zip = new CopyFiles(directoryToCopy, settings, project, zipOutput).zipThemAll();
-				if (zip != null) {
-					logger.debug("After zipping, resulted in =" + zip.getAbsolutePath());
-					post.with("content", zip);
-				}
-				post.with("zipOutput", zipOutput.getBuffer().toString());
+				zip("zipOutput", "content", project, directoryToCopy, post);
+				zip("artifactsOutput", "artifacts", project, artifactsToPush, post);
 				post.with("success", "" + !(failed(checkoutResult) || failed(stopResult) || failed(startResult)));
 				post.send();
 			} catch (Exception e) {
@@ -88,6 +84,21 @@ public class Server {
 		} finally {
 			post.close();
 		}
+	}
+
+	private void zip(String logName, String contentName, Project project, List<String> resources, Method post) throws IOException,
+			FileNotFoundException {
+		StringWriter zipOutput = new StringWriter();
+		if (resources == null || resources.size()==0) {
+			zipOutput.write("Nothing to zip to client.");
+		} else {
+			File zip = new CopyFiles(resources, settings, project, zipOutput).zipThemAll();
+			if (zip != null) {
+				logger.debug("After zipping, resulted in =" + zip.getAbsolutePath());
+				post.with(contentName, zip);
+			}
+		}
+		post.with(logName, zipOutput.getBuffer().toString());
 	}
 
 	private boolean failed(ProjectRunResult result) {

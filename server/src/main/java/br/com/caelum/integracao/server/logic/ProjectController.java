@@ -131,7 +131,7 @@ public class ProjectController {
 	@Post
 	@Path("/finish/job/{job.id}")
 	public void finish(final Job job, final String checkoutResult, final String stopResult, final String startResult,
-			final boolean success, final UploadedFile content, final String zipOutput) {
+			final boolean success, final UploadedFile content, final String zipOutput, final String artifactsOutput, final UploadedFile artifacts) {
 		Job loaded = jobs.load(job.getId());
 		if (loaded.getClient() == null) {
 			// we do not know who was executing this job!!!
@@ -145,7 +145,7 @@ public class ProjectController {
 				Database database = new Database(factory);
 				try {
 					new ProjectContinue(database).nextPhase(job.getId(), checkoutResult, startResult,
-							stopResult, success, zipOutput, content);
+							stopResult, success, zipOutput, content, artifactsOutput, artifacts);
 					queue.wakeup();
 				} finally {
 					database.close();

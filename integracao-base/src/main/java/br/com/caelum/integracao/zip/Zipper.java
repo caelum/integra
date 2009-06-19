@@ -31,6 +31,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -67,13 +68,23 @@ public class Zipper {
 	}
 
 	public int zip(File zipFile) throws IOException {
-		FileOutputStream target = new FileOutputStream(zipFile);
+		return zip(zipFile, false);
+	}
+
+	public int zip(File zipFile, boolean append) throws FileNotFoundException, IOException {
+		File tempFile = File.createTempFile("integracao-zip-", ".zip");
+		FileOutputStream target = new FileOutputStream(tempFile);
 		ZipOutputStream output = new ZipOutputStream(new BufferedOutputStream(target));
 		byte data[] = new byte[BUFFER];
 		int count = zip(data, output, workDirectory, "", this.fixedContent.contains(""));
+		if(append && zipFile.exists()) {
+			count += new Unzipper(output).logTo(log).unzip(zipFile);
+			zipFile.delete();
+		}
 		if(count!=0) {
 			output.close();
 		}
+		tempFile.renameTo(zipFile);
 		return count;
 	}
 

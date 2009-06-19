@@ -49,6 +49,6 @@ public interface Agent {
 	 */
 	boolean register(Project project);
 
-	boolean execute(BuildCommand command, Job job, String mySelf, File zip);
+	boolean execute(BuildCommand command, Job job, String mySelf, File zip, File artifacts);
 
 }

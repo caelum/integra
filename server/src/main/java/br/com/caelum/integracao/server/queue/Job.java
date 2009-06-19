@@ -96,7 +96,7 @@ public class Job {
 		logger.debug("Trying to execute " + command.getName() + " @ " + at.getHost() + ":" + at.getPort());
 		Agent agent = at.getAgent();
 		if (agent.register(build.getProject())) {
-			if (agent.execute(command, this, config.getUrl(), build.getRevisionContent())) {
+			if (agent.execute(command, this, config.getUrl(), build.getRevisionContent(), build.getArtifactsToPush())) {
 				useClient(at);
 				this.startTime = Calendar.getInstance();
 				return true;
@@ -109,20 +109,17 @@ public class Job {
 		this.client = at;
 	}
 
-	public void finish(String result, boolean success, Database database, String zipOutput, UploadedFile content)
+	public void finish(String result, boolean success, Database database, String zipOutput, UploadedFile content, String artifactsOutput, UploadedFile artifacts)
 			throws IOException {
 
 		Project project = build.getProject();
 		logger.debug("Finishing " + project.getName() + " build " + build.getBuildCount() + " phase "
 				+ command.getPhase().getName() + " command " + command.getId());
 
-		if (content != null) {
-			File baseDir = getFile(command.getId() + "");
-			baseDir.mkdir();
-			PrintWriter unzipLog = new PrintWriter(new FileWriter(getFile(command.getId() + "/zip-unzip.txt")), true);
-			unzipLog.append(zipOutput);
-			new Unzipper(baseDir).logTo(unzipLog).unzip(content.getFile());
-			unzipLog.close();
+		unzip(content, zipOutput, "report-copy-result.txt", "");
+		unzip(artifacts, artifactsOutput, "artifacts-copy-result.txt", "artifacts");
+		if(artifacts!=null) {
+			build.publishArtifact(getFile(command.getId()+"/artifacts"));
 		}
 
 		this.success = success;
@@ -141,6 +138,17 @@ public class Job {
 
 		build.proceed(phase, database);
 
+	}
+
+	private void unzip(UploadedFile uploaded, String output, String logFilename, String pathToUnzip) throws IOException {
+		File baseDir = getFile(command.getId() +"");
+		baseDir.mkdir();
+		PrintWriter unzipLog = new PrintWriter(new FileWriter(new File(baseDir,logFilename)), true);
+		unzipLog.append(output);
+		if(uploaded!=null) {
+			new Unzipper(baseDir).logTo(unzipLog).unzip(uploaded.getFile());
+		}
+		unzipLog.close();
 	}
 
 	private File getFile(String name) {

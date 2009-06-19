@@ -48,7 +48,7 @@ public class ProjectContinue {
 	}
 
 	void nextPhase(Long jobId, String checkoutResult, String startResult, String stopResult, boolean success,
-			String zipOutput, UploadedFile content) {
+			String zipOutput, UploadedFile content, String artifactsOutput, UploadedFile artifacts) {
 		synchronized (protectTwoJobsFinishingAtTheSameTime) {
 			try {
 				String completeResult = "Checkout:\n" + checkoutResult + "\n\n" + "Start result:\n" + startResult
@@ -58,7 +58,7 @@ public class ProjectContinue {
 				Jobs jobs = new Jobs(database);
 				Job job = jobs.load(jobId);
 
-				job.finish(completeResult, success, database, zipOutput, content);
+				job.finish(completeResult, success, database, zipOutput, content, artifactsOutput, artifacts);
 				database.commit();
 			} catch (Exception e) {
 				logger.error("Unable to proceeed with project for job" + jobId, e);

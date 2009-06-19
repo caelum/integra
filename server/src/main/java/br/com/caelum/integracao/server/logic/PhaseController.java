@@ -76,10 +76,10 @@ public class PhaseController {
 
 	@Post
 	@Path("/project/{project.name}/command")
-	public void addCommand(Phase phase, String startCommand, String stopCommand, String labels) {
+	public void addCommand(Phase phase, String startCommand, String stopCommand, String labels, String artifactsToPush) {
 		logger.debug("Adding a new command with " + startCommand + " and " + stopCommand);
 		phase = projects.get(phase);
-		BuildCommand line = new BuildCommand(phase, commandsFor(startCommand), commandsFor(stopCommand), this.labels.lookup(labels));
+		BuildCommand line = new BuildCommand(phase, commandsFor(startCommand), commandsFor(stopCommand), this.labels.lookup(labels), artifactsToPush);
 		projects.register(line);
 		showProject(phase.getProject());
 	}

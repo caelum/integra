@@ -49,7 +49,7 @@ public class BuildCommandTest {
 	
 	@Test
 	public void shouldHaveTheNameAsTheCommand() {
-		BuildCommand line = new BuildCommand(phase, new String[] {"hello world"}, new String[]{"stop world"},Arrays.asList(new Label("stop world")));
+		BuildCommand line = new BuildCommand(phase, new String[] {"hello world"}, new String[]{"stop world"},Arrays.asList(new Label("stop world")), "");
 		assertThat(line.getName(), is(equalTo("hello world ")));
 	}
 

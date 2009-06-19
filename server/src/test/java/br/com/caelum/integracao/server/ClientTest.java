@@ -160,8 +160,8 @@ public class ClientTest extends BaseTest {
 		Label maven = new Label("mvn");
 		Client c = new Client();
 		c.tag(Arrays.asList(java,ant));
-		assertThat(c.canHandle(new BuildCommand(new Phase(),new String[0], new String[0], Arrays.asList(java)), control), is(equalTo(true)));
-		assertThat(c.canHandle(new BuildCommand(new Phase(),new String[0], new String[0], Arrays.asList(java, maven)), control), is(equalTo(false)));
+		assertThat(c.canHandle(new BuildCommand(new Phase(),new String[0], new String[0], Arrays.asList(java), ""), control), is(equalTo(true)));
+		assertThat(c.canHandle(new BuildCommand(new Phase(),new String[0], new String[0], Arrays.asList(java, maven), ""), control), is(equalTo(false)));
 		mockery.assertIsSatisfied();
 	}
 

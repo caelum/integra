@@ -34,6 +34,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -58,16 +59,19 @@ public class BuildCommand {
 
 	@OneToMany
 	@OrderBy("id")
-	@JoinTable(name="CommandStart")
+	@JoinTable(name = "CommandStart")
 	@Cascade(value = { CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE })
 	private List<Command> start = new ArrayList<Command>();
 
 	@OneToMany
 	@OrderBy("id")
-	@JoinTable(name="CommandStop")
+	@JoinTable(name = "CommandStop")
 	@Cascade(value = { CascadeType.SAVE_UPDATE, CascadeType.DELETE, CascadeType.DELETE_ORPHAN, CascadeType.REMOVE })
 	private List<Command> stop = new ArrayList<Command>();
-	
+
+	@Lob
+	private String artifactsToPush = "";
+
 	private boolean active = true;
 
 	@NotNull
@@ -80,7 +84,8 @@ public class BuildCommand {
 	BuildCommand() {
 	}
 
-	public BuildCommand(Phase phase, String[] start, String[] stop, List<Label> labels) {
+	public BuildCommand(Phase phase, String[] start, String[] stop, List<Label> labels, String artifactsToPush) {
+		this.artifactsToPush = artifactsToPush;
 		this.phase = phase;
 		this.labels = labels;
 		for (String command : start) {
@@ -101,7 +106,7 @@ public class BuildCommand {
 	}
 
 	public String getStopName() {
-		if(stop==null || stop.isEmpty()) {
+		if (stop == null || stop.isEmpty()) {
 			return null;
 		}
 		String name = "";
@@ -114,11 +119,11 @@ public class BuildCommand {
 	public List<Command> getStartCommands() {
 		return start;
 	}
-	
+
 	public List<Command> getStopCommands() {
 		return stop;
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -126,6 +131,7 @@ public class BuildCommand {
 	public Phase getPhase() {
 		return phase;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -140,5 +146,16 @@ public class BuildCommand {
 
 	public boolean isActive() {
 		return active;
+	}
+
+	public List<String> getArtifactsToPush() {
+		String[] vals = artifactsToPush.split("\\s*,\\s*");
+		List<String> list = new ArrayList<String>();
+		for (String val : vals) {
+			if (!val.trim().equals("")) {
+				list.add(val);
+			}
+		}
+		return list;
 	}
 }

@@ -131,7 +131,7 @@ public class DefaultAgent implements Agent {
 		}
 	}
 
-	public boolean execute(BuildCommand command, Job job, String mySelf, File zip) {
+	public boolean execute(BuildCommand command, Job job, String mySelf, File revisionContent, File artifacts) {
 		Method post = http.post(baseUri + "/job/execute");
 		post.with("jobId", "" + job.getId());
 		post.with("revision", job.getBuild().getRevision().getName());
@@ -147,8 +147,14 @@ public class DefaultAgent implements Agent {
 		for(String directory : command.getPhase().getDirectoriesToCopy()) {
 			post.with("directoryToCopy[" + (k++) + "]",directory);
 		}
+		for(String artifact : command.getArtifactsToPush()) {
+			post.with("artifactsToPush[" + (k++) + "]",artifact);
+		}
 		try {
-			post.with("content", zip);
+			post.with("content", revisionContent);
+			if(artifacts.exists()) {
+				post.with("artifacts", artifacts);
+			}
 			post.send();
 			int result = post.getResult();
 			if (result != 200) {

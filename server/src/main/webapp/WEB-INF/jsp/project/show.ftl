@@ -36,17 +36,25 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 				<div class="phase_title">${phase.name } (${phase.position })</div>
 				<#list phase.commands as cmd>
 				<div class="command">
-					${cmd.name }
-					<#if cmd.stopName??>(stop: ${cmd.stopName})</#if>
+					${cmd.name }<br/>
+					<#if cmd.stopName??>(stop: ${cmd.stopName})<br/></#if>
+					<#if cmd.artifactsToPush??>
+						<#list cmd.artifactsToPush as artifact>
+							${artifact},
+						</#list>
+						<br/>
+					</#if>
 					"<#list cmd.labels as label>${label.name},</#list>"
 					(<a href="command/${cmd.id}?_method=DELETE">remove</a>)
 				</div>
 				</#list>
-				<div class="command formulario">
+				<a href="#new_command_${phase.id}" onclick="$('#new_command_${phase.id}').toggle()">new command</a>
+				<div id="new_command_${phase.id}" class="command formulario" style="display: none;">
 					<form action="command" method="post">
 						<input type="hidden" name="phase.id" value="${phase.id }" />
 						(start) <input type="text" name="startCommand" value="" size="5" /> <br/>
 						(stop) <input type="text" name="stopCommand" value="" size="5" /> <br/>
+						(artifacts to push) <input type="text" name="artifactsToPush" value="" size="20" /> <br/>
 						(labels) <textarea name="labels"></textarea>
 						<input type="submit" value="add" />
 					</form>
