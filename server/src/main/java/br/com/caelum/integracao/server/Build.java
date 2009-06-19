@@ -103,7 +103,7 @@ public class Build {
 	@OneToMany(mappedBy = "build")
 	private List<Tab> tabs = new ArrayList<Tab>();
 
-	@Column(length=10000)
+	@Column(length = 10000)
 	private String resultMessage;
 
 	Build() {
@@ -143,7 +143,7 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
-	public void setRevisionAsNextOne(Projects projects, Builds builds, Database database) {
+	public boolean setRevisionAsNextOne(Projects projects, Builds builds, Database database) {
 		this.currentPhase = 0;
 		logger.debug("Starting executing build for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
@@ -154,29 +154,40 @@ public class Build {
 			logFile = new LogFile(file);
 			ScmControl control = project.getControl();
 			this.revision = project.extractNextRevision(this, builds, control, logFile);
-			int result = control.checkoutOrUpdate(revision.getName(), logFile.getWriter());
+			int result = control.checkoutOrUpdate(revision.getName(), new PrintWriter(logFile.getWriter()) {
+				public void close() {
+				}
+			});
 			if (result != 0) {
 				finish(false, "Unable to checkout project from scm.", null, database);
-				return;
+				return false;
 			}
 			if (!getRevisionContent().exists()) {
 				try {
-					new Zipper(new File(project.getBaseDir(), project.getName())).ignore(control.getIgnorePattern())
-							.addExactly("").logTo(logFile.getWriter()).zip(getRevisionContent());
+					File revisionDirectory = new File(project.getBaseDir(), project.getName());
+					String scmPattern = control.getIgnorePattern();
+					int zipped = new Zipper(revisionDirectory).ignore(scmPattern).addExactly("").logTo(
+							logFile.getWriter()).zip(getRevisionContent());
+					if (zipped == 0) {
+						logFile.getWriter().println("Did not zip any files.");
+						finish(false, "Unable to zip revision content.", null, database);
+						return false;
+					}
 				} catch (IOException ex) {
 					finish(false, "Unable to zip files for this revision", ex, database);
-					return;
+					return false;
 				}
 			}
 
 		} catch (Exception ex) {
 			finish(false, "Unable to retrieve revision for " + project.getName(), ex, database);
-			return;
+			return false;
 		} finally {
 			if (logFile != null) {
 				logFile.close();
 			}
 		}
+		return true;
 	}
 
 	public void start(Jobs jobs, Database db) throws ScmException {
@@ -355,7 +366,7 @@ public class Build {
 
 	public boolean hasRun(Phase phase) {
 		int position = phase.getProject().getPhases().indexOf(phase);
-		if((currentPhase==position) && isFinished()) {
+		if ((currentPhase == position) && isFinished()) {
 			return true;
 		}
 		return currentPhase > position;
@@ -380,8 +391,8 @@ public class Build {
 		return getFile("artifactsToPush.zip");
 	}
 
-	public void publishArtifact(File file) throws IOException {
-		new Zipper(file).addExactly("").logTo(new PrintWriter(System.out)).zip(getArtifactsToPush(), true);
+	public void publishArtifact(File directory) throws IOException {
+		new Zipper(directory).addExactly("").logTo(new PrintWriter(System.out)).zip(getArtifactsToPush(), true);
 	}
 
 }

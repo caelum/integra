@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server.ioc;
 
+import br.com.caelum.integracao.LongMultipartConfig;
 import br.com.caelum.integracao.server.Builds;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.agent.Clients;
@@ -38,6 +39,7 @@ import br.com.caelum.integracao.server.queue.QueueThread;
 import br.com.caelum.integracao.server.vraptor.PathResolver;
 import br.com.caelum.vraptor.ComponentRegistry;
 import br.com.caelum.vraptor.http.route.RoutesConfiguration;
+import br.com.caelum.vraptor.interceptor.multipart.MultipartConfig;
 import br.com.caelum.vraptor.ioc.pico.PicoProvider;
 
 public class CustomProvider extends PicoProvider {
@@ -55,6 +57,7 @@ public class CustomProvider extends PicoProvider {
         container.register(Builds.class, Builds.class);
         container.register(Labels.class, Labels.class);
         container.register(RoutesConfiguration.class, CustomRoutes.class);
+		container.register(MultipartConfig.class, LongMultipartConfig.class);
     }
 
 }

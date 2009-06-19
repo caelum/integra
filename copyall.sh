@@ -20,6 +20,13 @@ scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.164:~/
 scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.162:~/        
 scp integra@192.168.0.159:~/integracao-client.war integra@192.168.0.165:~/
 
+echo Restarting 2
+ssh integra@192.168.0.2 ./deploy.sh        > /dev/null
+
+echo Restarting 123
+ssh integra@192.168.0.123 ./deploy.sh > /dev/null
+
+
 
 echo Restarting 66
 ssh integra@192.168.0.66 ./deploy.sh > /dev/null
@@ -41,11 +48,4 @@ ssh integra@192.168.0.164 ./deploy.sh > /dev/null
 
 echo Restarting 165
 ssh integra@192.168.0.165 ./deploy.sh > /dev/null
-
-echo Restarting 2
-ssh integra@192.168.0.2 ./deploy.sh        > /dev/null
-
-echo Restarting 123
-ssh integra@192.168.0.123 ./deploy.sh > /dev/null
-
 

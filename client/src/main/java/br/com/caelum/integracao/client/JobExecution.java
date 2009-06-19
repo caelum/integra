@@ -80,8 +80,8 @@ public class JobExecution {
 
 		try {
 
-			unzipResult = project.unzip(settings.getBaseDir(), revision, content, output, new ProjectRunResult("",0), true);
-			unzipResult = project.unzip(settings.getBaseDir(), revision, artifacts, output, unzipResult, false);
+			unzipResult = project.unzip(settings.getBaseDir(), content, output, new ProjectRunResult("",0), true);
+			unzipResult = project.unzip(settings.getBaseDir(), artifacts, output, unzipResult, false);
 			if (!unzipResult.failed()) {
 				startResult = project.run(settings.getBaseDir(), start, output);
 			}

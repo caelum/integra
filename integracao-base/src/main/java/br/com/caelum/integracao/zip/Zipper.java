@@ -52,7 +52,7 @@ public class Zipper {
 	private final List<String> fixedContent = new ArrayList<String>();
 
 	private PrintWriter log;
-	
+
 	public Zipper(File workDirectory) {
 		this.workDirectory = workDirectory;
 	}
@@ -72,36 +72,47 @@ public class Zipper {
 	}
 
 	public int zip(File zipFile, boolean append) throws FileNotFoundException, IOException {
-		File tempFile = File.createTempFile("integracao-zip-", ".zip");
-		FileOutputStream target = new FileOutputStream(tempFile);
-		ZipOutputStream output = new ZipOutputStream(new BufferedOutputStream(target));
-		byte data[] = new byte[BUFFER];
-		int count = zip(data, output, workDirectory, "", this.fixedContent.contains(""));
-		if(append && zipFile.exists()) {
-			count += new Unzipper(output).logTo(log).unzip(zipFile);
-			zipFile.delete();
+		File moved = null;
+		try {
+			if (zipFile.exists()) {
+				moved = new File(zipFile.getParent(), zipFile.getName() + ".bkz");
+				zipFile.renameTo(moved);
+				moved.deleteOnExit();
+			}
+
+			FileOutputStream target = new FileOutputStream(zipFile);
+			ZipOutputStream output = new ZipOutputStream(new BufferedOutputStream(target));
+			byte data[] = new byte[BUFFER];
+			int count = zip(data, output, workDirectory, "", this.fixedContent.contains(""));
+			if (append && moved != null) {
+				count += new Unzipper(output).logTo(log).unzip(moved);
+			}
+			if (count != 0) {
+				log.println("Closing zip file " + zipFile.getAbsolutePath());
+				output.close();
+				target.close();
+			}
+			return count;
+		} finally {
+			if (moved != null) {
+				moved.delete();
+			}
 		}
-		if(count!=0) {
-			output.close();
-		}
-		tempFile.renameTo(zipFile);
-		return count;
 	}
 
-	private int zip(byte[] data, ZipOutputStream output, File base, String currentPath, boolean matched) throws IOException {
+	private int zip(byte[] data, ZipOutputStream output, File base, String currentPath, boolean matched)
+			throws IOException {
 		int total = 0;
-		// log.println("For " + currentPath + " we will matched=" + matched);
 		for (File file : base.listFiles()) {
-			String completeName = (currentPath.equals("")? "" : currentPath + "/") + file.getName();
+			String completeName = (currentPath.equals("") ? "" : currentPath + "/") + file.getName();
 			boolean ignoreThisOne = shouldIgnore(completeName);
 			boolean addThisOne = shouldInclude(completeName);
 			boolean include = (matched || addThisOne) && !ignoreThisOne;
-			if(file.isDirectory()) {
+			if (file.isDirectory()) {
 				total += zip(data, output, file, completeName, include);
 				continue;
 			}
-			// log.println("For " + completeName + " we will ignore=" + ignoreThisOne);
-			if(ignoreThisOne || (!matched && !addThisOne)) {
+			if (ignoreThisOne || (!matched && !addThisOne)) {
 				continue;
 			}
 			total++;
@@ -119,9 +130,8 @@ public class Zipper {
 	}
 
 	private boolean shouldIgnore(String filePath) {
-		for(Pattern exclude :ignore) {
-			if(exclude.matcher(filePath).matches()) {
-				// log.println("[i]" + filePath);
+		for (Pattern exclude : ignore) {
+			if (exclude.matcher(filePath).matches()) {
 				return true;
 			}
 		}
@@ -129,14 +139,14 @@ public class Zipper {
 	}
 
 	private boolean shouldInclude(String filePath) {
-		for(Pattern include : content) {
-			if(include.matcher(filePath).matches()) {
+		for (Pattern include : content) {
+			if (include.matcher(filePath).matches()) {
 				log.println("[a] " + filePath);
 				return true;
 			}
 		}
-		for(String include : fixedContent) {
-			if(include.equals(filePath)) {
+		for (String include : fixedContent) {
+			if (include.equals(filePath)) {
 				log.println("[a] " + filePath);
 				return true;
 			}
@@ -148,7 +158,7 @@ public class Zipper {
 		this.ignore.add(Pattern.compile(pattern));
 		return this;
 	}
-	
+
 	public Zipper logTo(PrintWriter log) {
 		this.log = log;
 		return this;

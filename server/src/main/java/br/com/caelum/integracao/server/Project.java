@@ -28,7 +28,6 @@
 package br.com.caelum.integracao.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -91,9 +90,9 @@ public class Project {
 	@NotNull
 	private File baseDir;
 
-	private boolean buildEveryRevision;
+	private boolean buildEveryRevision = true;
 
-	private boolean allowAutomaticStartNextRevisionWhileBuildingPrevious;
+	private boolean allowAutomaticStartNextRevisionWhileBuildingPrevious = true;
 
 	private Long buildCount = 0L;
 
@@ -267,19 +266,17 @@ public class Project {
 		this.buildEveryRevision = buildEveryRevision;
 	}
 
-	public Revision extractNextRevision(Build forBuild, Builds builds, ScmControl control, LogFile file) throws IOException,
-			ScmException {
+	public Revision extractNextRevision(Build forBuild, Builds builds, ScmControl control, LogFile file)
+			throws ScmException {
 		logger.debug("Checking revision for " + getName() + ", build = " + buildCount);
-		Build lastBuild = getBuild(forBuild.getBuildCount() - 1);
-
-		Revision revision = extractRevisionAfter(lastBuild, control, builds, file);
-		return revision;
+		Build previousBuild = getBuild(forBuild.getBuildCount() - 1);
+		return extractRevisionAfter(previousBuild, control, builds, file);
 
 	}
 
-	public Revision extractRevisionAfter(Build lastBuild, ScmControl control, Builds builds, LogFile log)
-			throws IOException, ScmException {
-		Revision lastRevision = lastBuild == null ? null : lastBuild.getRevision();
+	public Revision extractRevisionAfter(Build previousBuild, ScmControl control, Builds builds, LogFile log)
+			throws ScmException {
+		Revision lastRevision = previousBuild == null ? null : previousBuild.getRevision();
 
 		Revision revision;
 		if (lastRevision != null && isBuildEveryRevision()) {

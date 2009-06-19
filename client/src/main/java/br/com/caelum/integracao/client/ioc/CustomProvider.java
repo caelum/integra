@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.client.ioc;
 
+import br.com.caelum.integracao.LongMultipartConfig;
 import br.com.caelum.integracao.client.CurrentJob;
 import br.com.caelum.integracao.client.Settings;
 import br.com.caelum.integracao.client.project.Projects;

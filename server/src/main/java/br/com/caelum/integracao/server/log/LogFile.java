@@ -54,13 +54,14 @@ public class LogFile {
 	}
 
 	synchronized public void close() {
+		closed = true;
+		writer.flush();
 		writer.close();
 		try {
 			output.close();
 		} catch (IOException e) {
 			logger.error("Unable to close log file", e);
 		}
-		closed = true;
 	}
 
 	public void error(String msg) {

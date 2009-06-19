@@ -117,7 +117,7 @@ public class Job {
 				+ command.getPhase().getName() + " command " + command.getId());
 
 		unzip(content, zipOutput, "report-copy-result.txt", "");
-		unzip(artifacts, artifactsOutput, "artifacts-copy-result.txt", "artifacts");
+		unzip(artifacts, artifactsOutput, "artifacts-copy-result.txt", "/artifacts");
 		if(artifacts!=null) {
 			build.publishArtifact(getFile(command.getId()+"/artifacts"));
 		}
@@ -141,7 +141,7 @@ public class Job {
 	}
 
 	private void unzip(UploadedFile uploaded, String output, String logFilename, String pathToUnzip) throws IOException {
-		File baseDir = getFile(command.getId() +"");
+		File baseDir = getFile(command.getId() +"" + pathToUnzip);
 		baseDir.mkdir();
 		PrintWriter unzipLog = new PrintWriter(new FileWriter(new File(baseDir,logFilename)), true);
 		unzipLog.append(output);

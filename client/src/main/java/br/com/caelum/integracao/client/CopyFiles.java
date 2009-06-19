@@ -52,12 +52,12 @@ public class CopyFiles {
 
 	public File zipThemAll() throws IOException {
 
-		File result = File.createTempFile("integra-copy-files-", ".zip");
-		result.delete();
-
 		if (directoryToCopy == null) {
 			return null;
 		}
+
+		File result = File.createTempFile("integra-copy-files-", ".zip");
+		result.delete();
 
 		File baseDirectory = new File(settings.getBaseDir(), project.getName());
 
