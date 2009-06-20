@@ -153,10 +153,10 @@ public class Build {
 		try {
 			logFile = new LogFile(file);
 			ScmControl control = project.getControl();
-			if(name==null) {
+			if (name == null) {
 				this.revision = project.extractNextRevision(this, builds, control, logFile);
 			} else {
-				this.revision = project.extractRevision(builds, control,logFile,name);
+				this.revision = project.extractRevision(builds, control, logFile, name);
 			}
 			return checkoutContent(database, logFile, control);
 		} catch (Exception ex) {
@@ -216,7 +216,11 @@ public class Build {
 		List<Phase> phases = project.getPhases();
 		if (!phases.isEmpty()) {
 			Phase phase = phases.get(0);
-			phase.execute(this, jobs);
+			if (phase.getCommandCount()==0) {
+				finish(false, "There are no commands at the first phase.", null, db);
+			} else {
+				phase.execute(this, jobs);
+			}
 		} else {
 			finish(false, "There were no phases to run.", null, db);
 		}
@@ -342,7 +346,12 @@ public class Build {
 			if (successSoFar) {
 				currentPhase++;
 				if (project.getPhases().size() != currentPhase) {
-					project.getPhases().get(currentPhase).execute(this, new Jobs(database));
+					Phase nextPhase = project.getPhases().get(currentPhase);
+					if(nextPhase.getCommandCount()==0) {
+						finish(false, "Phase " + nextPhase.getName() + " has no commands", null, database);
+					} else {
+						nextPhase.execute(this, new Jobs(database));
+					}
 				} else {
 					finish(true, "Well done.", null, database);
 				}
