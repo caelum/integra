@@ -34,10 +34,10 @@ import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.agent.AgentControl;
 import br.com.caelum.integracao.server.agent.Clients;
+import br.com.caelum.integracao.server.dao.Database;
 
-public class DefaultJobQueue implements JobQueue{
-	
-	
+public class DefaultJobQueue implements JobQueue {
+
 	private final Jobs jobs;
 	private final Clients clients;
 	private final Config config;
@@ -50,17 +50,26 @@ public class DefaultJobQueue implements JobQueue{
 		this.control = control;
 	}
 
-	public int iterate() {
+	public int iterate(Database db) {
 		List<Job> todo = jobs.todo();
 		int completed = 0;
 		List<Client> freeFound = clients.freeClients();
-		for(Job job : todo) {
+		for (Job job : todo) {
 			for (Iterator<Client> iterator = freeFound.iterator(); iterator.hasNext();) {
 				Client client = iterator.next();
-				if(client.canHandle(job.getCommand(), control) && client.work(job, config)) {
-					iterator.remove();
-					completed++;
-					break;
+				try {
+					db.beginTransaction();
+					if (client.canHandle(job.getCommand(), control) && client.work(job, config)) {
+						iterator.remove();
+						completed++;
+						db.commit();
+						break;
+					}
+					db.commit();
+				} finally {
+					if (db.hasTransaction()) {
+						db.rollback();
+					}
 				}
 			}
 		}

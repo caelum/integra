@@ -85,9 +85,6 @@ public class QueueThread {
 					} catch (Exception ex) {
 						logger.error("Something really nasty ocurred while executing the job queue", ex);
 					} finally {
-						if (db.hasTransaction()) {
-							db.rollback();
-						}
 						db.close();
 					}
 					if (shouldRun) {
@@ -108,10 +105,9 @@ public class QueueThread {
 	}
 
 	private void startJobs(Database db) {
-		db.beginTransaction();
-		JobQueue queue = new DefaultJobQueue(new Jobs(db), new Clients(db), new Application(db).getConfig(), new AgentControl());
-		int result = queue.iterate();
-		db.commit();
+		JobQueue queue = new DefaultJobQueue(new Jobs(db), new Clients(db), new Application(db)
+		.getConfig(), new AgentControl());
+		int result = queue.iterate(db);
 		logger.debug("Job queue started " + result + " jobs");
 	}
 
@@ -119,31 +115,32 @@ public class QueueThread {
 		db.beginTransaction();
 		List<Job> jobs = new Jobs(db).runningJobs();
 		int result = 0;
-		AgentControl control  =new AgentControl();
+		AgentControl control = new AgentControl();
 		for (Job job : jobs) {
 			long timeSpent = System.currentTimeMillis() - job.getStartTime().getTimeInMillis();
-			int minutes = new Application(db).getConfig()
-					.getMaximumTimeForAJob();
+			int minutes = new Application(db).getConfig().getMaximumTimeForAJob();
 			Client client = job.getClient();
 			AgentStatus status = control.to(client.getBaseUri()).getStatus();
 			Job currentJob = client.getCurrentJob();
 			if (status.equals(AgentStatus.UNAVAILABLE) || status.equals(AgentStatus.FREE)) {
 				job.reschedule();
-				if (currentJob!=null && currentJob.equals(job)) {
+				if (currentJob != null && currentJob.equals(job)) {
 					logger.error("Leaving the job because the server just told me there is nothing running there..."
 							+ "Did the client break or was it sending me the info right now?");
 					client.leaveJob();
 				}
 				continue;
-			}	
+			}
 			if (timeSpent > minutes * 60 * 1000) {
-				if(currentJob!=null && currentJob.equals(job)) {
-					if(client.stop(new DefaultAgent(client.getBaseUri(), new DefaultHttp()))) {
+				if (currentJob != null && currentJob.equals(job)) {
+					if (client.stop(new DefaultAgent(client.getBaseUri(), new DefaultHttp()))) {
 						result++;
 					}
 				} else {
 					try {
-						job.finish("killing job because there was no response and the client is not actually running it", false, db, "", null, "", null);
+						job.finish(
+								"killing job because there was no response and the client is not actually running it",
+								false, db, "", null, "", null);
 						result++;
 					} catch (IOException e) {
 						logger.error("Tried to kill job but couldnt.", e);

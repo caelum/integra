@@ -27,8 +27,10 @@
  */
 package br.com.caelum.integracao.server.queue;
 
+import br.com.caelum.integracao.server.dao.Database;
+
 public interface JobQueue {
 
-	int iterate();
+	int iterate(Database db);
 	
 }
