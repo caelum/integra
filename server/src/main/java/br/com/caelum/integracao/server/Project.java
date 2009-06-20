@@ -274,6 +274,18 @@ public class Project {
 
 	}
 
+	public Revision extractRevision(Builds builds, ScmControl control, LogFile file, String name)
+			throws ScmException {
+		logger.debug("Checking revision for " + getName() + ", name = " + name);
+		Revision found = builds.contains(this, name);
+		if (found != null) {
+			return found;
+		}
+		Revision revision = control.extractRevision(name, file.getWriter(), name);
+		builds.register(revision);
+		return revision;
+	}
+
 	public Revision extractRevisionAfter(Build previousBuild, ScmControl control, Builds builds, LogFile log)
 			throws ScmException {
 		Revision lastRevision = previousBuild == null ? null : previousBuild.getRevision();
@@ -287,10 +299,9 @@ public class Project {
 
 		Revision found = builds.contains(this, revision.getName());
 		if (found != null) {
-			revision = found;
-		} else {
-			builds.register(revision);
+			return found;
 		}
+		builds.register(revision);
 		return revision;
 	}
 

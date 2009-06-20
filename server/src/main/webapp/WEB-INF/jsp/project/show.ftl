@@ -3,8 +3,13 @@
 Uri: ${project.uri }<br />
 Basedir: ${project.buildsDirectory.absolutePath }<br />
 Control: ${project.controlType.name } <br />
-Actions: <a href="run?_method=post">force build</a>
-<br />
+Actions: <a href="run?_method=post">force build</a> (<a href="#specific_revision" onclick="$('#specific_revision').toggle();">specific revision</a>)<br/>
+<div style="display: hidden;">
+	<form action="run" method="post">
+		<input name="revision" value="" />
+		<input type="submit" value="run" />
+	</form>
+</div>
 Last build: ${project.lastBuildTime.time?datetime }<br />
 </div>
 <div class="plugin">

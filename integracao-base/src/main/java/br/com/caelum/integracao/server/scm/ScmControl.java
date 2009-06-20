@@ -62,4 +62,6 @@ public interface ScmControl {
 	 */
 	String getIgnorePattern();
 
+	Revision extractRevision(String name, PrintWriter log, String range) throws ScmException;
+
 }

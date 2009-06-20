@@ -118,7 +118,7 @@ public class GitControl implements ScmControl {
 		String content = writer.getBuffer().toString();
 		int pos = content.indexOf("commit ");
 		String name = content.substring(pos + "commit ".length(), content.indexOf("\n", pos));
-		return new Revision(name, "", "");
+		return extractRevision(name, log, name);
 	}
 
 	private String extract(PrintWriter log, String... cmd) {
@@ -144,7 +144,7 @@ public class GitControl implements ScmControl {
 		int end = diff.indexOf(" ", start);
 		String baseName = diff.substring(start, end);
 		String name = baseName + "^.." + baseName;
-		return new Revision(name, extractInfoForRevision(log, name), "");
+		return extractRevision(name, log, name);
 	}
 
 	private String extractInfoForRevision(PrintWriter log, String revisionRange) throws ScmException {
@@ -154,6 +154,10 @@ public class GitControl implements ScmControl {
 
 	public String getIgnorePattern() {
 		return ".*\\.git";
+	}
+
+	public Revision extractRevision(String name, PrintWriter log, String range) throws ScmException {
+		return new Revision(name, extractInfoForRevision(log, range), "");
 	}
 
 }

@@ -143,7 +143,7 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
-	public boolean setRevisionAsNextOne(Projects projects, Builds builds, Database database) {
+	public boolean setRevisionAsNextOne(Projects projects, Builds builds, Database database, String name) {
 		this.currentPhase = 0;
 		logger.debug("Starting executing build for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
@@ -153,38 +153,45 @@ public class Build {
 		try {
 			logFile = new LogFile(file);
 			ScmControl control = project.getControl();
-			this.revision = project.extractNextRevision(this, builds, control, logFile);
-			int result = control.checkoutOrUpdate(revision.getName(), new PrintWriter(logFile.getWriter()) {
-				public void close() {
-				}
-			});
-			if (result != 0) {
-				finish(false, "Unable to checkout project from scm.", null, database);
-				return false;
+			if(name==null) {
+				this.revision = project.extractNextRevision(this, builds, control, logFile);
+			} else {
+				this.revision = project.extractRevision(builds, control,logFile,name);
 			}
-			if (!getRevisionContent().exists()) {
-				try {
-					File revisionDirectory = new File(project.getBaseDir(), project.getName());
-					String scmPattern = control.getIgnorePattern();
-					int zipped = new Zipper(revisionDirectory).ignore(scmPattern).addExactly("").logTo(
-							logFile.getWriter()).zip(getRevisionContent());
-					if (zipped == 0) {
-						logFile.getWriter().println("Did not zip any files.");
-						finish(false, "Unable to zip revision content.", null, database);
-						return false;
-					}
-				} catch (IOException ex) {
-					finish(false, "Unable to zip files for this revision", ex, database);
-					return false;
-				}
-			}
-
+			return checkoutContent(database, logFile, control);
 		} catch (Exception ex) {
 			finish(false, "Unable to retrieve revision for " + project.getName(), ex, database);
 			return false;
 		} finally {
 			if (logFile != null) {
 				logFile.close();
+			}
+		}
+	}
+
+	private boolean checkoutContent(Database database, LogFile logFile, ScmControl control) throws ScmException {
+		int result = control.checkoutOrUpdate(revision.getName(), new PrintWriter(logFile.getWriter()) {
+			public void close() {
+			}
+		});
+		if (result != 0) {
+			finish(false, "Unable to checkout project from scm.", null, database);
+			return false;
+		}
+		if (!getRevisionContent().exists()) {
+			try {
+				File revisionDirectory = new File(project.getBaseDir(), project.getName());
+				String scmPattern = control.getIgnorePattern();
+				int zipped = new Zipper(revisionDirectory).ignore(scmPattern).addExactly("").logTo(logFile.getWriter())
+						.zip(getRevisionContent());
+				if (zipped == 0) {
+					logFile.getWriter().println("Did not zip any files.");
+					finish(false, "Unable to zip revision content.", null, database);
+					return false;
+				}
+			} catch (IOException ex) {
+				finish(false, "Unable to zip files for this revision", ex, database);
+				return false;
 			}
 		}
 		return true;

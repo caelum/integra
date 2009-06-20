@@ -134,7 +134,7 @@ public class PingScm {
 				if (lastRevision == null || !lastRevision.getName().equals(nextRevision.getName())) {
 					logger.debug("Project " + project.getName() + " has a revision '" + nextRevision.getName()
 							+ "', therefore we will start the build.");
-					new ProjectStart(db).runProject(project.getName());
+					new ProjectStart(db).runProject(project.getName(), null);
 				} else {
 					logger.debug(project.getName() + " did not require a new build");
 				}

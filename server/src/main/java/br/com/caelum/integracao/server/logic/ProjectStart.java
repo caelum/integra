@@ -53,7 +53,7 @@ public class ProjectStart {
 		this.database = database;
 	}
 
-	void runProject(String name) {
+	void runProject(String name, String revision) {
 		synchronized (protectTwoBuildsOfStartingAtTheSameTime) {
 			// TODO we probably dont need a new database connection, we can
 			// probably
@@ -64,7 +64,8 @@ public class ProjectStart {
 				Project toBuild = new Projects(database).get(name);
 				Build build = toBuild.build();
 				new Projects(database).register(build);
-				boolean allowStart = build.setRevisionAsNextOne(new Projects(database), new Builds(database), database);
+
+				boolean allowStart = build.setRevisionAsNextOne(new Projects(database), new Builds(database), database, revision);
 				if(allowStart) {
 					build.start(new Jobs(database), database);
 				}

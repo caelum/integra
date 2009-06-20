@@ -105,7 +105,7 @@ public class ProjectController {
 
 	@Post
 	@Path("/project/{project.name}/run")
-	public void run(Project project) throws IllegalArgumentException, SecurityException, InstantiationException,
+	public void run(Project project, final String revision) throws IllegalArgumentException, SecurityException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		final Project found = projects.get(project.getName());
 		validator.onError().goTo(ProjectController.class).list();
@@ -117,7 +117,7 @@ public class ProjectController {
 			public void run() {
 				Database db = new Database(factory);
 				try {
-					new ProjectStart(db).runProject(found.getName());
+					new ProjectStart(db).runProject(found.getName(), revision);
 					queue.wakeup();
 				} finally {
 					db.close();
