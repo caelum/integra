@@ -4,7 +4,7 @@ Uri: ${project.uri }<br />
 Basedir: ${project.buildsDirectory.absolutePath }<br />
 Control: ${project.controlType.name } <br />
 Actions: <a href="run?_method=post">force build</a> (<a href="#specific_revision" onclick="$('#specific_revision').toggle();">specific revision</a>)<br/>
-<div style="display: hidden;">
+<div style="display: none;" id="specific_revision">
 	<form action="run" method="post">
 		<input name="revision" value="" />
 		<input type="submit" value="run" />
@@ -121,14 +121,15 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 			</#if>
 			</td>
 			<td>
-				<#assign last = null>
+				<#assign count = 0>
 				<#list project.phases as phase>
-					<#if last != null>
+					<#if count!=0>
 						<#if phase.manual && build.hasRun(last) && !build.hasRun(phase) && !build.isRunning(phase)>
 							<a href="build/${build.buildCount}/manual/${phase.id}?method=_put">(manual)</a> ==>
 						</#if>
 						==>
 					</#if>
+					<#assign count = 1>
 					<#assign last = phase>
 					<div class="build_phase" style="
 						<#if build.hasRun(phase)>
