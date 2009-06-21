@@ -126,6 +126,7 @@ public class ProjectController {
 		};
 		Thread thread = new Thread(execution);
 		thread.start();
+		showProject(project);
 	}
 
 	@Post

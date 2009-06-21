@@ -121,28 +121,27 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 			</#if>
 			</td>
 			<td>
-				<#assign count = 0>
+				<#assign first = true>
 				<#list project.phases as phase>
-					<#if count!=0>
-						<#if phase.manual && build.hasRun(last) && !build.hasRun(phase) && !build.isRunning(phase)>
-							<a href="build/${build.buildCount}/manual/${phase.id}?method=_put">(manual)</a> ==>
+					<#if !first>
+						<#if build.canManuallyActivate(last, phase)>
+							<a href="build/${build.buildCount}/manual/${phase.id}?method=_put">(manual)</a>
 						</#if>
 						==>
 					</#if>
-					<#assign count = 1>
+					<#assign first = false>
 					<#assign last = phase>
 					<div class="build_phase" style="
-						<#if build.hasRun(phase)>
-							<#if build.hasSucceeded(phase)>
-								background-color: green;
-							<#else>
-								background-color: red;
-							</#if>
+					
+						<#if build.hasSucceeded(phase)>
+							background-color: green;
 						<#elseif build.isRunning(phase)>
 							background-color: orange;
-						<#else>
+						<#elseif !build.hasRun(phase)>
 							background-color: gray;
-						</#if>
+						<#else>
+							background-color: red;
+x						</#if>
 						float: left;
 						">
 						<div class="phase_title">

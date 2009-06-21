@@ -343,14 +343,18 @@ public class Build {
 					+ successSoFar);
 			boolean thisResult = actualPhase.runAfter(this, database);
 			successSoFar &= thisResult;
+			currentPhase++;
 			if (successSoFar) {
-				currentPhase++;
 				if (project.getPhases().size() != currentPhase) {
 					Phase nextPhase = project.getPhases().get(currentPhase);
 					if(nextPhase.getCommandCount()==0) {
 						finish(false, "Phase " + nextPhase.getName() + " has no commands", null, database);
 					} else {
-						nextPhase.execute(this, new Jobs(database));
+						if(!nextPhase.isManual()) {
+							nextPhase.execute(this, new Jobs(database));
+						} else {
+							finish(true, "Well done. Next phase is manual.", null, database);
+						}
 					}
 				} else {
 					finish(true, "Well done.", null, database);
@@ -382,18 +386,18 @@ public class Build {
 
 	public boolean hasRun(Phase phase) {
 		int position = phase.getProject().getPhases().indexOf(phase);
-		if ((currentPhase == position) && isFinished()) {
-			return true;
-		}
 		return currentPhase > position;
 	}
-
+	
 	public boolean isRunning(Phase phase) {
 		int position = phase.getProject().getPhases().indexOf(phase);
 		return currentPhase == position && !isFinished();
 	}
 
 	public boolean hasSucceeded(Phase phase) {
+		if(!hasRun(phase) ) {
+			return false; 
+		}
 		List<Job> jobs = getJobsFor(phase);
 		for (Job j : jobs) {
 			if (!j.isSuccess()) {
@@ -409,6 +413,22 @@ public class Build {
 
 	public void publishArtifact(File directory) throws IOException {
 		new Zipper(directory).addExactly("").logTo(new PrintWriter(System.out)).zip(getArtifactsToPush(), true);
+	}
+	
+	public boolean canManuallyActivate(Phase last, Phase phase) {
+		if(!phase.isManual()) {
+			return false;
+		}
+		if(!hasRun(last)) {
+			return false;
+		}
+		if(hasRun(phase)) {
+			return false;
+		}
+		if(isRunning(phase)) {
+			return false;
+		}
+		return true;
 	}
 	
 }
