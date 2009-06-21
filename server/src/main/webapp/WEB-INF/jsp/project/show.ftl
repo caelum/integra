@@ -94,8 +94,8 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 			name="project.name" value="${project.name }" />
 			Name: <input size="10" name="phase.name" value="unnamed" />
 			Directories: <input size="10" name="phase.directoriesToCopy" value="" />
-			<input type="submit"
-			value="new phase" /></form>
+			<input type="checkbox" name="phase.manual" /> require manual move 
+			<input type="submit" value="add" /></form>
 		</td>
 	</tr>
 </table>
@@ -121,7 +121,15 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 			</#if>
 			</td>
 			<td>
+				<#assign last = null>
 				<#list project.phases as phase>
+					<#if last != null>
+						<#if phase.manual && build.hasRun(last) && !build.hasRun(phase) && !build.isRunning(phase)>
+							<a href="build/${build.buildCount}/manual/${phase.id}?method=_put">(manual)</a> ==>
+						</#if>
+						==>
+					</#if>
+					<#assign last = phase>
 					<div class="build_phase" style="
 						<#if build.hasRun(phase)>
 							<#if build.hasSucceeded(phase)>

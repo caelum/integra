@@ -226,7 +226,7 @@ public class Build {
 		}
 	}
 
-	private void finish(boolean success, String cause, Exception ex, Database db) {
+	void finish(boolean success, String cause, Exception ex, Database db) {
 		this.finished = true;
 		StringWriter writer = new StringWriter();
 		writer.write(cause + "\n");
@@ -410,5 +410,5 @@ public class Build {
 	public void publishArtifact(File directory) throws IOException {
 		new Zipper(directory).addExactly("").logTo(new PrintWriter(System.out)).zip(getArtifactsToPush(), true);
 	}
-
+	
 }

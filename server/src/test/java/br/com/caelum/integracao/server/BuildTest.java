@@ -25,7 +25,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao.server.project;
+package br.com.caelum.integracao.server;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -43,13 +43,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.com.caelum.integracao.server.Build;
-import br.com.caelum.integracao.server.Phase;
-import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.plugin.Plugin;
 import br.com.caelum.integracao.server.plugin.PluginException;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
+import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 import br.com.caelum.integracao.server.queue.Jobs;
+import br.com.caelum.integracao.server.scm.Revision;
 import br.com.caelum.integracao.server.scm.ScmControl;
 import br.com.caelum.integracao.server.scm.ScmException;
 
@@ -304,8 +303,8 @@ public class BuildTest extends DatabaseBasedTest {
 			{
 				allowing(project).getName();
 				will(returnValue("my-horses"));
-				one(control).checkoutOrUpdate(null,(PrintWriter) with(an(PrintWriter.class)));
-				one(control).getCurrentRevision(null,(PrintWriter) with(an(PrintWriter.class)));
+				one(control).checkoutOrUpdate(with(aNull(String.class)),(PrintWriter) with(an(PrintWriter.class)));
+				one(control).getCurrentRevision(with(aNull(Revision.class)),(PrintWriter) with(an(PrintWriter.class)));
 				will(returnValue("my-revision"));
 				one(firstPlugin).getPlugin(database);
 				will(returnValue(firstImplementation));
@@ -358,8 +357,15 @@ public class BuildTest extends DatabaseBasedTest {
 		assertThat(build.buildStatusChangedFromLastBuild(), is(equalTo(true)));
 	}
 	
-	// start
-	// getJobsFor
-	// remove
-	// proceed
+	@Test
+	public void shouldReturnElapsedTimeIfNotFinished() {
+		Build build = new Build(project);
+		assertThat(build.getRuntime(), is(equalTo((System.currentTimeMillis()-build.getStartTime().getTimeInMillis())/(1000.0*60))));
+	}
+	@Test
+	public void shouldReturnExecutionTimeIfFinished() {
+		Build build = new Build(project);
+		build.finish(false, "", null, null);
+		assertThat(build.getRuntime(), is(equalTo((build.getFinishTime().getTimeInMillis()-build.getStartTime().getTimeInMillis())/(1000.0*60))));
+	}
 }
