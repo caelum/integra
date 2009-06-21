@@ -268,7 +268,7 @@ public class Build {
 		if (finishTime != null) {
 			f = finishTime;
 		}
-		return (f.getTimeInMillis() - startTime.getTimeInMillis()) / 1000.0;
+		return (f.getTimeInMillis() - startTime.getTimeInMillis()) / 1000.0 / 60.0;
 	}
 
 	public Calendar getFinishTime() {
