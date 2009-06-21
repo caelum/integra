@@ -83,6 +83,8 @@ public class Phase {
 
 	@ManyToOne
 	private Project project;
+	
+	private boolean manual = false;
 
 	public Phase(String name, BuildCommand... cmds) {
 		this.name = name;
@@ -92,7 +94,7 @@ public class Phase {
 		}
 	}
 
-	protected Phase() {
+	Phase() {
 	}
 
 	public void execute(Build build, Jobs jobs) {
@@ -206,6 +208,14 @@ public class Phase {
 			}
 		}
 		return list;
+	}
+	
+	public boolean isManual() {
+		return manual;
+	}
+	
+	public void setManual(boolean manual) {
+		this.manual = manual;
 	}
 
 }

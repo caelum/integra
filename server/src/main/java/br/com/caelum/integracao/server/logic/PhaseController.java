@@ -157,6 +157,7 @@ public class PhaseController {
 		plugin.updateParameters(keys, values);
 		projects.registerOrUpdate(plugin.getConfig());
 		showProject(project);
+
 	}
 
 }
