@@ -8,7 +8,7 @@
 		<#assign build = project.lastBuild>
 		<a href="${project.name}/build/${build.buildCount}/info">build ${build.buildCount}</a>
 		<#if !build.finished>
-			<font color="orange">is building (${build.runtime})</font>
+			<font color="orange">is building (${build.runtime} minutes)</font>
 		<#else>
 			<#if build.successSoFar>
 				<font color="green">was a success</font>

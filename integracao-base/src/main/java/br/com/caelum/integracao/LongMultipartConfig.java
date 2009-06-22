@@ -33,7 +33,7 @@ public class LongMultipartConfig extends DefaultMultipartConfig{
 	
 	@Override
 	public long getSizeLimit() {
-		return 100 * 1024 * 1024;
+		return 500 * 1024 * 1024;
 	}
 
 }

@@ -42,6 +42,7 @@ import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.agent.AgentControl;
 import br.com.caelum.integracao.server.agent.Clients;
+import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.project.BaseTest;
 
 public class DefaultJobQueueTest extends BaseTest{
@@ -53,6 +54,7 @@ public class DefaultJobQueueTest extends BaseTest{
 	private Client firstClient;
 	private Config config;
 	private AgentControl control;
+	private Database db;
 
 	@Before
 	public void config() {
@@ -63,6 +65,7 @@ public class DefaultJobQueueTest extends BaseTest{
 		this.queue = new DefaultJobQueue(jobs, clients, config, control);
 		this.first = mockery.mock(Job.class, "first");
 		this.firstClient = mockery.mock(Client.class, "firstClient");
+		this.db = mockery.mock(Database.class);
 	}
 	
 	@Test
@@ -71,7 +74,7 @@ public class DefaultJobQueueTest extends BaseTest{
 			one(jobs).todo(); will(returnValue(new ArrayList<Client>()));
 			one(clients).freeClients(); will(returnValue(new ArrayList<Client>()));
 		}});
-		assertThat(queue.iterate(), is(equalTo(0)));
+		assertThat(queue.iterate(db), is(equalTo(0)));
 	}
 
 	@Test
@@ -80,7 +83,7 @@ public class DefaultJobQueueTest extends BaseTest{
 			one(jobs).todo(); will(returnValue(Arrays.asList(first)));
 			one(clients).freeClients(); will(returnValue(new ArrayList<Client>()));
 		}});
-		assertThat(queue.iterate(), is(equalTo(0)));
+		assertThat(queue.iterate(db), is(equalTo(0)));
 	}
 
 
@@ -92,7 +95,7 @@ public class DefaultJobQueueTest extends BaseTest{
 			one(firstClient).work(first, config); will(returnValue(true));
 			one(firstClient).isAlive(control); will(returnValue(true));
 		}});
-		assertThat(queue.iterate(), is(equalTo(1)));
+		assertThat(queue.iterate(db), is(equalTo(1)));
 	}
 
 	@Test
@@ -103,7 +106,7 @@ public class DefaultJobQueueTest extends BaseTest{
 			one(firstClient).work(first, config); will(returnValue(false));
 			one(firstClient).isAlive(control); will(returnValue(true));
 		}});
-		assertThat(queue.iterate(), is(equalTo(0)));
+		assertThat(queue.iterate(db), is(equalTo(0)));
 	}
 
 }

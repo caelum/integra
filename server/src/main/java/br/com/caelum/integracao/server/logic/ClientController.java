@@ -115,7 +115,9 @@ public class ClientController {
 	public void stop(Client client) {
 		logger.debug("Stopping " + client.getId());
 		client = clients.get(client);
-		client.stop(new DefaultAgent(client.getBaseUri(), new DefaultHttp()));
+		if(client.getCurrentJob()!=null) {
+			client.stop(new DefaultAgent(client.getBaseUri(), new DefaultHttp()));
+		}
 		showList();
 	}
 
