@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.Application;
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.action.BasicProjects;
@@ -48,6 +49,7 @@ import br.com.caelum.integracao.server.queue.QueueThread;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
+import br.com.caelum.vraptor.Put;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.Validator;
@@ -72,8 +74,10 @@ public class ProjectController {
 
 	private final QueueThread queue;
 
+	private final Database currentDatabase;
+
 	public ProjectController(Projects projects, Validator validator, Result result, DatabaseFactory factory,
-			Application app, Jobs jobs, QueueThread queue) {
+			Application app, Jobs jobs, QueueThread queue, Database currentDatabase) {
 		this.projects = projects;
 		this.validator = validator;
 		this.result = result;
@@ -81,6 +85,7 @@ public class ProjectController {
 		this.app = app;
 		this.jobs = jobs;
 		this.queue = queue;
+		this.currentDatabase = currentDatabase;
 	}
 
 	public void addAll() {
@@ -126,6 +131,15 @@ public class ProjectController {
 		};
 		Thread thread = new Thread(execution);
 		thread.start();
+		showProject(project);
+	}
+	
+	@Put
+	@Path("/project/{project.name}/build/{buildCount}/manual")
+	public void move(Project project, Long buildCount) {
+		project = projects.get(project.getName());
+		Build build = project.getBuild(buildCount);
+		build.proceedToNextPhase(jobs, currentDatabase);
 		showProject(project);
 	}
 

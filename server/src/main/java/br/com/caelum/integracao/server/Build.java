@@ -347,14 +347,10 @@ public class Build {
 			if (successSoFar) {
 				if (project.getPhases().size() != currentPhase) {
 					Phase nextPhase = project.getPhases().get(currentPhase);
-					if(nextPhase.getCommandCount()==0) {
-						finish(false, "Phase " + nextPhase.getName() + " has no commands", null, database);
+					if(nextPhase.isManual()) {
+						finish(true, "Well done. Next phase is manual.", null, database);
 					} else {
-						if(!nextPhase.isManual()) {
-							nextPhase.execute(this, new Jobs(database));
-						} else {
-							finish(true, "Well done. Next phase is manual.", null, database);
-						}
+						proceedToNextPhase(new Jobs(database), database);
 					}
 				} else {
 					finish(true, "Well done.", null, database);
@@ -362,6 +358,15 @@ public class Build {
 			} else {
 				finish(false, "One or more commands failed.", null, database);
 			}
+		}
+	}
+
+	public void proceedToNextPhase(Jobs jobs, Database database) {
+		Phase nextPhase = project.getPhases().get(currentPhase);
+		if(nextPhase.getCommandCount()==0) {
+			finish(false, "Phase " + nextPhase.getName() + " has no commands", null, database);
+		} else {
+			nextPhase.execute(this, jobs);
 		}
 	}
 

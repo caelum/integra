@@ -125,7 +125,7 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 				<#list project.phases as phase>
 					<#if !first>
 						<#if build.canManuallyActivate(last, phase)>
-							<a href="build/${build.buildCount}/manual/${phase.id}?method=_put">(manual)</a>
+							<a href="build/${build.buildCount}/manual?_method=put">(manual)</a>
 						</#if>
 						==>
 					</#if>
