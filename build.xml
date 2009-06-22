@@ -20,6 +20,7 @@
 	</target>
 
 	<target name="war" depends="deploy">
+		<echo message="waring all projects" />
 		<ant antfile="build.xml" inheritall="false" dir="server" target="clean-war" />
 		<ant antfile="build.xml" inheritall="false" dir="client" target="clean-war" />
 	</target>
