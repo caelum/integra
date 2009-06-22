@@ -48,6 +48,12 @@ public class LogFile {
 		this.writer = new PrintWriter(output, true);
 	}
 
+	public LogFile(PrintWriter log) {
+		this.output = null;
+		this.writer = log;
+		this.closed = true;
+	}
+
 	public void error(String msg, Throwable ex) {
 		writer.write("[error]" + msg);
 		ex.printStackTrace(writer);

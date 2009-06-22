@@ -148,7 +148,7 @@ public class GitControl implements ScmControl {
 	}
 
 	private String extractInfoForRevision(PrintWriter log, String revisionRange) throws ScmException {
-		String logContent = extract(log, "git", "--no-pager", "log", revisionRange, "-v", "--non-interactive");
+		String logContent = extract(log, "git", "--no-pager", "log", revisionRange , "-v");
 		return logContent;
 	}
 
@@ -157,7 +157,7 @@ public class GitControl implements ScmControl {
 	}
 
 	public Revision extractRevision(String name, PrintWriter log, String range) throws ScmException {
-		return new Revision(name, extractInfoForRevision(log, range), "");
+		return new Revision(name, extractInfoForRevision(log, range + "^!"), "");
 	}
 
 }

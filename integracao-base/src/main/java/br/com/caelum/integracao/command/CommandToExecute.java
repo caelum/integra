@@ -64,8 +64,8 @@ public class CommandToExecute {
 
 	public int run() {
 		List<String> commands = Arrays.asList(cmd);
-		logger.debug("Ready to execute " + commands);
-		outputWriter.println("[execute] " + baseDir.getAbsolutePath() + "/" + commands);
+		logger.debug("Ready to execute " + baseDir.getAbsolutePath() + "/" + commands);
+		outputWriter.println("execute:" + baseDir.getAbsolutePath() + "/" + commands);
 		ProcessBuilder builder = new ProcessBuilder();
 		baseDir.mkdirs();
 		builder.directory(baseDir);

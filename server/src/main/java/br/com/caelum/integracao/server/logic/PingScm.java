@@ -27,7 +27,8 @@
  */
 package br.com.caelum.integracao.server.logic;
 
-import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -39,7 +40,6 @@ import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Builds;
 import br.com.caelum.integracao.server.Config;
-import br.com.caelum.integracao.server.Files;
 import br.com.caelum.integracao.server.Project;
 import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.dao.Database;
@@ -128,8 +128,10 @@ public class PingScm {
 		if (lastBuild.isFinished() || project.isAllowAutomaticStartNextRevisionWhileBuildingPrevious()) {
 			logger.debug("Checking if " + project.getName() + " needs a build");
 			Revision lastRevision = lastBuild.getRevision();
+			StringWriter logString = new StringWriter();
+			PrintWriter log = new PrintWriter(logString, true);
 			try {
-				File log = File.createTempFile(Files.CHECK_REVISION, ".txt");
+				//da caca aqui qdo ta em reviao antiga (fora dobranch)
 				Revision nextRevision = project.extractRevisionAfter(lastBuild, project.getControl(), builds, new LogFile(log));
 				if (lastRevision == null || !lastRevision.getName().equals(nextRevision.getName())) {
 					logger.debug("Project " + project.getName() + " has a revision '" + nextRevision.getName()
@@ -139,7 +141,7 @@ public class PingScm {
 					logger.debug(project.getName() + " did not require a new build");
 				}
 			} catch (Exception e) {
-				logger.debug("Unable to build project " + project.getName(), e);
+				logger.debug("Unable to build project " + project.getName() + " due to " + logString.getBuffer().toString(), e);
 			}
 		}
 	}
