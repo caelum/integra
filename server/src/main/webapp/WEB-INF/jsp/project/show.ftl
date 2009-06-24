@@ -1,39 +1,40 @@
 <h2>${project.name}</h2>
-<div class="box">
-Uri: ${project.uri }<br />
-Basedir: ${project.buildsDirectory.absolutePath }<br />
-Control: ${project.controlType.name } <br />
-Actions: <a href="run?_method=post">force build</a> (<a href="#specific_revision" onclick="$('#specific_revision').toggle();">specific revision</a>)<br/>
-<div style="display: none;" id="specific_revision">
+	Last build: ${project.lastBuildTime.time?datetime }<br />
+	
 	<form action="run" method="post">
-		<input name="revision" value="" />
-		<input type="submit" value="run" />
+		<input type="submit" value="Force Build" />
+		<a href="#specific_revision" onclick="$('#specific_revision').toggle();">(force specific revision)</a><br/>
+		<div style="display: none;" id="specific_revision">
+			<input name="revision" value="" />
+		</div>
 	</form>
-</div>
-Last build: ${project.lastBuildTime.time?datetime }<br />
-</div>
-<div class="plugin">
-	<div class="plugin_title">Plugins</div>
-	<#list project.plugins as plugin>
-		<span class="plugin_title">${plugin.type.information.name }</span>
-		<span class="commands">
-			(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
-			(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)
-		</span><br/>
-		<span id="plugin_${plugin.id }"></span>
-	</#list>
-	<form action="plugin" method="post">
-		<input type="hidden" name="project.name" value="${project.name }" />
-		<select name="registered.id">
-			<#list plugins as plugin>
-				<#if plugin.information.appliesForAProject()><option value="${plugin.id }">${plugin.information.name }</option></#if>
-			</#list>
-		</select>
-		<input type="submit" value="add" />
-	</form>
+<div class="box" id="info">
+	Uri: ${project.uri }<br />
+	Basedir: ${project.buildsDirectory.absolutePath }<br />
+	Control: ${project.controlType.name } <br />
+	<div class="plugin" id="info_plugins" >
+		<div class="plugin_title">Plugins</div>
+		<#list project.plugins as plugin>
+			<span class="plugin_title">${plugin.type.information.name }</span>
+			<span class="commands">
+				(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
+				(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)
+			</span><br/>
+			<span id="plugin_${plugin.id }"></span>
+		</#list>
+		<form action="plugin" method="post">
+			<input type="hidden" name="project.name" value="${project.name }" />
+			<select name="registered.id">
+				<#list plugins as plugin>
+					<#if plugin.information.appliesForAProject()><option value="${plugin.id }">${plugin.information.name }</option></#if>
+				</#list>
+			</select>
+			<input type="submit" value="add" />
+		</form>
+	</div>
 </div>
 
-<table>
+<table class="large">
 	<tr>
 		<#list project.phases as phase>
 			<td>
@@ -53,49 +54,56 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 					(<a href="command/${cmd.id}?_method=DELETE">remove</a>)
 				</div>
 				</#list>
-				<a href="#new_command_${phase.id}" onclick="$('#new_command_${phase.id}').toggle()">new command</a>
+				<a href="#new_command_${phase.id}" onclick="$('#new_command_${phase.id}').toggle();">new command</a>
 				<div id="new_command_${phase.id}" class="command formulario" style="display: none;">
 					<form action="command" method="post">
 						<input type="hidden" name="phase.id" value="${phase.id }" />
 						(start) <input type="text" name="startCommand" value="" size="5" /> <br/>
 						(stop) <input type="text" name="stopCommand" value="" size="5" /> <br/>
 						(artifacts to push) <input type="text" name="artifactsToPush" value="" size="20" /> <br/>
-						(labels) <textarea name="labels"></textarea>
+						(labels required @ agent) <textarea name="labels" cols="40" rows="5"></textarea>
 						<input type="submit" value="add" />
 					</form>
 				</div>
-				<#list phase.plugins as plugin>
-				<div class="plugin">
-						<span class="plugin_title">${plugin.type.information.name }</span>
-						<span class="commands">
-							(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
-							(<a href="phase/${phase.id}/plugin/${plugin.id}?_method=DELETE">remove</a>)
-						</span>
-						<div id="plugin_${plugin.id }"></div>
-				</div>
-				</#list>
 				<div class="plugin, formulario">
-					<form action="phase/plugin" method="post">
-						<input type="hidden" name="phase.id" value="${phase.id }" />
-						<select name="registered.id">
-							<#list plugins as plugin>
-								<#if plugin.information.appliesForAPhase()><option value="${plugin.id }">${plugin.information.name }</option></#if>
-							</#list>
-						</select>
-						<input type="submit" value="add" />
-					</form>
+					<div class="plugin_title"><a href="#plugins_for_phase_${phase.id}" onclick="$('#plugins_for_phase_${phase.id}').toggle();">Plugins</a></div>
+					<div id="plugins_for_phase_${phase.id}" style="display: none;">
+						<#list phase.plugins as plugin>
+						<div class="plugin">
+								<span class="plugin_title">${plugin.type.information.name }</span>
+								<span class="commands">
+									(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
+									(<a href="phase/${phase.id}/plugin/${plugin.id}?_method=DELETE">remove</a>)
+								</span>
+								<div id="plugin_${plugin.id }"></div>
+						</div>
+						</#list>
+						<form action="phase/plugin" method="post">
+							<input type="hidden" name="phase.id" value="${phase.id }" />
+							<select name="registered.id">
+								<#list plugins as plugin>
+									<#if plugin.information.appliesForAPhase()><option value="${plugin.id }">${plugin.information.name }</option></#if>
+								</#list>
+							</select>
+							<input type="submit" value="add" />
+						</form>
+					</div>
 				</div>
 			</div>
 			</td>
-			<td> --> </td>
+			<td> ----> </td>
 		</#list>
 		<td>
-		<form action="phase" method="post" class="formulario"><input type="hidden"
-			name="project.name" value="${project.name }" />
-			Name: <input size="10" name="phase.name" value="unnamed" />
-			Directories: <input size="10" name="phase.directoriesToCopy" value="" />
-			<input type="checkbox" name="phase.manual" /> require manual move 
-			<input type="submit" value="add" /></form>
+			<div class="box">
+				<div class="subtitle">New phase</div>
+				<form action="phase" method="post" class="formulario">
+					<input type="hidden" name="project.name" value="${project.name }" />
+					Name: <input size="10" name="phase.name" value="test" />
+					Directories to copy to server: <input size="10" name="phase.directoriesToCopy" value="target" />
+					<input type="checkbox" name="phase.manual" /> require manual move 
+					<input type="submit" value="add" />
+				</form>
+			</div>
 		</td>
 	</tr>
 </table>
@@ -123,51 +131,24 @@ Last build: ${project.lastBuildTime.time?datetime }<br />
 			<td>
 				<#assign first = true>
 				<#list project.phases as phase>
-					<div class="build_phase" style="
-					
-						<#if build.hasSucceeded(phase)>
-							background-color: green;
-						<#elseif build.isRunning(phase)>
-							background-color: orange;
-						<#elseif !build.hasRun(phase)>
-							background-color: gray;
-						<#else>
-							background-color: red;
+					<#if !first>
+						<#if build.canManuallyActivate(last, phase)>
+							<span class="phase_title">
+								<a href="build/${build.buildCount}/manual?_method=put">manual</a>
+							</span>
 						</#if>
-						float: left;
-						">
-						<div class="phase_title">
-						<#if !first>
-							<#if build.canManuallyActivate(last, phase)>
-								<a href="build/${build.buildCount}/manual?_method=put">(manual)</a>
-							</#if>
-						</#if>
-						<#assign first = false>
-						<#assign last = phase>
-						<#if build.isRunning(phase) || !build.hasSucceeded(phase)>
-							<a href="#build_${build.id}" onclick="$('#build_${build.id}_${phase.id}').toggle();">${phase.name}</a>
-						<#else>
-							${phase.name}
-						</#if>
-						</div><br/>
-						<div id="build_${build.id}_${phase.id}" style="display: none;">
-						<#list build.getJobsFor(phase) as job>
-							<#if !build.hasRun(phase) & build.isRunning(phase)>
-								<#if !job.finished>
-									<#if job.client??>
-										${job.command.name} @ ${job.client.host}<br/>
-									<#else>
-										${job.command.name} @ waiting for a client<br/>
-									</#if>
-								</#if>
-							<#else>
-								<#if job.finished & (!job.success)>
-										${job.command.name} @ ${job.client.host} failed<br/>
-								</#if>
-							</#if>
-						</#list>
-						</div>
-					</div>
+					</#if>
+					<#assign first = false>
+					<#assign last = phase>
+					<#if build.hasSucceeded(phase)>
+						<img src="../../images/ok.gif" />
+					<#elseif build.isRunning(phase)>
+						<img src="../../images/recycle.gif" />
+					<#elseif !build.hasRun(phase)>
+						<img src="../../images/empty.gif" />
+					<#else>
+						<img src="../../images/notok.gif" />
+					</#if>
 				</#list>
 			</td>
 		</tr>

@@ -10,8 +10,7 @@
 	<!-- <meta http-equiv="refresh" content="40" /> -->
 	<title><decorator:title default="Integracao" /></title>
 	<div class="actions">
-		<a href="${pageContext.request.contextPath }/client/form">new client</a>
-		<a href="${pageContext.request.contextPath }/client/list">list clients</a>
+		<a href="${pageContext.request.contextPath }/client/list">agents</a>
 		<a href="${pageContext.request.contextPath }/project/">list projects</a>
 		<a href="${pageContext.request.contextPath }/settings">settings</a>
 		<a href="${pageContext.request.contextPath }/jobs">jobs</a>
