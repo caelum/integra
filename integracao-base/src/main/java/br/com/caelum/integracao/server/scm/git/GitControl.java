@@ -142,11 +142,11 @@ public class GitControl implements ScmControl {
 			return fromRevision;
 		}
 
-		log.println("diff message was: " + diff);
+		log.println("\ndiff message was: " + diff + "\n");
 		int start = diff.lastIndexOf("commit ", diff.lastIndexOf("Author:")) + "commit ".length();
-		int end = diff.indexOf(" ", start);
-		String baseName = diff.substring(start, end);
-		log.println("diff basename is " +baseName);
+		log.println("\nstart=\n" + start);
+		String baseName = diff.substring(start, start + "0f367b2fd83947fe916c3a54da2a341e28b88d78".length());
+		log.println("\ndiff basename is " +baseName + "\n");
 		return extractRevision(baseName, log, baseName);
 	}
 
