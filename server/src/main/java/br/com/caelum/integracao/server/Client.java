@@ -164,6 +164,7 @@ public class Client {
 	}
 
 	public void tag(List<Label> list) {
+		this.labels.clear();
 		this.labels.addAll(list);
 	}
 

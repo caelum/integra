@@ -46,7 +46,6 @@ public class CommandToExecute {
 	private final String[] cmd;
 	private File baseDir;
 	private PrintWriter outputWriter = new PrintWriter(System.out, true);
-	private boolean closeWriter = false;
 	private Thread waitThread;
 	private Thread outputThread;
 	private Process process;
@@ -118,16 +117,11 @@ public class CommandToExecute {
 		} catch (InterruptedException e) {
 			// someone told me to STOP this job, ok ,please stop it now!!!
 			throw new RuntimeException(e);
-		} finally {
-			if (closeWriter) {
-				this.outputWriter.close();
-			}
 		}
 	}
 
 	public CommandToExecute logTo(Writer writer) {
 		this.outputWriter = new PrintWriter(writer, true);
-		this.closeWriter = true;
 		return this;
 	}
 

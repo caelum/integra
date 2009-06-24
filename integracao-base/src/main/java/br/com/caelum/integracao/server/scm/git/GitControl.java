@@ -30,6 +30,7 @@ package br.com.caelum.integracao.server.scm.git;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +126,7 @@ public class GitControl implements ScmControl {
 		StringWriter writer = new StringWriter();
 		prepare(cmd).logTo(writer).at(getDir()).run();
 		String content = writer.getBuffer().toString();
-		log.println(content);
+		log.println(Arrays.toString(cmd) + " resulted in: " + content);
 		return content;
 	}
 
@@ -135,16 +136,18 @@ public class GitControl implements ScmControl {
 			throw new ScmException("Unable to load data and revision information.");
 		}
 		String diff = extract(log, "git", "--no-pager", "log", fromRevision.getName() + "..HEAD", "--shortstat");
+		logger.debug("diff was " + diff);
 		if (diff.indexOf("files changed") == -1) {
 			// there was no change in the content
 			return fromRevision;
 		}
 
-		int start = diff.lastIndexOf("commit ", diff.lastIndexOf("Author:", diff.indexOf("|"))) + 1;
+		log.println("diff message was: " + diff);
+		int start = diff.lastIndexOf("commit ", diff.lastIndexOf("Author:")) + "commit ".length();
 		int end = diff.indexOf(" ", start);
 		String baseName = diff.substring(start, end);
-		String name = baseName + "^.." + baseName;
-		return extractRevision(name, log, name);
+		log.println("diff basename is " +baseName);
+		return extractRevision(baseName, log, baseName);
 	}
 
 	private String extractInfoForRevision(PrintWriter log, String revisionRange) throws ScmException {

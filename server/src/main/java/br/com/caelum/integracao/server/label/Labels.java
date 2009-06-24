@@ -66,6 +66,7 @@ public class Labels {
 		List<Label> list = new ArrayList<Label>();
 		String[] tagsFound = tags.split("\\s*,\\s*");
 		for(String tag : tagsFound) {
+			tag = tag.trim();
 			if(!tag.equals("")) {
 				list.add(getLabel(tag));
 			}

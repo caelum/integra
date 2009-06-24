@@ -103,7 +103,7 @@ public class Phase {
 					+ commands.size() + " parallel commands.");
 		}
 		build.getFile(name).mkdirs();
-		for (BuildCommand command : commands) {
+		for (BuildCommand command : getCommands()) {
 			jobs.add(new Job(build, command));
 		}
 	}
