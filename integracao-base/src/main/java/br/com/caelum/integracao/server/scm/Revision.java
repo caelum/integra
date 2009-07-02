@@ -43,14 +43,16 @@ public class Revision {
 	@Column(length=10000)
 	private String message;
 	private String author;
+	private String date;
 	
-	public Revision(String name, String message, String author) {
+	public Revision(String name, String message, String author, String date) {
 		this.name = name;
 		this.message = message;
 		this.author = author;
+		this.date = date;
 	}
 
-	protected Revision() {
+	Revision() {
 	}
 	
 	public String getName() {
@@ -64,6 +66,10 @@ public class Revision {
 	
 	public String getMessage() {
 		return message;
+	}
+	
+	public String getDate() {
+		return date;
 	}
 
 }

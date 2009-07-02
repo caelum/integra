@@ -135,7 +135,7 @@ public class SvnControl implements ScmControl {
 	}
 
 	public Revision extractRevision(String name, PrintWriter log, String range) throws ScmException {
-		return new Revision(name, extractInfoForRevision(log, range), "");
+		return new Revision(name, extractInfoForRevision(log, range), "", "");
 	}
 
 	public String getIgnorePattern() {

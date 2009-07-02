@@ -316,8 +316,14 @@ public class Project {
 		return allowAutomaticStartNextRevisionWhileBuildingPrevious;
 	}
 
-	public void setLastRevisionBuilt(Revision lastRevisionBuilt) {
-		this.lastRevisionBuilt = lastRevisionBuilt;
+	public void setLastRevisionBuilt(Revision newer) {
+		if(lastRevisionBuilt==null || lastRevisionBuilt.getDate().compareTo(newer.getDate())>=0) {
+			this.lastRevisionBuilt = lastRevisionBuilt;
+		}
+	}
+
+	public Revision getLastRevisionBuilt() {
+		return lastRevisionBuilt;
 	}
 
 }

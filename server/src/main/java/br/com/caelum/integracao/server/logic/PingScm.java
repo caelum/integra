@@ -136,7 +136,7 @@ public class PingScm {
 			PrintWriter log = new PrintWriter(logString, true);
 			try {
 				Revision nextRevision = project.extractNextRevision(project.getControl(), builds, new LogFile(log));
-				if (project.getLastBuiltRevision().getName().equals(nextRevision.getName())) {
+				if (project.getLastRevisionBuilt().getName().equals(nextRevision.getName())) {
 					logger.debug("Project " + project.getName() + " has a revision '" + nextRevision.getName()
 							+ "', therefore we will start the build.");
 					new ProjectStart(db).runProject(project.getName(), null);
