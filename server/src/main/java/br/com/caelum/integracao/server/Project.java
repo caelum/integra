@@ -37,6 +37,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -102,6 +103,7 @@ public class Project {
 	@NotNull
 	private Calendar lastBuild = new GregorianCalendar();
 
+	@ManyToOne
 	private Revision lastRevisionBuilt;
 
 	@OneToMany
@@ -268,14 +270,14 @@ public class Project {
 		this.buildEveryRevision = buildEveryRevision;
 	}
 
-	public Revision extractRevision(Builds builds, ScmControl control, LogFile file, String name)
+	public Revision extractRevision(Builds builds, ScmControl control, LogFile file, String revisionName)
 			throws ScmException {
-		logger.debug("Checking revision for " + getName() + ", name = " + name);
-		Revision found = builds.contains(this, name);
+		logger.debug("Checking revision for " + getName() + ", name = " + revisionName);
+		Revision found = builds.contains(this, revisionName);
 		if (found != null) {
 			return found;
 		}
-		Revision revision = control.extractRevision(name, file.getWriter(), name);
+		Revision revision = control.extractRevision(revisionName, file.getWriter(), revisionName);
 		builds.register(revision);
 		return revision;
 	}

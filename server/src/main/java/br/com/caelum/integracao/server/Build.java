@@ -160,11 +160,12 @@ public class Build {
 		try {
 			LogFile checkoutLog = new LogFile(file);
 			ScmControl control = project.getControl();
-			if (name == null) {
-				this.revision = project.extractNextRevision(this, builds, control, checkoutLog);
+			if (name == null || name.equals("")) {
+				this.revision = project.extractNextRevision(control, builds,  checkoutLog);
 			} else {
 				this.revision = project.extractRevision(builds, control, checkoutLog, name);
 			}
+			project.setLastRevisionBuilt(revision);
 			return checkoutContent(database, checkoutLog, control);
 		} catch (Exception ex) {
 			finish(false, "Unable to retrieve revision for " + project.getName(), ex, database);

@@ -99,21 +99,26 @@ public class PingScm {
 		} catch (Exception ex) {
 			logger.error("Something really nasty ocurred while pinging the scm servers", ex);
 		} finally {
-			if(!db.isClosed()) {
+			if (!db.isClosed()) {
+				if (db.hasTransaction()) {
+					db.rollback();
+				}
 				db.close();
 			}
 		}
 	}
 
 	private void buildProjects() {
-		Database db = new Database(factory);
-		try {
-			Projects projects = new Projects(db);
-			for (Project project : projects.all()) {
-				tryToBuild(db, project);
+		synchronized (ProjectStart.protectTwoBuildsOfStartingAtTheSameTime) {
+			Database db = new Database(factory);
+			try {
+				Projects projects = new Projects(db);
+				for (Project project : projects.all()) {
+					tryToBuild(db, project);
+				}
+			} finally {
+				db.close();
 			}
-		} finally {
-			db.close();
 		}
 	}
 
@@ -140,7 +145,8 @@ public class PingScm {
 					logger.debug(project.getName() + " did not require a new build");
 				}
 			} catch (Exception e) {
-				logger.debug("Unable to build project " + project.getName() + " due to " + logString.getBuffer().toString(), e);
+				logger.debug("Unable to build project " + project.getName() + " due to "
+						+ logString.getBuffer().toString(), e);
 			}
 		}
 	}
