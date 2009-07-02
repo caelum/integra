@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,10 +27,6 @@
  */
 package br.com.caelum.integracao.server;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -42,6 +38,10 @@ import br.com.caelum.integracao.server.project.BaseTest;
 import br.com.caelum.integracao.server.scm.Revision;
 import br.com.caelum.integracao.server.scm.ScmException;
 import br.com.caelum.integracao.server.scm.svn.SvnControl;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 public class ProjectTest extends BaseTest {
 
@@ -102,20 +102,19 @@ public class ProjectTest extends BaseTest {
 	@Test
 	public void returnsTheSameRevisionIfThereIsNoNewRevision() throws IOException, ScmException {
 		final Revision old = mockery.mock(Revision.class);
-		final Build previous = mockery.mock(Build.class);
 		final SvnControl control = mockery.mock(SvnControl.class);
 		final Builds builds = mockery.mock(Builds.class);
 		final LogFile log = new LogFile(new File(baseDir, "tmp.log"));
 		final Project p = new Project();
+		p.setLastRevisionBuilt(old);
 		mockery.checking(new Expectations() {
 			{
-				one(previous).getRevision(); will(returnValue(old));
 				one(control).getNextRevision(old, log.getWriter()); will(returnValue(old));
 				allowing(old).getName(); will(returnValue("revision-name"));
 				one(builds).contains(p, "revision-name"); will(returnValue(old));
 			}
 		});
-		Revision found = p.extractRevisionAfter(previous, control, builds, log);
+		Revision found = p.extractRevisionAfter( control, builds, log);
 		assertThat(found, is(equalTo(old)));
 		mockery.assertIsSatisfied();
 	}
@@ -125,21 +124,20 @@ public class ProjectTest extends BaseTest {
 	public void savesTheNewRevisionIfThereIsANewRevision() throws IOException, ScmException {
 		final Revision old = mockery.mock(Revision.class);
 		final Revision next = mockery.mock(Revision.class, "next");
-		final Build previous = mockery.mock(Build.class);
 		final SvnControl control = mockery.mock(SvnControl.class);
 		final Builds builds = mockery.mock(Builds.class);
 		final LogFile log = new LogFile(new File(baseDir, "tmp.log"));
 		final Project p = new Project();
+		p.setLastRevisionBuilt(old);
 		mockery.checking(new Expectations() {
 			{
-				one(previous).getRevision(); will(returnValue(old));
 				one(control).getNextRevision(old, log.getWriter()); will(returnValue(next));
 				allowing(next).getName(); will(returnValue("revision-name"));
 				one(builds).contains(p, "revision-name"); will(returnValue(null));
 				one(builds).register(next);
 			}
 		});
-		Revision found = p.extractRevisionAfter(previous, control, builds, log);
+		Revision found = p.extractRevisionAfter(control, builds, log);
 		assertThat(found, is(equalTo(next)));
 		mockery.assertIsSatisfied();
 	}
@@ -149,22 +147,21 @@ public class ProjectTest extends BaseTest {
 	public void asksForCurrentRevisionIfNotSupposedToBuildEveryRevision() throws IOException, ScmException {
 		final Revision old = mockery.mock(Revision.class);
 		final Revision next = mockery.mock(Revision.class, "next");
-		final Build previous = mockery.mock(Build.class);
 		final SvnControl control = mockery.mock(SvnControl.class);
 		final Builds builds = mockery.mock(Builds.class);
 		final LogFile log = new LogFile(new File(baseDir, "tmp.log"));
 		final Project p = new Project();
 		p.setBuildEveryRevision(false);
+		p.setLastRevisionBuilt(old);
 		mockery.checking(new Expectations() {
 			{
-				one(previous).getRevision(); will(returnValue(old));
 				one(control).getCurrentRevision(old, log.getWriter()); will(returnValue(next));
 				allowing(next).getName(); will(returnValue("revision-name"));
 				one(builds).contains(p, "revision-name"); will(returnValue(null));
 				one(builds).register(next);
 			}
 		});
-		Revision found = p.extractRevisionAfter(previous, control, builds, log);
+		Revision found = p.extractRevisionAfter(control, builds, log);
 		assertThat(found, is(equalTo(next)));
 		mockery.assertIsSatisfied();
 	}

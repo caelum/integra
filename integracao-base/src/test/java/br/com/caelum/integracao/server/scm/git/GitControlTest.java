@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -63,12 +63,12 @@ public class GitControlTest extends AtDirectoryTest {
 
 		PrintWriter log = new PrintWriter(new StringWriter());
 
-		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "my-cloned-cruise");
+		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "checking-in");
 		Assert.assertEquals(0, control1.checkoutOrUpdate(null, log));
 		File file = new File(control1.getDir(), "test-file");
-		givenA(file, "second file content\n");
+		givenA(file, "second file content");
 
-		GitControl control2 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "apostilas-2");
+		GitControl control2 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "checking-out");
 		Assert.assertEquals(0, control2.checkoutOrUpdate(null, log));
 
 		Assert.assertEquals(0, control1.add(file));
@@ -76,7 +76,7 @@ public class GitControlTest extends AtDirectoryTest {
 		control2.checkoutOrUpdate(null, log);
 		File found = new File(control2.getDir(), "test-file");
 		Assert.assertTrue(found.exists());
-		Assert.assertEquals("second file content\n", contentOf(found));
+		Assert.assertEquals("second file content", contentOf(found));
 		control2.remove(found);
 		control2.commit("removed test file");
 		control1.checkoutOrUpdate(null, log);
