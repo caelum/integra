@@ -17,12 +17,12 @@
 		<a href="${pageContext.request.contextPath }/admin/stats">statistics</a>
 		<br/>
 	</div>
-	<link rel="stylesheet" type="text/css" media="all" href="/integracao/css/integracao.css" />
-	<link rel="stylesheet" type="text/css" media="all" href="/integracao/css/jquery-ui-1.7.2.custom.css" />
+	<link rel="stylesheet" type="text/css" media="all" href="${pageContext.request.contextPath }/css/integracao.css" />
+	<link rel="stylesheet" type="text/css" media="all" href="${pageContext.request.contextPath }/css/jquery-ui-1.7.2.custom.css" />
 </head>
 	<body>
-		<script type="text/javascript" src="/integracao/js/jquery-1.3.2.min.js" charset="ISO-8859-1"></script>
-		<script type="text/javascript" src="/integracao/js/jquery-ui-1.7.2.custom.min.js" charset="ISO-8859-1"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath }/js/jquery-1.3.2.min.js" charset="ISO-8859-1"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath }/js/jquery-ui-1.7.2.custom.min.js" charset="ISO-8859-1"></script>
 		<div id="content">
 			<decorator:body />
 		</div>

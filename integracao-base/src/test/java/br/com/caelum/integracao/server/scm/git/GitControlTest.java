@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -38,20 +38,24 @@ import org.junit.Test;
 
 import br.com.caelum.integracao.AtDirectoryTest;
 import br.com.caelum.integracao.command.CommandToExecute;
+import br.com.caelum.integracao.server.scm.Revision;
 import br.com.caelum.integracao.server.scm.ScmException;
 
 public class GitControlTest extends AtDirectoryTest {
 
 	private File myGitDir;
+	private PrintWriter log;
 
 	@Before
-	public void configGit() throws IOException {
+	public void configGit() throws IOException, ScmException {
 		this.myGitDir = new File(baseDir, "cruise");
 		prepare("git", "init").at(myGitDir).run();
 		File file = new File(myGitDir, "sample-file");
 		givenA(file, "misc content\n");
 		prepare("git", "add", file.getAbsolutePath()).at(myGitDir).run();
 		prepare("git", "commit", "-m", "ha").at(myGitDir).run();
+
+		this.log = new PrintWriter(new StringWriter());
 	}
 
 	private CommandToExecute prepare(String... cmd) {
@@ -61,14 +65,12 @@ public class GitControlTest extends AtDirectoryTest {
 	@Test
 	public void shouldCommitAndReceiveUpdate() throws IOException, ScmException {
 
-		PrintWriter log = new PrintWriter(new StringWriter());
-
-		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "my-cloned-cruise");
+		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "checking-in");
 		Assert.assertEquals(0, control1.checkoutOrUpdate(null, log));
 		File file = new File(control1.getDir(), "test-file");
-		givenA(file, "second file content\n");
+		givenA(file, "second file content");
 
-		GitControl control2 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "apostilas-2");
+		GitControl control2 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "checking-out");
 		Assert.assertEquals(0, control2.checkoutOrUpdate(null, log));
 
 		Assert.assertEquals(0, control1.add(file));
@@ -76,11 +78,65 @@ public class GitControlTest extends AtDirectoryTest {
 		control2.checkoutOrUpdate(null, log);
 		File found = new File(control2.getDir(), "test-file");
 		Assert.assertTrue(found.exists());
-		Assert.assertEquals("second file content\n", contentOf(found));
+		Assert.assertEquals("second file content", contentOf(found));
 		control2.remove(found);
 		control2.commit("removed test file");
 		control1.checkoutOrUpdate(null, log);
 		Assert.assertFalse(file.exists());
+	}
+
+	@Test
+	public void shouldBeAbleToCheckoutHeadIfUsingNextRevisionWithNullRevision() throws ScmException {
+		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "checking-in");
+		Revision revision = control1.getNextRevision(null, log);
+		File found = new File(control1.getDir(), "sample-file");
+		Assert.assertTrue(found.exists());
+
+		String expectedRevision = currentRevision();
+		Assert.assertEquals(expectedRevision, revision.getName());
+
+	}
+
+
+	@Test
+	public void shouldBeAbleToCheckoutNextIfUsingNextRevision() throws ScmException, IOException {
+		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "checking-in");
+		Assert.assertEquals(0, control1.checkoutOrUpdate(null, log));
+		File file = new File(control1.getDir(), "test-file");
+		givenA(file, "second file content");
+
+		GitControl control2 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "checking-out");
+		Revision previous = control2.getNextRevision(null, log);
+
+		Assert.assertEquals(0, control1.add(file));
+		Assert.assertEquals(0, control1.commit("commiting test file"));
+
+		Revision current = control2.getNextRevision(previous, log);
+
+		String expectedRevision = currentRevision();
+		Assert.assertEquals(expectedRevision, current.getName());
+
+	}
+
+	@Test
+	public void shouldReturnTheSameRevisionIfNothingWasChanged() throws ScmException, IOException {
+		GitControl control1 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "checking-in");
+		Assert.assertEquals(0, control1.checkoutOrUpdate(null, log));
+
+		GitControl control2 = new GitControl(myGitDir.getAbsolutePath(), baseDir, "checking-out");
+		Revision previous = control2.getNextRevision(null, log);
+		Revision current = control2.getNextRevision(previous, log);
+		Assert.assertEquals(previous, current);
+
+	}
+
+	private String currentRevision() {
+		StringWriter writer = new StringWriter();
+		PrintWriter temp = new PrintWriter(writer);
+		Assert.assertEquals(0,prepare("git", "--no-pager", "log").at(myGitDir).logTo(temp).run());
+		String content = writer.getBuffer().toString();
+		content = content.substring(content.indexOf("\n")+1);
+		return content.substring("commit ".length(), content.indexOf("\n"));
 	}
 
 }

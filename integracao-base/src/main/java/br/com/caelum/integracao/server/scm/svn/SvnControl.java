@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,8 +42,8 @@ public class SvnControl implements ScmControl {
 
 	private final String uri;
 	private final File baseDir;
-	private String baseName;
-	private File baseDirectory;
+	private final String baseName;
+	private final File baseDirectory;
 
 	public SvnControl(String uri, File baseDir, String baseName) {
 		this.uri = uri;
@@ -92,14 +92,14 @@ public class SvnControl implements ScmControl {
 		return prepare("svn", "remove", file.getAbsolutePath()).at(file.getParentFile()).run();
 	}
 
-	public Revision getCurrentRevision(Revision fromRevision, PrintWriter log) throws ScmException {
+	public Revision getCurrentRevision(Revision revision, PrintWriter log) throws ScmException {
 		String content = extract(log, "svn", "info", uri, "--non-interactive");
 		int pos = content.indexOf("Last Changed Rev: ");
 		String name = content.substring(pos + "Last Changed Rev: ".length(), content.indexOf("\n", pos));
 
 		String from = "";
-		if (fromRevision != null) {
-			from = "" + (Long.parseLong(fromRevision.getName()) + 1) + ":";
+		if (revision != null) {
+			from = "" + (Long.parseLong(revision.getName()) + 1) + ":";
 		}
 		return extractRevision(name, log, from + "HEAD");
 	}
@@ -117,21 +117,21 @@ public class SvnControl implements ScmControl {
 		return content;
 	}
 
-	public Revision getNextRevision(Revision fromRevision, PrintWriter log) throws ScmException {
-		
-		String checkRange = (Long.parseLong(fromRevision.getName())+1)+ ":HEAD";
+	public Revision getNextRevision(Revision revision, PrintWriter log) throws ScmException {
+
+		String checkRange = (Long.parseLong(revision.getName())+1)+ ":HEAD";
 		String diff = extract(log, "svn", "log", uri, "-r", checkRange, "-v", "--non-interactive");
 		if(diff.indexOf("Changed paths:")==-1) {
 			// there was no change in the content
-			return fromRevision;
+			return revision;
 		}
-		
+
 		int start = diff.lastIndexOf("r", diff.indexOf("|")) +1;
 		int end = diff.indexOf( " ", start);
 		String name = diff.substring(start,end);
 		Revision nextRevision = extractRevision(name, log, name);
 		return nextRevision;
-		
+
 	}
 
 	public Revision extractRevision(String name, PrintWriter log, String range) throws ScmException {
@@ -141,5 +141,5 @@ public class SvnControl implements ScmControl {
 	public String getIgnorePattern() {
 		return ".*\\.svn";
 	}
-	
+
 }

@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -37,6 +37,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -58,7 +59,7 @@ import br.com.caelum.integracao.server.scm.ScmException;
 
 /**
  * Represents a project which should be built.
- * 
+ *
  * @author guilherme silveira
  */
 @Entity
@@ -102,10 +103,13 @@ public class Project {
 	@NotNull
 	private Calendar lastBuild = new GregorianCalendar();
 
+	@ManyToOne
+	private Revision lastRevisionBuilt;
+
 	@OneToMany
 	@OrderBy("position")
 	@Cascade(CascadeType.ALL)
-	private List<PluginToRun> plugins = new ArrayList<PluginToRun>();
+	private final List<PluginToRun> plugins = new ArrayList<PluginToRun>();
 
 	protected Project() {
 	}
@@ -266,36 +270,26 @@ public class Project {
 		this.buildEveryRevision = buildEveryRevision;
 	}
 
-	public Revision extractNextRevision(Build forBuild, Builds builds, ScmControl control, LogFile file)
+	public Revision extractRevision(Builds builds, ScmControl control, LogFile file, String revisionName)
 			throws ScmException {
-		logger.debug("Checking revision for " + getName() + ", build = " + buildCount);
-		Build previousBuild = getBuild(forBuild.getBuildCount() - 1);
-		return extractRevisionAfter(previousBuild, control, builds, file);
-
-	}
-
-	public Revision extractRevision(Builds builds, ScmControl control, LogFile file, String name)
-			throws ScmException {
-		logger.debug("Checking revision for " + getName() + ", name = " + name);
-		Revision found = builds.contains(this, name);
+		logger.debug("Checking revision for " + getName() + ", name = " + revisionName);
+		Revision found = builds.contains(this, revisionName);
 		if (found != null) {
 			return found;
 		}
-		Revision revision = control.extractRevision(name, file.getWriter(), name);
+		Revision revision = control.extractRevision(revisionName, file.getWriter(), revisionName);
 		builds.register(revision);
 		return revision;
 	}
 
-	public Revision extractRevisionAfter(Build previousBuild, ScmControl control, Builds builds, LogFile log)
+	/**
+	 * Extracts the information on the revision after this one.
+	 */
+	public Revision extractNextRevision(ScmControl control, Builds builds, LogFile log)
 			throws ScmException {
-		Revision lastRevision = previousBuild == null ? null : previousBuild.getRevision();
+		logger.debug("Checking next revision for " + getName() + ", build = " + buildCount);
 
-		Revision revision;
-		if (lastRevision != null && isBuildEveryRevision()) {
-			revision = control.getNextRevision(lastRevision, log.getWriter());
-		} else {
-			revision = control.getCurrentRevision(lastRevision, log.getWriter());
-		}
+		Revision revision = getNextRevisionToBuild(control, log);
 
 		Revision found = builds.contains(this, revision.getName());
 		if (found != null) {
@@ -305,6 +299,14 @@ public class Project {
 		return revision;
 	}
 
+	private Revision getNextRevisionToBuild(ScmControl control, LogFile log)
+			throws ScmException {
+		if (isBuildEveryRevision()) {
+			return control.getNextRevision(lastRevisionBuilt, log.getWriter());
+		}
+		return control.getCurrentRevision(lastRevisionBuilt, log.getWriter());
+	}
+
 	public void setAllowAutomaticStartNextRevisionWhileBuildingPrevious(
 			boolean allowAutomaticStartNextRevisionWhileBuildingPrevious) {
 		this.allowAutomaticStartNextRevisionWhileBuildingPrevious = allowAutomaticStartNextRevisionWhileBuildingPrevious;
@@ -312,6 +314,10 @@ public class Project {
 
 	public boolean isAllowAutomaticStartNextRevisionWhileBuildingPrevious() {
 		return allowAutomaticStartNextRevisionWhileBuildingPrevious;
+	}
+
+	public void setLastRevisionBuilt(Revision lastRevisionBuilt) {
+		this.lastRevisionBuilt = lastRevisionBuilt;
 	}
 
 }

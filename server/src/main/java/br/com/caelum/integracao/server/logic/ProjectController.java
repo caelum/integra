@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -43,8 +43,10 @@ import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.plugin.RegisteredPlugin;
+import br.com.caelum.integracao.server.queue.DatabaseRunnable;
 import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;
+import br.com.caelum.integracao.server.queue.OtherThreadRunner;
 import br.com.caelum.integracao.server.queue.QueueThread;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
@@ -118,22 +120,16 @@ public class ProjectController {
 			validator.add(new ValidationMessage("", "project_not_found"));
 		}
 		validator.validate();
-		Runnable execution = new Runnable() {
-			public void run() {
-				Database db = new Database(factory);
-				try {
-					new ProjectStart(db).runProject(found.getName(), revision);
-					queue.wakeup();
-				} finally {
-					db.close();
-				}
+		OtherThreadRunner runner = new OtherThreadRunner(factory, new DatabaseRunnable() {
+			public void run(Database db) {
+				new ProjectStart(db).runProject(found.getName(), revision);
+				queue.wakeup();
 			}
-		};
-		Thread thread = new Thread(execution);
-		thread.start();
+		});
+		runner.start();
 		showProject(project);
 	}
-	
+
 	@Put
 	@Path("/project/{project.name}/build/{buildCount}/manual")
 	public void move(Project project, Long buildCount) {
@@ -155,18 +151,14 @@ public class ProjectController {
 			// TODO IMPORTANT JOB CHECK IF THIS IS THE RIGHT CLIENT, ITS STILL MISSING< OTHERWISE IM CLOSING THE WRONG CLIENT
 			loaded.getClient().leaveJob();
 		}
-		new Thread(new Runnable() {
-			public void run() {
-				Database database = new Database(factory);
-				try {
-					new ProjectContinue(database).nextPhase(job.getId(), checkoutResult, startResult,
-							stopResult, success, zipOutput, content, artifactsOutput, artifacts);
-					queue.wakeup();
-				} finally {
-					database.close();
-				}
+		OtherThreadRunner runner = new OtherThreadRunner(factory, new DatabaseRunnable() {
+			public void run(Database db) {
+				new ProjectContinue(db).nextPhase(job.getId(), checkoutResult, startResult,
+						stopResult, success, zipOutput, content, artifactsOutput, artifacts);
+				queue.wakeup();
 			}
-		}).start();
+		});
+		runner.start();
 		this.result.use(Results.nothing());
 	}
 

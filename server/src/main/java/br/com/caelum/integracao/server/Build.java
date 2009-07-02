@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,9 +62,9 @@ import br.com.caelum.integracao.zip.Zipper;
 
 /**
  * Represents an build either in process or already processed.
- * 
+ *
  * @author guilherme silveira
- * 
+ *
  */
 @Entity
 public class Build {
@@ -92,16 +92,16 @@ public class Build {
 	private boolean finished = false;
 
 	/** when the build started */
-	private Calendar startTime = new GregorianCalendar();
+	private final Calendar startTime = new GregorianCalendar();
 
 	/** when the build finished */
 	private Calendar finishTime;
 
 	@OneToMany(mappedBy = "build")
-	private List<Job> jobs = new ArrayList<Job>();
+	private final List<Job> jobs = new ArrayList<Job>();
 
 	@OneToMany(mappedBy = "build")
-	private List<Tab> tabs = new ArrayList<Tab>();
+	private final List<Tab> tabs = new ArrayList<Tab>();
 
 	@Column(length = 10000)
 	private String resultMessage;
@@ -143,34 +143,39 @@ public class Build {
 		return new File(getBaseDirectory(), filename);
 	}
 
+	/**
+	 * Sets this build revision to the following revision after the one passed
+	 * by the name parameter.<br>
+	 * If name is null, extracts the HEAD revision.
+	 *
+	 * @param name
+	 *            the current revision
+	 */
 	public boolean setRevisionAsNextOne(Projects projects, Builds builds, Database database, String name) {
 		this.currentPhase = 0;
 		logger.debug("Starting executing build for " + project.getName() + " at "
 				+ project.getBaseDir().getAbsolutePath());
 		File file = getFile("revision-checkout.txt");
 		projects.register(new Tab(this, "Checkout commands and log", "revision-checkout.txt"));
-		LogFile logFile = null;
 		try {
-			logFile = new LogFile(file);
+			LogFile checkoutLog = new LogFile(file);
 			ScmControl control = project.getControl();
-			if (name == null) {
-				this.revision = project.extractNextRevision(this, builds, control, logFile);
+			if (name == null || name.equals("")) {
+				this.revision = project.extractNextRevision(control, builds,  checkoutLog);
 			} else {
-				this.revision = project.extractRevision(builds, control, logFile, name);
+				this.revision = project.extractRevision(builds, control, checkoutLog, name);
 			}
-			return checkoutContent(database, logFile, control);
+			project.setLastRevisionBuilt(revision);
+			return checkoutContent(database, checkoutLog, control);
 		} catch (Exception ex) {
 			finish(false, "Unable to retrieve revision for " + project.getName(), ex, database);
 			return false;
-		} finally {
-			if (logFile != null) {
-				logFile.close();
-			}
 		}
 	}
 
 	private boolean checkoutContent(Database database, LogFile logFile, ScmControl control) throws ScmException {
 		int result = control.checkoutOrUpdate(revision.getName(), new PrintWriter(logFile.getWriter()) {
+			@Override
 			public void close() {
 			}
 		});
@@ -216,7 +221,7 @@ public class Build {
 		List<Phase> phases = project.getPhases();
 		if (!phases.isEmpty()) {
 			Phase phase = phases.get(0);
-			if (phase.getCommandCount()==0) {
+			if (phase.getCommandCount() == 0) {
 				finish(false, "There are no commands at the first phase.", null, db);
 			} else {
 				phase.execute(this, jobs);
@@ -347,7 +352,7 @@ public class Build {
 			if (successSoFar) {
 				if (project.getPhases().size() != currentPhase) {
 					Phase nextPhase = project.getPhases().get(currentPhase);
-					if(nextPhase.isManual()) {
+					if (nextPhase.isManual()) {
 						finish(true, "Well done. Next phase is manual.", null, database);
 					} else {
 						proceedToNextPhase(new Jobs(database), database);
@@ -363,7 +368,7 @@ public class Build {
 
 	public void proceedToNextPhase(Jobs jobs, Database database) {
 		Phase nextPhase = project.getPhases().get(currentPhase);
-		if(nextPhase.getCommandCount()==0) {
+		if (nextPhase.getCommandCount() == 0) {
 			finish(false, "Phase " + nextPhase.getName() + " has no commands", null, database);
 		} else {
 			nextPhase.execute(this, jobs);
@@ -393,15 +398,15 @@ public class Build {
 		int position = phase.getProject().getPhases().indexOf(phase);
 		return currentPhase > position;
 	}
-	
+
 	public boolean isRunning(Phase phase) {
 		int position = phase.getProject().getPhases().indexOf(phase);
 		return currentPhase == position && !isFinished();
 	}
 
 	public boolean hasSucceeded(Phase phase) {
-		if(!hasRun(phase) ) {
-			return false; 
+		if (!hasRun(phase)) {
+			return false;
 		}
 		List<Job> jobs = getJobsFor(phase);
 		for (Job j : jobs) {
@@ -419,21 +424,21 @@ public class Build {
 	public void publishArtifact(File directory) throws IOException {
 		new Zipper(directory).addExactly("").logTo(new PrintWriter(System.out)).zip(getArtifactsToPush(), true);
 	}
-	
+
 	public boolean canManuallyActivate(Phase last, Phase phase) {
-		if(!phase.isManual()) {
+		if (!phase.isManual()) {
 			return false;
 		}
-		if(!hasRun(last)) {
+		if (!hasRun(last)) {
 			return false;
 		}
-		if(hasRun(phase)) {
+		if (hasRun(phase)) {
 			return false;
 		}
-		if(isRunning(phase)) {
+		if (isRunning(phase)) {
 			return false;
 		}
 		return true;
 	}
-	
+
 }

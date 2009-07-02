@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -50,7 +50,7 @@ import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 /**
  * Pings the scm server once in a while.
- * 
+ *
  * @author guilherme silveira
  */
 @ApplicationScoped
@@ -99,21 +99,26 @@ public class PingScm {
 		} catch (Exception ex) {
 			logger.error("Something really nasty ocurred while pinging the scm servers", ex);
 		} finally {
-			if(!db.isClosed()) {
+			if (!db.isClosed()) {
+				if (db.hasTransaction()) {
+					db.rollback();
+				}
 				db.close();
 			}
 		}
 	}
 
 	private void buildProjects() {
-		Database db = new Database(factory);
-		try {
-			Projects projects = new Projects(db);
-			for (Project project : projects.all()) {
-				tryToBuild(db, project);
+		synchronized (ProjectStart.protectTwoBuildsOfStartingAtTheSameTime) {
+			Database db = new Database(factory);
+			try {
+				Projects projects = new Projects(db);
+				for (Project project : projects.all()) {
+					tryToBuild(db, project);
+				}
+			} finally {
+				db.close();
 			}
-		} finally {
-			db.close();
 		}
 	}
 
@@ -130,8 +135,7 @@ public class PingScm {
 			StringWriter logString = new StringWriter();
 			PrintWriter log = new PrintWriter(logString, true);
 			try {
-				//da caca aqui qdo ta em reviao antiga (fora dobranch)
-				Revision nextRevision = project.extractRevisionAfter(lastBuild, project.getControl(), builds, new LogFile(log));
+				Revision nextRevision = project.extractNextRevision(project.getControl(), builds, new LogFile(log));
 				if (project.getLastBuiltRevision().getName().equals(nextRevision.getName())) {
 					logger.debug("Project " + project.getName() + " has a revision '" + nextRevision.getName()
 							+ "', therefore we will start the build.");
@@ -140,7 +144,8 @@ public class PingScm {
 					logger.debug(project.getName() + " did not require a new build");
 				}
 			} catch (Exception e) {
-				logger.debug("Unable to build project " + project.getName() + " due to " + logString.getBuffer().toString(), e);
+				logger.debug("Unable to build project " + project.getName() + " due to "
+						+ logString.getBuffer().toString(), e);
 			}
 		}
 	}
