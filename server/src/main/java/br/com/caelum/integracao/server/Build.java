@@ -356,7 +356,7 @@ public class Build {
 					finish(true, "Well done.", null, database);
 				}
 			} else {
-				finish(false, "One or more commands failed.", null, database);
+				finish(false, "One or more commands failed for " + actualPhase.getName(), null, database);
 			}
 		}
 	}
@@ -405,7 +405,7 @@ public class Build {
 		}
 		List<Job> jobs = getJobsFor(phase);
 		for (Job j : jobs) {
-			if (!j.isSuccess()) {
+			if (!j.isFinished() || !j.isSuccess()) {
 				return false;
 			}
 		}

@@ -131,15 +131,15 @@
 			<td>
 				<#assign first = true>
 				<#list project.phases as phase>
+
 					<#if !first>
 						<#if build.canManuallyActivate(last, phase)>
-							<span class="phase_title">
-								<a href="build/${build.buildCount}/manual?_method=put">manual</a>
-							</span>
+							<a href="build/${build.buildCount}/manual?_method=put"><img src="../../images/right.gif" style="width:41px;"></a>
 						</#if>
 					</#if>
 					<#assign first = false>
 					<#assign last = phase>
+
 					<#if build.hasSucceeded(phase)>
 						<img src="../../images/ok.gif" />
 					<#elseif build.isRunning(phase)>

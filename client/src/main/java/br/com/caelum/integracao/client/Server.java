@@ -56,7 +56,7 @@ public class Server {
 		this.settings = settings;
 	}
 
-	public void dispatch(Project project, ProjectRunResult checkoutResult, ProjectRunResult startResult,
+	public void dispatch(Project project, ProjectRunResult unzipResult, ProjectRunResult startResult,
 			ProjectRunResult stopResult, List<String> directoryToCopy, List<String> artifactsToPush) {
 		logger.debug("Job " + project.getName() + " has finished");
 		Http http = new DefaultHttp();
@@ -64,12 +64,12 @@ public class Server {
 		Method post = http.post(resultUri);
 		try {
 			try {
-				addTo(post, checkoutResult, "checkout");
+				addTo(post, unzipResult, "checkout");
 				addTo(post, startResult, "start");
 				addTo(post, stopResult, "stop");
 				zip("zipOutput", "content", project, directoryToCopy, post);
 				zip("artifactsOutput", "artifacts", project, artifactsToPush, post);
-				post.with("success", "" + !(failed(checkoutResult) || failed(stopResult) || failed(startResult)));
+				post.with("success", (failed(unzipResult) || failed(stopResult) || failed(startResult))? "false" : "true");
 				post.send();
 			} catch (Exception e) {
 				logger.error("Was unable to notify the server of this request..."

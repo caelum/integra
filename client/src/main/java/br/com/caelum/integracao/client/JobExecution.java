@@ -84,6 +84,8 @@ public class JobExecution {
 			unzipResult = project.unzip(settings.getBaseDir(), artifacts, output, unzipResult, false);
 			if (!unzipResult.failed()) {
 				startResult = project.run(settings.getBaseDir(), start, output);
+			} else {
+				startResult = new ProjectRunResult("Unable to unzip files, therefore the build did not start.", 1);
 			}
 
 		} catch (Exception e) {

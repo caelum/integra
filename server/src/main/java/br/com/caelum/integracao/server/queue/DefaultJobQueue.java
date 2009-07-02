@@ -30,6 +30,9 @@ package br.com.caelum.integracao.server.queue;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import br.com.caelum.integracao.server.Client;
 import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.agent.AgentControl;
@@ -38,6 +41,8 @@ import br.com.caelum.integracao.server.dao.Database;
 
 public class DefaultJobQueue implements JobQueue {
 
+	
+	private final Logger logger = LoggerFactory.getLogger(DefaultJobQueue.class);
 	private final Jobs jobs;
 	private final Clients clients;
 	private final Config config;
@@ -59,6 +64,7 @@ public class DefaultJobQueue implements JobQueue {
 				Client client = iterator.next();
 				try {
 					db.beginTransaction();
+					logger.debug("Will try to schedule " + job.getId() + " @ "+ client.getBaseUri());
 					if (client.canHandle(job.getCommand(), control) && client.work(job, config)) {
 						iterator.remove();
 						completed++;

@@ -127,13 +127,12 @@ public class PingScm {
 		logger.debug("Project " + project.getName() + " last build finished=" + lastBuild.isFinished());
 		if (lastBuild.isFinished() || project.isAllowAutomaticStartNextRevisionWhileBuildingPrevious()) {
 			logger.debug("Checking if " + project.getName() + " needs a build");
-			Revision lastRevision = lastBuild.getRevision();
 			StringWriter logString = new StringWriter();
 			PrintWriter log = new PrintWriter(logString, true);
 			try {
 				//da caca aqui qdo ta em reviao antiga (fora dobranch)
 				Revision nextRevision = project.extractRevisionAfter(lastBuild, project.getControl(), builds, new LogFile(log));
-				if (lastRevision == null || !lastRevision.getName().equals(nextRevision.getName())) {
+				if (project.getLastBuiltRevision().getName().equals(nextRevision.getName())) {
 					logger.debug("Project " + project.getName() + " has a revision '" + nextRevision.getName()
 							+ "', therefore we will start the build.");
 					new ProjectStart(db).runProject(project.getName(), null);

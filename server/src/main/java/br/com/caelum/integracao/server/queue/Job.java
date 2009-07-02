@@ -126,7 +126,7 @@ public class Job {
 		if (!success) {
 			build.failed();
 		}
-		finished = true;
+		this.finished = true;
 		this.finishTime = Calendar.getInstance();
 
 		Phase phase = command.getPhase();
