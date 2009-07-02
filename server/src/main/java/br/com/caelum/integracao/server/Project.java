@@ -268,16 +268,6 @@ public class Project {
 		this.buildEveryRevision = buildEveryRevision;
 	}
 
-	/**
-	 * Extracts the information on the revision after the one from the most up-to-date revision.
-	 */
-	public Revision extractNextRevision(Build forBuild, Builds builds, ScmControl control, LogFile file)
-			throws ScmException {
-		logger.debug("Checking revision for " + getName() + ", build = " + buildCount);
-		return extractRevisionAfter(control, builds, file);
-
-	}
-
 	public Revision extractRevision(Builds builds, ScmControl control, LogFile file, String name)
 			throws ScmException {
 		logger.debug("Checking revision for " + getName() + ", name = " + name);
@@ -293,10 +283,11 @@ public class Project {
 	/**
 	 * Extracts the information on the revision after this one.
 	 */
-	public Revision extractRevisionAfter(ScmControl control, Builds builds, LogFile log)
+	public Revision extractNextRevision(ScmControl control, Builds builds, LogFile log)
 			throws ScmException {
+		logger.debug("Checking next revision for " + getName() + ", build = " + buildCount);
 
-		Revision revision = getNextRevisionToBuildAfter(control, log);
+		Revision revision = getNextRevisionToBuild(control, log);
 
 		Revision found = builds.contains(this, revision.getName());
 		if (found != null) {
@@ -306,7 +297,7 @@ public class Project {
 		return revision;
 	}
 
-	private Revision getNextRevisionToBuildAfter(ScmControl control, LogFile log)
+	private Revision getNextRevisionToBuild(ScmControl control, LogFile log)
 			throws ScmException {
 		if (isBuildEveryRevision()) {
 			return control.getNextRevision(lastRevisionBuilt, log.getWriter());

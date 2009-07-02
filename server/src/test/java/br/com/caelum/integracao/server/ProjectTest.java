@@ -114,7 +114,7 @@ public class ProjectTest extends BaseTest {
 				one(builds).contains(p, "revision-name"); will(returnValue(old));
 			}
 		});
-		Revision found = p.extractRevisionAfter( control, builds, log);
+		Revision found = p.extractNextRevision( control, builds, log);
 		assertThat(found, is(equalTo(old)));
 		mockery.assertIsSatisfied();
 	}
@@ -137,7 +137,7 @@ public class ProjectTest extends BaseTest {
 				one(builds).register(next);
 			}
 		});
-		Revision found = p.extractRevisionAfter(control, builds, log);
+		Revision found = p.extractNextRevision(control, builds, log);
 		assertThat(found, is(equalTo(next)));
 		mockery.assertIsSatisfied();
 	}
@@ -161,7 +161,7 @@ public class ProjectTest extends BaseTest {
 				one(builds).register(next);
 			}
 		});
-		Revision found = p.extractRevisionAfter(control, builds, log);
+		Revision found = p.extractNextRevision(control, builds, log);
 		assertThat(found, is(equalTo(next)));
 		mockery.assertIsSatisfied();
 	}
