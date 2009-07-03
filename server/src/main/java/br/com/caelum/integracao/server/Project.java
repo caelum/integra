@@ -317,8 +317,8 @@ public class Project {
 	}
 
 	public void setLastRevisionBuilt(Revision newer) {
-		if(lastRevisionBuilt==null || lastRevisionBuilt.getDate().compareTo(newer.getDate())>=0) {
-			this.lastRevisionBuilt = lastRevisionBuilt;
+		if(lastRevisionBuilt==null || lastRevisionBuilt.getDate().compareTo(newer.getDate())<=0) {
+			this.lastRevisionBuilt = newer;
 		}
 	}
 
