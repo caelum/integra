@@ -165,7 +165,7 @@ public class GitControl implements ScmControl {
 
 	public Revision extractRevision(String name, PrintWriter log, String range) throws ScmException {
 		String content = extractInfoForRevision(log, range + "^!");
-		String date = content.substring(content.indexOf("Date:"), content.indexOf("\n",content.indexOf("Date:"))).trim().substring(3).trim();
+		String date = content.substring(content.indexOf("Date:")+"Date:".length(), content.indexOf("\n",content.indexOf("Date:"))).trim().substring(3).trim();
 		return new Revision(name, content, "", date);
 	}
 
