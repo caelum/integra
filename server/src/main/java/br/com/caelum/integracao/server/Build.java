@@ -350,7 +350,7 @@ public class Build {
 			successSoFar &= thisResult;
 			currentPhase++;
 			if (successSoFar) {
-				if (project.getPhases().size() != currentPhase) {
+				if (project.getPhases().size() > currentPhase) {
 					Phase nextPhase = project.getPhases().get(currentPhase);
 					if (nextPhase.isManual()) {
 						finish(true, "Well done. Next phase is manual.", null, database);
