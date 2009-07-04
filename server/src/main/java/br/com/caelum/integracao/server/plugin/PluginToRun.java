@@ -45,6 +45,8 @@ import org.hibernate.validator.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.caelum.integracao.server.Build;
+import br.com.caelum.integracao.server.Phase;
 import br.com.caelum.integracao.server.dao.Database;
 
 @Entity
@@ -69,7 +71,7 @@ public class PluginToRun {
 
 	public PluginToRun(RegisteredPlugin type) {
 		this.type = type;
-		for(Parameter param : type.getInformation().getParameters()) {
+		for (Parameter param : type.getInformation().getParameters()) {
 			config.add(new PluginParameter(this, param.getName(), param.getDefaultValue()));
 		}
 	}
@@ -129,6 +131,19 @@ public class PluginToRun {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public boolean execute(Build build, Phase phase, Database database) {
+		try {
+			Plugin plugin = getPlugin(database);
+			if (plugin == null || (!plugin.after(build, phase))) {
+				return false;
+			}
+		} catch (PluginException e) {
+			logger.error("Unable to run plugin " + getId() + " after a specific phase.", e);
+			return false;
+		}
+		return true;
 	}
 
 }

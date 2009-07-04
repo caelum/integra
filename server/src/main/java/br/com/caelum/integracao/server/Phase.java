@@ -44,8 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.server.dao.Database;
-import br.com.caelum.integracao.server.plugin.Plugin;
-import br.com.caelum.integracao.server.plugin.PluginException;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
 import br.com.caelum.integracao.server.queue.Job;
 import br.com.caelum.integracao.server.queue.Jobs;
@@ -69,8 +67,8 @@ public class Phase {
 	@OrderBy("position")
 	@Cascade(CascadeType.ALL)
 	private List<PluginToRun> plugins = new ArrayList<PluginToRun>();
-	
-	@Column(length=10000)
+
+	@Column(length = 10000)
 	private String directoriesToCopy;
 
 	@Id
@@ -83,7 +81,7 @@ public class Phase {
 
 	@ManyToOne
 	private Project project;
-	
+
 	private boolean manual = false;
 
 	public Phase(String name, BuildCommand... cmds) {
@@ -168,22 +166,13 @@ public class Phase {
 
 	/**
 	 * Runs all plugins after this build phase has been completed, no matter
-	 * with a sucess or not. Plugins are run in order and if one tells the
-	 * system to stop, no other plugins are run.
+	 * with a sucess or not.<br/>
+	 * Plugins are run in order and if one tells the system to stop, no other
+	 * plugins are run.
 	 */
 	public boolean runAfter(Build build, Database database) {
 		for (PluginToRun toRun : getPlugins()) {
-			try {
-				Plugin plugin = toRun.getPlugin(database);
-				if (plugin == null) {
-					return false;
-				} else {
-					if (!plugin.after(build, this)) {
-						return false;
-					}
-				}
-			} catch (PluginException e) {
-				e.printStackTrace();
+			if(!toRun.execute(build, this, database)) {
 				return false;
 			}
 		}
@@ -202,18 +191,18 @@ public class Phase {
 	public List<String> getDirectoriesToCopy() {
 		String[] vals = directoriesToCopy.split("\\s*,\\s*");
 		List<String> list = new ArrayList<String>();
-		for(String val : vals) {
-			if(!val.trim().equals("")) {
+		for (String val : vals) {
+			if (!val.trim().equals("")) {
 				list.add(val);
 			}
 		}
 		return list;
 	}
-	
+
 	public boolean isManual() {
 		return manual;
 	}
-	
+
 	public void setManual(boolean manual) {
 		this.manual = manual;
 	}

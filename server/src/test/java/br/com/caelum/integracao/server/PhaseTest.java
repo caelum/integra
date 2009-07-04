@@ -33,30 +33,33 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.com.caelum.integracao.server.plugin.Plugin;
+import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.plugin.PluginException;
 import br.com.caelum.integracao.server.plugin.PluginToRun;
-import br.com.caelum.integracao.server.project.DatabaseBasedTest;
+import br.com.caelum.integracao.server.project.BaseTest;
 import br.com.caelum.integracao.server.queue.Jobs;
+import br.com.caelum.integracao.server.scm.ScmControl;
 
-public class PhaseTest extends DatabaseBasedTest {
+public class PhaseTest extends BaseTest {
 	
 	private Build build;
 	private Jobs jobs;
+	private Database database;
 
 	@Before
 	public void mockData() {
 		this.build = mockery.mock(Build.class);
 		this.jobs = mockery.mock(Jobs.class);
+		this.database =mockery.mock(Database.class);
 		mockery.checking(new Expectations() {
 			{
-				allowing(build).getProject(); will(returnValue(project("custom")));
-				
+				allowing(build).getProject(); will(returnValue(new Project(ScmControl.class, "custom", baseDir, "custom")));
 			}
 		});
 	}
@@ -81,14 +84,12 @@ public class PhaseTest extends DatabaseBasedTest {
 		final PluginToRun run = mockery.mock(PluginToRun.class);
 		final PluginToRun second = mockery.mock(PluginToRun.class, "second");
 		final Phase test = new Phase();
-		final Plugin plugin = mockery.mock(Plugin.class);
 		mockery.checking(new Expectations() {
 			{
 				one(run).setPosition(1);
 				one(second).setPosition(2);
-				one(run).getPlugin(database); will(returnValue(plugin));
-				one(second).getPlugin(database); will(returnValue(plugin));
-				exactly(2).of(plugin).after(build, test); will(returnValue(true));
+				one(run).execute(build, test, database); will(returnValue(true));
+				one(second).execute(build, test,database); will(returnValue(true));
 			}
 		});
 		test.add(run);
@@ -98,35 +99,15 @@ public class PhaseTest extends DatabaseBasedTest {
 	}
 	
 	@Test
-	public void shouldNotInvokeNextPluginIfPreviousOneWasntCreated() throws PluginException {
-		final PluginToRun run = mockery.mock(PluginToRun.class);
-		final PluginToRun second = mockery.mock(PluginToRun.class, "second");
-		final Phase test = new Phase();
-		mockery.checking(new Expectations() {
-			{
-				one(run).setPosition(1);
-				one(second).setPosition(2);
-				one(run).getPlugin(database); will(returnValue(null));
-			}
-		});
-		test.add(run);
-		test.add(second);
-		assertThat(test.runAfter(build,database), is(equalTo(false)));
-		mockery.assertIsSatisfied();
-	}
-
-	@Test
 	public void shouldNotInvokeNextPluginIfPreviousOneReturnedFalse() throws PluginException {
 		final PluginToRun run = mockery.mock(PluginToRun.class);
 		final PluginToRun second = mockery.mock(PluginToRun.class, "second");
 		final Phase test = new Phase();
-		final Plugin plugin = mockery.mock(Plugin.class);
 		mockery.checking(new Expectations() {
 			{
 				one(run).setPosition(1);
 				one(second).setPosition(2);
-				one(run).getPlugin(database); will(returnValue(plugin));
-				one(plugin).after(build, test); will(returnValue(false));
+				one(run).execute(build, test, database); will(returnValue(false));
 			}
 		});
 		test.add(run);
@@ -134,7 +115,6 @@ public class PhaseTest extends DatabaseBasedTest {
 		assertThat(test.runAfter(build,database), is(equalTo(false)));
 		mockery.assertIsSatisfied();
 	}
-	
 	
 	@Test
 	public void executionShouldCreateAJobForEachCommand() throws IOException {
@@ -142,12 +122,30 @@ public class PhaseTest extends DatabaseBasedTest {
 		final BuildCommand second = mockery.mock(BuildCommand.class, "secondJob");
 		
 		Phase compileTwice = new Phase("compile");
-		compileTwice.getCommands().add(first);
-		compileTwice.getCommands().add(second);
+		compileTwice.setCommands(Arrays.asList(first,second));
 		mockery.checking(new Expectations() {
 			{
+				one(first).isActive(); will(returnValue(true));
+				one(second).isActive(); will(returnValue(true));
 				one(jobs).add(with((IntegracaoMatchers.jobFor(build, first))));
 				one(jobs).add(with((IntegracaoMatchers.jobFor(build, second))));
+				one(build).getFile("compile"); will(returnValue(new File(baseDir, "compile")));
+			}
+		});
+		compileTwice.execute(build, jobs);
+		mockery.assertIsSatisfied();
+	}
+
+	
+	@Test
+	public void executionShouldNotCreateAJobForInactiveCommands() throws IOException {
+		final BuildCommand first = mockery.mock(BuildCommand.class, "firstJob");
+		
+		Phase compileTwice = new Phase("compile");
+		compileTwice.setCommands(Arrays.asList(first));
+		mockery.checking(new Expectations() {
+			{
+				one(first).isActive(); will(returnValue(false));
 				one(build).getFile("compile"); will(returnValue(new File(baseDir, "compile")));
 			}
 		});
