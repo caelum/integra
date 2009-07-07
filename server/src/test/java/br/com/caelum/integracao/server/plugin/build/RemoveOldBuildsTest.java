@@ -51,7 +51,7 @@ public class RemoveOldBuildsTest extends DatabaseBasedTest {
 		all.add(first);
 		mockery.checking(new Expectations() {
 			{
-				one(first).remove(database);
+				one(first).remove();
 				one(current).getProject(); will(returnValue(project));
 				one(project).getBuilds(); will(returnValue(all));
 			}

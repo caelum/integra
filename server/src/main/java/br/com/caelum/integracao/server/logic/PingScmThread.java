@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,60 +27,83 @@
  */
 package br.com.caelum.integracao.server.logic;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.caelum.integracao.server.Builds;
-import br.com.caelum.integracao.server.Project;
-import br.com.caelum.integracao.server.Projects;
+import br.com.caelum.integracao.server.Application;
+import br.com.caelum.integracao.server.Config;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
-import br.com.caelum.integracao.server.log.LogFile;
-import br.com.caelum.integracao.server.scm.Revision;
+import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
-public class PingScm {
+/**
+ * Pings the scm server once in a while.
+ *
+ * @author guilherme silveira
+ */
+@ApplicationScoped
+public class PingScmThread {
 
-	private final Logger logger = LoggerFactory.getLogger(PingScm.class);
+	private final Logger logger = LoggerFactory.getLogger(PingScmThread.class);
 
-	void buildProjects(DatabaseFactory factory) {
-		synchronized (ProjectStart.protectTwoBuildsOfStartingAtTheSameTime) {
-			Database db = new Database(factory);
-			try {
-				Projects projects = new Projects(db);
-				for (Project project : projects.all()) {
-					tryToBuild(db, project);
+	private Thread thread;
+
+	private final DatabaseFactory factory;
+
+	public PingScmThread(DatabaseFactory factory) {
+		this.factory = factory;
+	}
+
+	@PostConstruct
+	public void startup() {
+		logger.debug("Starting up ping scm thread");
+		this.thread = new Thread(new Runnable() {
+			public void run() {
+				while (true) {
+					try {
+						pingSystem();
+					} catch (Exception ex) {
+						logger.error("Something really nasty ocurred while pinging the scm servers", ex);
+					}
 				}
-			} finally {
+			}
+		});
+		thread.start();
+	}
+
+	public void pingSystem() {
+		Database db = new Database(factory);
+		try {
+			Config config = new Application(db).getConfig();
+			int time = config.getCheckInterval();
+			db.close();
+			if (time <= 0) {
+				// no automatic pinging, thank you
+				Thread.sleep(5 * 60 * 1000);
+				return;
+			}
+			Thread.sleep(time * 1000);
+			new PingScm().buildProjects(factory);
+		} catch (Exception ex) {
+			logger.error("Something really nasty ocurred while pinging the scm servers", ex);
+		} finally {
+			if (!db.isClosed()) {
+				if (db.hasTransaction()) {
+					db.rollback();
+				}
 				db.close();
 			}
 		}
 	}
 
-	private void tryToBuild(Database db, Project project) {
-		if (project.wasntBuiltYet()) {
-			return;
-		}
-		Builds builds = new Builds(db);
-		if (!project.isReadyToRestartBuild()) {
-			return;
-		}
-		logger.debug("Project " + project.getName() + " is ready for a scm check.");
-		StringWriter log = new StringWriter();
-		PrintWriter writer = new PrintWriter(log, true);
-		try {
-			Revision nextRevision = project.extractNextRevision(project.getControl(), builds, new LogFile(writer));
-			if (!project.getLastRevisionBuilt().getName().equals(nextRevision.getName())) {
-				logger.debug("Project " + project.getName() + " has a revision '" + nextRevision.getName()
-						+ "', therefore we will start the build.");
-				new ProjectStart(db).runProject(project.getName(), null);
-			} else {
-				logger.debug(project.getName() + " did not require a new build");
-			}
-		} catch (Exception e) {
-			logger.debug("Unable to build project " + project.getName() + " due to " + log.getBuffer().toString(), e);
+	@PreDestroy
+	public void destroy() {
+		if (thread != null && thread.isAlive()) {
+			logger.debug("Shutting down ping thread");
+			thread.stop();
 		}
 	}
 

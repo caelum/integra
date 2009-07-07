@@ -326,4 +326,12 @@ public class Project {
 		return lastRevisionBuilt;
 	}
 
+	public boolean wasntBuiltYet() {
+		return getBuilds().isEmpty();
+	}
+
+	public boolean isReadyToRestartBuild() {
+		return getLastBuild().isFinished() || isAllowAutomaticStartNextRevisionWhileBuildingPrevious();
+	}
+
 }

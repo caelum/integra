@@ -255,7 +255,7 @@ public class BuildTest extends DatabaseBasedTest {
 		File file = new File(buildDir, "custom");
 		givenA(file, "custom-file-content");
 		Build build = new Build(project);
-		build.remove(database);
+		build.remove();
 		assertThat(file.exists(), is(equalTo(false)));
 		assertThat(buildDir.exists(), is(equalTo(false)));
 		mockery.assertIsSatisfied();

@@ -57,7 +57,7 @@ public class RemoveOldBuilds implements Plugin {
 		List<Build> builds = build.getProject().getBuilds();
 		for(int i = keep; i<builds.size();i++) {
 			Build b = builds.get(i);
-			b.remove(database);
+			b.remove();
 		}
 		return true;
 	}
