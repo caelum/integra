@@ -30,4 +30,10 @@
 		<ant antfile="build.xml" inheritall="false" dir="client" target="all" />
 	</target>
 	
+	<target name="test" depends="base">
+		<ant antfile="build.xml" inheritall="false" dir="integracao-base" target="test" />
+		<ant antfile="build.xml" inheritall="false" dir="server" target="test" />
+		<ant antfile="build.xml" inheritall="false" dir="client" target="test" />
+	</target>
+	
 </project>
