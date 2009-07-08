@@ -86,7 +86,7 @@ public class JobsTest extends DatabaseBasedTest {
 				allowing(agent).register(project);
 				will(returnValue(true));
 				allowing(config).getUrl(); will(returnValue("uri"));
-				one(build).getProject(); will(returnValue(project));
+				allowing(build).getProject(); will(returnValue(project));
 			}
 		});
 		for (int i = 0; i < 3; i++) {
