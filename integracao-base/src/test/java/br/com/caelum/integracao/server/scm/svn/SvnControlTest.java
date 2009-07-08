@@ -35,21 +35,43 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import br.com.caelum.integracao.AtDirectoryTest;
+import br.com.caelum.integracao.command.CommandToExecute;
 import br.com.caelum.integracao.server.scm.ScmException;
 
 public class SvnControlTest extends AtDirectoryTest {
+	
+	private File mySvnDir;
+	private PrintWriter log;
+
+	@Before
+	public void configGit() throws IOException, ScmException {
+		this.mySvnDir = new File(baseDir, "cruise");
+		prepare("svnadmin", "create", mySvnDir.getAbsolutePath()).at(mySvnDir).run();
+		File file = new File(mySvnDir, "sample-file");
+		givenA(file, "misc content\n");
+		prepare("svn", "add", file.getAbsolutePath()).at(mySvnDir).run();
+		prepare("svn", "commit", "-m", "ha").at(mySvnDir).run();
+
+		this.log = new PrintWriter(new StringWriter());
+	}
+
+	private CommandToExecute prepare(String... cmd) {
+		return new CommandToExecute(cmd);
+	}
+
 
 	@Test
 	public void shouldCommitAndReceiveUpdate() throws IOException, ScmException {
-		PrintWriter log = new PrintWriter(new StringWriter());
 
-		SvnControl control1 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-1");
+		String repositoryPath = "file:///" + mySvnDir.getAbsolutePath();
+		SvnControl control1 = new SvnControl(repositoryPath, baseDir, "apostilas-1");
 		Assert.assertEquals(0,control1.checkoutOrUpdate(null,log));
 		
-		SvnControl control2 = new SvnControl("svn+ssh://192.168.0.2/svn/caelum/how-to/trunk/apostilas", baseDir, "apostilas-2");
+		SvnControl control2 = new SvnControl(repositoryPath, baseDir, "apostilas-2");
 		Assert.assertEquals(0,control2.checkoutOrUpdate(null,log));
 		
 		File file = new File(control1.getDir(), "test-file");
