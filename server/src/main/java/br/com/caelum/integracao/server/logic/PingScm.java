@@ -46,7 +46,7 @@ public class PingScm {
 	private final Logger logger = LoggerFactory.getLogger(PingScm.class);
 
 	void buildProjects(DatabaseFactory factory) {
-		synchronized (ProjectStart.protectTwoBuildsOfStartingAtTheSameTime) {
+		synchronized (ProjectStart.protectTwoBuildsOfProcessingAtTheSameTime) {
 			Database db = new Database(factory);
 			try {
 				Projects projects = new Projects(db);

@@ -123,7 +123,16 @@ public class QueueThread {
 			AgentStatus status = control.to(client.getBaseUri()).getStatus();
 			Job currentJob = client.getCurrentJob();
 			if (status.equals(AgentStatus.UNAVAILABLE) || status.equals(AgentStatus.FREE)) {
-				job.reschedule();
+				if(job.canReschedule()) {
+					job.reschedule();
+				} else {
+					try {
+						job.finish("Tried to reschedule this job too many times", false, db, "no output", null, "no output", null);
+					} catch (IOException e) {
+						logger.error("Could not finish the job after trying it several times", e);
+					}
+					return;
+				}
 				if (currentJob != null && currentJob.equals(job)) {
 					logger.error("Leaving the job because the server just told me there is nothing running there..."
 							+ "Did the client break or was it sending me the info right now?");

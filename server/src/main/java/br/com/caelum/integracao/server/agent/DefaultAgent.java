@@ -36,8 +36,10 @@ import org.slf4j.LoggerFactory;
 
 import br.com.caelum.integracao.http.Http;
 import br.com.caelum.integracao.http.Method;
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.BuildCommand;
 import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.logic.ProjectStart;
 import br.com.caelum.integracao.server.queue.Job;
 
 /**
@@ -131,45 +133,49 @@ public class DefaultAgent implements Agent {
 		}
 	}
 
-	public boolean execute(BuildCommand command, Job job, String mySelf, File revisionContent, File artifacts) {
-		Method post = http.post(baseUri + "/job/execute");
-		post.with("jobId", "" + job.getId());
-		post.with("revision", job.getBuild().getRevision().getName());
-		post.with("project.name", job.getBuild().getProject().getName());
-		post.with("resultUri", "http://" + mySelf + "/integracao/finish/job/" + job.getId());
-		for (int i = 0; i < command.getStartCommands().size(); i++) {
-			post.with("startCommand[" + i + "]", command.getStartCommands().get(i).getValue());
-		}
-		for (int i = 0; i < command.getStopCommands().size(); i++) {
-			post.with("stopCommand[" + i + "]", command.getStopCommands().get(i).getValue());
-		}
-		int k = 0;
-		for(String directory : command.getPhase().getDirectoriesToCopy()) {
-			post.with("directoryToCopy[" + (k++) + "]",directory);
-		}
-		for(String artifact : command.getArtifactsToPush()) {
-			post.with("artifactsToPush[" + (k++) + "]",artifact);
-		}
-		try {
-			post.with("content", revisionContent);
-			if(artifacts.exists()) {
-				post.with("artifacts", artifacts);
+	public boolean execute(Job job, String mySelf, Build build) {
+		synchronized (ProjectStart.protectTwoBuildsOfProcessingAtTheSameTime) {
+			File revisionContent = build.getRevisionContent();
+			File artifacts = build.getArtifactsToPush();
+
+			Method post = http.post(baseUri + "/job/execute");
+			post.with("jobId", "" + job.getId());
+			post.with("revision", job.getBuild().getRevision().getName());
+			post.with("project.name", job.getBuild().getProject().getName());
+			post.with("resultUri", "http://" + mySelf + "/integracao/finish/job/" + job.getId());
+			BuildCommand command = job.getCommand();
+			for (int i = 0; i < command.getStartCommands().size(); i++) {
+				post.with("startCommand[" + i + "]", command.getStartCommands().get(i).getValue());
 			}
-			post.send();
-			int result = post.getResult();
-			if (result != 200) {
-				logger
-						.error("Unable to execute command.id=" + command.getId() + "@" + baseUri + " due to "
-								+ post.getContent());
+			for (int i = 0; i < command.getStopCommands().size(); i++) {
+				post.with("stopCommand[" + i + "]", command.getStopCommands().get(i).getValue());
 			}
-			return result == 200;
-		} catch (IOException e) {
-			logger.error("Unable to execute command.id=" + command.getId() + "@" + baseUri, e);
-			return false;
-		} finally {
-			post.close();
+			int k = 0;
+			for (String directory : command.getPhase().getDirectoriesToCopy()) {
+				post.with("directoryToCopy[" + (k++) + "]", directory);
+			}
+			for (String artifact : command.getArtifactsToPush()) {
+				post.with("artifactsToPush[" + (k++) + "]", artifact);
+			}
+			try {
+				post.with("content", revisionContent);
+				if (artifacts.exists()) {
+					post.with("artifacts", artifacts);
+				}
+				post.send();
+				int result = post.getResult();
+				if (result != 200) {
+					logger.error("Unable to execute command.id=" + command.getId() + "@" + baseUri + " due to "
+							+ post.getContent());
+				}
+				return result == 200;
+			} catch (IOException e) {
+				logger.error("Unable to execute command.id=" + command.getId() + "@" + baseUri, e);
+				return false;
+			} finally {
+				post.close();
+			}
 		}
 	}
-
 
 }

@@ -44,7 +44,12 @@ import br.com.caelum.integracao.server.queue.Jobs;
  */
 public class ProjectStart {
 
-	final static Object protectTwoBuildsOfStartingAtTheSameTime = new Object();
+	/**
+	 * Mutex to be sure that no two builds will start/stop at the same time, and that
+	 * no job will try to send the data to a client while another job is zipping that
+	 * data at that specific time.
+	 */
+	public final static Object protectTwoBuildsOfProcessingAtTheSameTime = new Object();
 
 	private final Logger logger = LoggerFactory.getLogger(ProjectStart.class);
 	private final Database database;
@@ -54,7 +59,7 @@ public class ProjectStart {
 	}
 
 	void runProject(String name, String revision) {
-		synchronized (protectTwoBuildsOfStartingAtTheSameTime) {
+		synchronized (protectTwoBuildsOfProcessingAtTheSameTime) {
 			// TODO we probably dont need a new database connection, we can
 			// probably
 			// work out with the original one

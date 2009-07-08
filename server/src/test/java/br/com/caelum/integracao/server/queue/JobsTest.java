@@ -31,44 +31,79 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import java.net.UnknownHostException;
+
+import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.com.caelum.integracao.server.Build;
 import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.Config;
+import br.com.caelum.integracao.server.Project;
+import br.com.caelum.integracao.server.agent.Agent;
 import br.com.caelum.integracao.server.agent.Clients;
 import br.com.caelum.integracao.server.project.DatabaseBasedTest;
 
-public class JobsTest extends DatabaseBasedTest{
+public class JobsTest extends DatabaseBasedTest {
 
 	private Jobs jobs;
 	private Job running;
 	private Job finished;
 	private Job notStarted;
+	private Job startedTooManyTimes;
+
 	@Before
-	public void insertData() {
+	public void insertData() throws UnknownHostException {
 		this.jobs = new Jobs(database);
 		Clients clients = new Clients(database);
 
 		Client busy = new Client();
 		clients.register(busy);
 
-		this.running = new Job(null,null);
+		this.running = new Job(null, null);
 		running.useClient(busy);
 		jobs.add(running);
-		
-		this.finished = new Job(null,null);
+
+		this.finished = new Job(null, null);
 		finished.useClient(busy);
 		finished.setFinished(true);
 		jobs.add(finished);
-		
+
 		this.notStarted = new Job(null, null);
 		jobs.add(notStarted);
-		
+
+		final Build build = mockery.mock(Build.class);
+		this.startedTooManyTimes = new Job(build, null);
+		final Client client = mockery.mock(Client.class);
+		final Agent agent = mockery.mock(Agent.class);
+		final Project project = mockery.mock(Project.class);
+		final Config config = mockery.mock(Config.class);
+		mockery.checking(new Expectations() {
+			{
+				allowing(client).getAgent();
+				will(returnValue(agent));
+				allowing(agent).register(project);
+				will(returnValue(true));
+				allowing(config).getUrl(); will(returnValue("uri"));
+				one(build).getProject(); will(returnValue(project));
+			}
+		});
+		for (int i = 0; i < 3; i++) {
+			mockery.checking(new Expectations() {
+				{
+					allowing(agent).execute(startedTooManyTimes, "uri", build);
+				}
+			});
+			this.startedTooManyTimes.executeAt(client, config);
+		}
+
 		database.getSession().flush();
 	}
+
 	@Test
 	public void shouldParseWellJobsRunning() {
-		
+
 		assertThat(jobs.runningJobs().contains(running), is(equalTo(true)));
 		assertThat(jobs.runningJobs().contains(finished), is(equalTo(false)));
 		assertThat(jobs.runningJobs().contains(notStarted), is(equalTo(false)));
@@ -76,10 +111,11 @@ public class JobsTest extends DatabaseBasedTest{
 
 	@Test
 	public void shouldParseWellNotYetStartedJobs() {
-		
+
 		assertThat(jobs.todo().contains(running), is(equalTo(false)));
 		assertThat(jobs.todo().contains(finished), is(equalTo(false)));
 		assertThat(jobs.todo().contains(notStarted), is(equalTo(true)));
+		assertThat(jobs.todo().contains(startedTooManyTimes), is(equalTo(false)));
 	}
 
 }

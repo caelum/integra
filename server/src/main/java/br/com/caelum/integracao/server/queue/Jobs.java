@@ -45,7 +45,7 @@ public class Jobs {
 	}
 
 	public List<Job> todo() {
-		return session.createQuery("from Job as j where j.client is null order by j.id").list();
+		return session.createQuery("from Job as j where j.client is null and timesTriedSoFar<3 order by j.id").list();
 	}
 
 	public void add(Job job) {

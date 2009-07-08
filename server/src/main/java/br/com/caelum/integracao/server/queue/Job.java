@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -55,6 +56,12 @@ import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.zip.Unzipper;
 import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
 
+/**
+ * Represents a schedulable job in the system.<br>
+ * Jobs are commands which will run or ran in an agent and have a maximum number of retries.<br>
+ * 
+ * @author guilherme silveira
+ */
 @Entity
 public class Job {
 
@@ -81,8 +88,10 @@ public class Job {
 	private Calendar startTime;
 
 	private Calendar finishTime;
+	
+	private int timesTriedSoFar = 0;
 
-	private boolean success;
+	private boolean success = false;
 
 	Job() {
 	}
@@ -92,13 +101,14 @@ public class Job {
 		this.command = command;
 	}
 
-	public boolean executeAt(Client at, Config config) throws IOException {
-		logger.debug("Trying to execute " + command.getName() + " @ " + at.getHost() + ":" + at.getPort());
+	public boolean executeAt(Client at, Config config) throws UnknownHostException {
+		logger.debug("Trying to execute " + command + " @ " + at);
 		Agent agent = at.getAgent();
 		if (agent.register(build.getProject())) {
-			if (agent.execute(command, this, config.getUrl(), build.getRevisionContent(), build.getArtifactsToPush())) {
+			if (agent.execute(this, config.getUrl(), build)) {
 				useClient(at);
 				this.startTime = Calendar.getInstance();
+				timesTriedSoFar++;
 				return true;
 			}
 		}
@@ -109,8 +119,8 @@ public class Job {
 		this.client = at;
 	}
 
-	public void finish(String result, boolean success, Database database, String zipOutput, UploadedFile content, String artifactsOutput, UploadedFile artifacts)
-			throws IOException {
+	public void finish(String result, boolean success, Database database, String zipOutput, UploadedFile content,
+			String artifactsOutput, UploadedFile artifacts) throws IOException {
 
 		Project project = build.getProject();
 		logger.debug("Finishing " + project.getName() + " build " + build.getBuildCount() + " phase "
@@ -118,8 +128,8 @@ public class Job {
 
 		unzip(content, zipOutput, "report-copy-result.txt", "");
 		unzip(artifacts, artifactsOutput, "artifacts-copy-result.txt", "/artifacts");
-		if(artifacts!=null) {
-			build.publishArtifact(getFile(command.getId()+"/artifacts"));
+		if (artifacts != null) {
+			build.publishArtifact(getFile(command.getId() + "/artifacts"));
 		}
 
 		this.success = success;
@@ -141,11 +151,11 @@ public class Job {
 	}
 
 	private void unzip(UploadedFile uploaded, String output, String logFilename, String pathToUnzip) throws IOException {
-		File baseDir = getFile(command.getId() +"" + pathToUnzip);
+		File baseDir = getFile(command.getId() + "" + pathToUnzip);
 		baseDir.mkdir();
-		PrintWriter unzipLog = new PrintWriter(new FileWriter(new File(baseDir,logFilename)), true);
+		PrintWriter unzipLog = new PrintWriter(new FileWriter(new File(baseDir, logFilename)), true);
 		unzipLog.append(output);
-		if(uploaded!=null) {
+		if (uploaded != null) {
 			new Unzipper(baseDir).logTo(unzipLog).unzip(uploaded.getFile());
 		}
 		unzipLog.close();
@@ -212,6 +222,10 @@ public class Job {
 		logger.debug("Rescheduling job " + getId());
 		this.client = null;
 		this.startTime = null;
+	}
+
+	public boolean canReschedule() {
+		return timesTriedSoFar<3;
 	}
 
 }

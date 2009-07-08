@@ -27,7 +27,6 @@
  */
 package br.com.caelum.integracao.server;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +80,7 @@ public class Client {
 		return "http://" + this.getHost() + ":" + this.getPort() + this.getContext();
 	}
 
-	public Agent getAgent() throws UnknownHostException, IOException {
+	public Agent getAgent() throws UnknownHostException {
 		return new DefaultAgent(this.getBaseUri(), new DefaultHttp());
 	}
 
@@ -191,6 +190,11 @@ public class Client {
 
 	public boolean isAlive() {
 		return isAlive(new AgentControl());
+	}
+	
+	@Override
+	public String toString() {
+		return "{Client " + getBaseUri() +"}";
 	}
 
 }

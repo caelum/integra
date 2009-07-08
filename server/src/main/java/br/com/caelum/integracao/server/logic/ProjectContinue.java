@@ -37,8 +37,6 @@ import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
 
 public class ProjectContinue {
 
-	private final static Object protectTwoJobsFinishingAtTheSameTime = new Object();
-
 	private final Logger logger = LoggerFactory.getLogger(ProjectContinue.class);
 
 	private final Database database;
@@ -49,7 +47,7 @@ public class ProjectContinue {
 
 	void nextPhase(Long jobId, String checkoutResult, String startResult, String stopResult, boolean success,
 			String zipOutput, UploadedFile content, String artifactsOutput, UploadedFile artifacts) {
-		synchronized (protectTwoJobsFinishingAtTheSameTime) {
+		synchronized (ProjectStart.protectTwoBuildsOfProcessingAtTheSameTime) {
 			try {
 				String completeResult = "Checkout:\n" + checkoutResult + "\n\n" + "Start result:\n" + startResult
 						+ "\n\n" + "Stop result:\n" + stopResult;

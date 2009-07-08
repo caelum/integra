@@ -158,4 +158,9 @@ public class BuildCommand {
 		}
 		return list;
 	}
+	
+	@Override
+	public String toString() {
+		return "{Command " + getName() + "}";
+	}
 }
