@@ -133,7 +133,7 @@
 				<#list project.phases as phase>
 
 					<#if !first>
-						<#if build.canManuallyActivate(last, phase)>
+						<#if build.canManuallyActivate(last, phase) & build.hasSucceeded(last)>
 							<a href="build/${build.buildCount}/manual?_method=put"><img src="../../images/right.gif" style="width:41px;"></a>
 						</#if>
 					</#if>
