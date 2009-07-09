@@ -25,7 +25,7 @@
 			<td><a href="${client.id }/deactivate?_method=post">deactivate</a></td>
 			<td>${client.host }:${client.port }</td>
 			<td><#list client.labels as label>${label.name},</#list></td>
-			<td><font color="red">(busy)</font> #${client.currentJob.id } ${client.currentJob.command.name}</td>
+			<td><font color="red">(busy)</font> #${client.currentJob.id }/${client.currentJob.buildCount} ${client.currentJob.command.name}</td>
 			<td><a href="http://${client.host }:${client.port }${client.context }/job/current">ask for its job</a></td>
 			<td><a href="${client.id}/stop?_method=post">stop</a></td>
 		</tr>

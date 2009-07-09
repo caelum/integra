@@ -39,12 +39,15 @@ import org.slf4j.LoggerFactory;
 import br.com.caelum.integracao.http.DefaultHttp;
 import br.com.caelum.integracao.server.Application;
 import br.com.caelum.integracao.server.Client;
+import br.com.caelum.integracao.server.Projects;
 import br.com.caelum.integracao.server.agent.AgentControl;
 import br.com.caelum.integracao.server.agent.AgentStatus;
 import br.com.caelum.integracao.server.agent.Clients;
 import br.com.caelum.integracao.server.agent.DefaultAgent;
+import br.com.caelum.integracao.server.build.Tab;
 import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.dao.DatabaseFactory;
+import br.com.caelum.integracao.server.logic.ProjectStart;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
 
 @ApplicationScoped
@@ -105,8 +108,8 @@ public class QueueThread {
 	}
 
 	private void startJobs(Database db) {
-		JobQueue queue = new DefaultJobQueue(new Jobs(db), new Clients(db), new Application(db)
-		.getConfig(), new AgentControl());
+		JobQueue queue = new DefaultJobQueue(new Jobs(db), new Clients(db), new Application(db).getConfig(),
+				new AgentControl());
 		int result = queue.iterate(db);
 		logger.debug("Job queue started " + result + " jobs");
 	}
@@ -123,11 +126,13 @@ public class QueueThread {
 			AgentStatus status = control.to(client.getBaseUri()).getStatus();
 			Job currentJob = client.getCurrentJob();
 			if (status.equals(AgentStatus.UNAVAILABLE) || status.equals(AgentStatus.FREE)) {
-				if(job.canReschedule()) {
+				if (job.canReschedule()) {
+					new Projects(db).register(new Tab(job.getBuild(), "Retrying job " + job.getId(), ""));
 					job.reschedule();
 				} else {
 					try {
-						job.finish("Tried to reschedule this job too many times", false, db, "no output", null, "no output", null);
+						job.finish("Tried to reschedule this job too many times", false, db, "no output", null,
+								"no output", null);
 					} catch (IOException e) {
 						logger.error("Could not finish the job after trying it several times", e);
 					}
@@ -146,13 +151,16 @@ public class QueueThread {
 						result++;
 					}
 				} else {
-					try {
-						job.finish(
-								"killing job because there was no response and the client is not actually running it",
-								false, db, "", null, "", null);
-						result++;
-					} catch (IOException e) {
-						logger.error("Tried to kill job but couldnt.", e);
+					synchronized (ProjectStart.protectTwoBuildsOfProcessingAtTheSameTime) {
+						try {
+							job
+									.finish(
+											"killing job because there was no response and the client is not actually running it",
+											false, db, "", null, "", null);
+							result++;
+						} catch (IOException e) {
+							logger.error("Tried to kill job but couldnt.", e);
+						}
 					}
 				}
 			}
