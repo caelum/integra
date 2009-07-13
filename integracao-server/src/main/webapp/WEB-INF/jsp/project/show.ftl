@@ -42,18 +42,21 @@
 				<div class="phase_title">${phase.name } (${phase.position })</div>
 				<#list phase.commands as cmd>
 				<div class="command">
-					${cmd.name }<br/>
-					<#if cmd.stopName??>(stop: ${cmd.stopName})<br/></#if>
-					<#if cmd.artifactsToPush??>
+					start: ${cmd.name }<br/>
+					<#if cmd.stopName??>stop: ${cmd.stopName}<br/></#if>
+					<#if cmd.artifactsToPush?? && cmd.artifactsToPush?size!=0>artifacts:
 						<#list cmd.artifactsToPush as artifact>
 							${artifact},
 						</#list>
 						<br/>
 					</#if>
-					"<#list cmd.labels as label>${label.name},</#list>"
-					(<a href="command/${cmd.id}?_method=DELETE">remove</a>)
+					<#if cmd.labels?size!=0>
+						labels: "<#list cmd.labels as label>${label.name},</#list>"<br/>
+					</#if>
+					(<a href="command/${cmd.id}?_method=DELETE" style="color: red">remove</a>)
 				</div>
 				</#list>
+				<br/>
 				<a href="#new_command_${phase.id}" onclick="$('#new_command_${phase.id}').toggle();">new command</a>
 				<div id="new_command_${phase.id}" class="command formulario" style="display: none;">
 					<form action="command" method="post">
@@ -94,7 +97,7 @@
 			<td> ----> </td>
 		</#list>
 		<td>
-			<div class="box">
+			<div class="phase">
 				<div class="subtitle">New phase</div>
 				<form action="phase" method="post" class="formulario">
 					<input type="hidden" name="project.name" value="${project.name }" />
@@ -115,14 +118,14 @@
 			</td>
 			<td>build-${build.buildCount}</td>
 			<td>
-				revision '${build.revisionName }'
+				'${build.revisionName }'
 			</td>
 			<td>
 			<#if !build.finished>
-				<font color="orange">building... who knows?</font>
+				<font color="orange">building</font>
 			<#else>
 				<#if build.successSoFar>
-					<font color="green">success</font>
+					<font color="green">win</font>
 				<#else>
 					<font color="red">fail</font>
 				</#if>

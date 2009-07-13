@@ -8,6 +8,7 @@
 }
 .phase {
 	width: 300px;
+	background-color: #99aa99;
 }
 .build_phase {
 	width: 100px;
