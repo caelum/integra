@@ -14,19 +14,19 @@
 	<target name="deploy" description="copy to dependencies" depends="base">
 		<property file="integracao-base/build.properties" />
 		<delete file="client/src/main/webapp/WEB-INF/lib/integracao-*.jar" />
-		<delete file="server/src/main/webapp/WEB-INF/lib/integracao-*.jar" />
+		<delete file="integracao-server/src/main/webapp/WEB-INF/lib/integracao-*.jar" />
 		<copy file="integracao-base/${jar.file}" todir="client/src/main/webapp/WEB-INF/lib" />
-		<copy file="integracao-base/${jar.file}" todir="server/src/main/webapp/WEB-INF/lib" />
+		<copy file="integracao-base/${jar.file}" todir="integracao-server/src/main/webapp/WEB-INF/lib" />
 	</target>
 
 	<target name="war" depends="deploy">
 		<echo message="waring all projects" />
-		<ant antfile="build.xml" inheritall="false" dir="server" target="clean-war" />
+		<ant antfile="build.xml" inheritall="false" dir="integracao-server" target="clean-war" />
 		<ant antfile="build.xml" inheritall="false" dir="client" target="clean-war" />
 	</target>
 	
 	<target name="all" depends="deploy">
-		<ant antfile="build.xml" inheritall="false" dir="server" target="all" />
+		<ant antfile="build.xml" inheritall="false" dir="integracao-server" target="all" />
 		<ant antfile="build.xml" inheritall="false" dir="client" target="all" />
 	</target>
 	

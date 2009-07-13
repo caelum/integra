@@ -115,8 +115,9 @@ public class CommandToExecute {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (InterruptedException e) {
-			// someone told me to STOP this job, ok ,please stop it now!!!
-			throw new RuntimeException(e);
+			outputWriter.println("Stooping this job");
+			e.printStackTrace(outputWriter);
+			return -1;
 		}
 	}
 
