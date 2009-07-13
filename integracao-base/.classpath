@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/test/resources"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="lib" path="src/lib/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="src/lib/ejb3-persistence-1.0.1.GA.jar"/>
+	<classpathentry kind="lib" path="src/lib/junit-4.5.jar"/>
+	<classpathentry kind="lib" path="src/lib/log4j-1.2.12.jar"/>
+	<classpathentry kind="lib" path="src/lib/slf4j-api-1.5.6.jar"/>
+	<classpathentry kind="lib" path="src/lib/slf4j-log4j12-1.5.6.jar"/>
+	<classpathentry kind="lib" path="src/lib/vraptor3-3.0.0-SNAPSHOT.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
