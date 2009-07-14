@@ -3,7 +3,7 @@
 Commands running or already run:<br/>
 <#list build.project.phases as phase>
 	<h2>${phase.name}</h2>
-	<table>
+	<table class="tabela">
 		<thead>
 			<tr>
 				<th>id</th>
