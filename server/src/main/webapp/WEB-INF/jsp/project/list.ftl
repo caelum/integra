@@ -31,27 +31,31 @@ Found: ${projectList?size}<br/>
 	<form action="" method="post" class="formulario">
 	<table>
 		<tr>
-			<td>Scm: <select name="scmType">
-			<option value="br.com.caelum.integracao.server.scm.svn.SvnControl">svn</option>
-			<option value="br.com.caelum.integracao.server.scm.git.GitControl">git</option>
-			</select></td>
+			<td>Scm:</td>
+			<td>
+				<select name="scmType">
+					<option value="br.com.caelum.integracao.server.scm.svn.SvnControl">svn</option>
+					<option value="br.com.caelum.integracao.server.scm.git.GitControl">git</option>
+				</select>
+			</td>
 		</tr>
 		<tr>
-			<td><input type="checkbox" name="project.buildEveryRevision" checked="true" /> do not skip revisions while building</td>
+			<td><input type="checkbox" name="project.buildEveryRevision" checked="true" /></td><td>do not skip revisions while building</td>
 		</tr>
 		<tr>
-			<td><input type="checkbox" name="project.allowAutomaticStartNextRevisionWhileBuildingPrevious" checked="true" /> allow automatic start of the next revision while building the previous one</td>
+			<td><input type="checkbox" name="project.allowAutomaticStartNextRevisionWhileBuildingPrevious" checked="true" /></td><td>allow automatic start of the next revision while building the previous one</td>
 		</tr>
 		<tr>
-			<td>Uri: <input name="project.uri" /></td>
+			<td>Uri:</td><td><input name="project.uri" /></td>
 		</tr>
 		<tr>
-			<td>Name: <input name="project.name" /></td>
+			<td>Name:</td><td><input name="project.name" /></td>
 		</tr>
 		<tr>
-			<td>Base directory: <input name="baseDir" /></td>
+			<td>Base directory:</td><td><input name="baseDir" /></td>
 		</tr>
 		<tr>
+			<td>&nbsp;</td>
 			<td><input type="submit"></td>
 		</tr>
 	</table>
