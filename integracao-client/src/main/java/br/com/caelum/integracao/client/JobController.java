@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -48,7 +48,7 @@ import br.com.caelum.vraptor.view.Results;
 
 /**
  * Resource controlling the current job.
- * 
+ *
  * @author guilherme silveira
  */
 @ApplicationScoped
@@ -83,12 +83,19 @@ public class JobController {
 	@Post
 	public synchronized void execute(String jobId, Project project, String revision, List<String> startCommand,
 			List<String> stopCommand, String resultUri, List<String> directoryToCopy, UploadedFile content, List<String> artifactsToPush, UploadedFile artifacts) {
-		logger.debug("Will start execution for " + jobId + "/" + project + "@" + revision);
-		Server server = new Server(resultUri, new DefaultHttp(), settings);
-		Project projectFound = projects.get(project.getName());
-		JobExecution execution = new JobExecution(projectFound, startCommand, stopCommand, revision,
-				directoryToCopy, settings, server, content, artifactsToPush, artifacts);
-		job.start(jobId, execution);
+		content.getFile().deleteOnExit();
+		artifacts.getFile().deleteOnExit();
+		try {
+			logger.debug("Will start execution for " + jobId + "/" + project + "@" + revision);
+			Server server = new Server(resultUri, new DefaultHttp(), settings);
+			Project projectFound = projects.get(project.getName());
+			JobExecution execution = new JobExecution(projectFound, startCommand, stopCommand, revision,
+					directoryToCopy, settings, server, content, artifactsToPush, artifacts);
+			job.start(jobId, execution);
+		} finally {
+			content.getFile().delete();
+			artifacts.getFile().delete();
+		}
 	}
 
 	@Get

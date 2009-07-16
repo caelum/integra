@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -49,11 +50,13 @@ public class Server {
 	private final String resultUri;
 	private final DefaultHttp http;
 	private final Settings settings;
+	private final List<File> generatedFiles;
 
 	public Server(String resultUri, DefaultHttp http, Settings settings) {
 		this.resultUri = resultUri;
 		this.http = http;
 		this.settings = settings;
+		this.generatedFiles = new ArrayList<File>();
 	}
 
 	public void dispatch(Project project, ProjectRunResult unzipResult, ProjectRunResult startResult,
@@ -69,7 +72,7 @@ public class Server {
 				addTo(post, stopResult, "stop");
 				zip("zipOutput", "content", project, directoryToCopy, post);
 				zip("artifactsOutput", "artifacts", project, artifactsToPush, post);
-				post.with("success", (failed(unzipResult) || failed(stopResult) || failed(startResult))? "false" : "true");
+				post.with("success", (failed(unzipResult) || failed(stopResult) || failed(startResult)) ? "false" : "true");
 				post.send();
 			} catch (Exception e) {
 				logger.error("Was unable to notify the server of this request..."
@@ -78,6 +81,11 @@ public class Server {
 			if (post.getResult() != 200) {
 				logger.error(post.getContent());
 				throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
+			}
+
+			// Release generated zip files
+			for (File file : generatedFiles) {
+				file.delete();
 			}
 		} catch (IOException e) {
 			throw new RuntimeException("The server returned a problematic answer", e);
@@ -89,13 +97,14 @@ public class Server {
 	private void zip(String logName, String contentName, Project project, List<String> resources, Method post) throws IOException,
 			FileNotFoundException {
 		StringWriter zipOutput = new StringWriter();
-		if (resources == null || resources.size()==0) {
+		if (resources == null || resources.isEmpty()) {
 			zipOutput.write("Nothing to zip to client.");
 		} else {
 			File zip = new CopyFiles(resources, settings, project, zipOutput).zipThemAll();
 			if (zip != null) {
 				logger.debug("After zipping, resulted in =" + zip.getAbsolutePath());
 				post.with(contentName, zip);
+				generatedFiles.add(zip);
 			}
 		}
 		post.with(logName, zipOutput.getBuffer().toString());
