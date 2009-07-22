@@ -83,19 +83,12 @@ public class JobController {
 	@Post
 	public synchronized void execute(String jobId, Project project, String revision, List<String> startCommand,
 			List<String> stopCommand, String resultUri, List<String> directoryToCopy, UploadedFile content, List<String> artifactsToPush, UploadedFile artifacts) {
-		content.getFile().deleteOnExit();
-		artifacts.getFile().deleteOnExit();
-		try {
 			logger.debug("Will start execution for " + jobId + "/" + project + "@" + revision);
 			Server server = new Server(resultUri, new DefaultHttp(), settings);
 			Project projectFound = projects.get(project.getName());
 			JobExecution execution = new JobExecution(projectFound, startCommand, stopCommand, revision,
 					directoryToCopy, settings, server, content, artifactsToPush, artifacts);
 			job.start(jobId, execution);
-		} finally {
-			content.getFile().delete();
-			artifacts.getFile().delete();
-		}
 	}
 
 	@Get

@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -50,13 +49,11 @@ public class Server {
 	private final String resultUri;
 	private final DefaultHttp http;
 	private final Settings settings;
-	private final List<File> generatedFiles;
 
 	public Server(String resultUri, DefaultHttp http, Settings settings) {
 		this.resultUri = resultUri;
 		this.http = http;
 		this.settings = settings;
-		this.generatedFiles = new ArrayList<File>();
 	}
 
 	public void dispatch(Project project, ProjectRunResult unzipResult, ProjectRunResult startResult,
@@ -82,11 +79,6 @@ public class Server {
 				logger.error(post.getContent());
 				throw new RuntimeException("The server returned a problematic answer: " + post.getResult());
 			}
-
-			// Release generated zip files
-			for (File file : generatedFiles) {
-				file.delete();
-			}
 		} catch (IOException e) {
 			throw new RuntimeException("The server returned a problematic answer", e);
 		} finally {
@@ -104,7 +96,6 @@ public class Server {
 			if (zip != null) {
 				logger.debug("After zipping, resulted in =" + zip.getAbsolutePath());
 				post.with(contentName, zip);
-				generatedFiles.add(zip);
 			}
 		}
 		post.with(logName, zipOutput.getBuffer().toString());
