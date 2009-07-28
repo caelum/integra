@@ -207,4 +207,8 @@ public class Client {
 		return "{Client " + getBaseUri() +"}";
 	}
 
+	public boolean isRunning(Job job) {
+		return currentJob!=null && currentJob.equals(job);
+	}
+
 }

@@ -12,7 +12,7 @@ Found: ${projectList?size}<br/>
 			<font color="orange">is building (${build.runtime} minutes)</font>
 		<#else>
 			<#if build.successSoFar>
-				<font color="green">was a success</font>
+				<font color="green">win</font>
 			<#else>
 				<font color="red">failed</font>
 			</#if>

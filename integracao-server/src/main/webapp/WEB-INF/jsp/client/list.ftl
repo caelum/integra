@@ -29,7 +29,7 @@
 				<td>${client.host }:${client.port }</td>
 				<td><#list client.labels as label>${label.name},</#list></td>
 				<#if client.currentJob??>
-					<td><font color="red">(busy)</font> #${client.currentJob.id }/${client.currentJob.buildCount} ${client.currentJob.command.name}</td>
+					<td><font color="red">(busy)</font> #${client.currentJob.id }/${client.currentJob.build.buildCount} ${client.currentJob.command.name}</td>
 				<#else>
 					<td>no job!</td>
 				</#if>
