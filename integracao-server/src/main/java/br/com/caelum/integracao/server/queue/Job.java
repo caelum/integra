@@ -123,7 +123,7 @@ public class Job {
 			String artifactsOutput, UploadedFile artifacts) throws IOException {
 
 		Project project = build.getProject();
-		logger.debug("Finishing " + project.getName() + " build " + build.getBuildCount() + " phase "
+		logger.debug("Job #" + id + " - finishing " + project.getName() + " build " + build.getBuildCount() + " phase "
 				+ command.getPhase().getName() + " command " + command.getId());
 
 		unzip(content, zipOutput, "report-copy-result.txt", "");

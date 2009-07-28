@@ -55,11 +55,13 @@ public class ProjectContinue {
 				database.beginTransaction();
 				Jobs jobs = new Jobs(database);
 				Job job = jobs.load(jobId);
+				
+				logger.debug("Ready to finish job " + job.getId());
 
 				job.finish(completeResult, success, database, zipOutput, content, artifactsOutput, artifacts);
 				database.commit();
 			} catch (Exception e) {
-				logger.error("Unable to proceeed with project for job" + jobId, e);
+				logger.error("Unable to proceeed with project for job " + jobId + " which was a " + success, e);
 			}
 		}
 	}
