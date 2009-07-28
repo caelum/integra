@@ -165,6 +165,7 @@ public class Build {
 			} else {
 				this.revision = project.extractRevision(builds, control, checkoutLog, name);
 			}
+			logger.debug("Ready to set last revision to " + revision.getName());
 			project.setLastRevisionBuilt(revision);
 			return checkoutContent(database, checkoutLog, control);
 		} catch (Exception ex) {
