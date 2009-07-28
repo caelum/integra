@@ -72,9 +72,7 @@ public class PingScm {
 		PrintWriter writer = new PrintWriter(log, true);
 		try {
 			Revision nextRevision = project.extractNextRevision(project.getControl(), builds, new LogFile(writer));
-			if (!project.getLastRevisionBuilt().getName().equals(nextRevision.getName())) {
-				logger.debug("Project " + project.getName() + " has a revision '" + nextRevision.getName()
-						+ "', therefore we will start the build.");
+			if(project.mostUpdatedRevisionIs(nextRevision)) {
 				new ProjectStart(db).runProject(project.getName(), null);
 			} else {
 				logger.debug(project.getName() + " did not require a new build");

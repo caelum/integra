@@ -324,6 +324,7 @@ public class Project {
 
 	public void setLastRevisionBuilt(Revision newer) {
 		if(lastRevisionBuilt==null || lastRevisionBuilt.getDate().compareTo(newer.getDate())<=0) {
+			logger.debug("Updated " + newer.getName() + " as newest revision because it was after the last revision");
 			this.lastRevisionBuilt = newer;
 		}
 	}
@@ -342,6 +343,15 @@ public class Project {
 	
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public boolean mostUpdatedRevisionIs(Revision nextRevision) {
+		if (!getLastRevisionBuilt().getName().equals(nextRevision.getName())) {
+			logger.debug("Project " + getName() + " has a revision '" + nextRevision.getName()
+					+ "', which is not the last built '" + getLastRevisionBuilt().getName() + "' therefore we will start the build.");
+			return true;
+		}
+		return false;
 	}
 
 }
