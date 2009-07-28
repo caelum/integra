@@ -126,18 +126,18 @@ public class Job {
 		logger.debug("Job #" + id + " - finishing " + project.getName() + " build count " + build.getBuildCount() + " phase "
 				+ command.getPhase().getName() + " command " + command.getId());
 
-		unzip(content, zipOutput, "report-copy-result.txt", "");
-		unzip(artifacts, artifactsOutput, "artifacts-copy-result.txt", "/artifacts");
-		if (artifacts != null) {
-			build.publishArtifact(getFile(command.getId() + "/artifacts"));
-		}
-
 		this.success = success;
 		if (!success) {
 			build.failed();
 		}
 		this.finished = true;
 		this.finishTime = Calendar.getInstance();
+
+		unzip(content, zipOutput, "report-copy-result.txt", "");
+		unzip(artifacts, artifactsOutput, "artifacts-copy-result.txt", "/artifacts");
+		if (artifacts != null) {
+			build.publishArtifact(getFile(command.getId() + "/artifacts"));
+		}
 
 		Phase phase = command.getPhase();
 		File file = getFile(command.getName() + ".txt");

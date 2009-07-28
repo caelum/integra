@@ -136,7 +136,6 @@ public class QueueThread {
 					} catch (IOException e) {
 						logger.error("Could not finish the job after trying it several times", e);
 					}
-					return;
 				}
 				if (currentJob != null && currentJob.equals(job)) {
 					logger.error("Leaving the job because the server just told me there is nothing running there..."
