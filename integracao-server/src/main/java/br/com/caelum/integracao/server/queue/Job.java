@@ -153,13 +153,14 @@ public class Job {
 
 	private void unzip(UploadedFile uploaded, String output, String logFilename, String pathToUnzip) throws IOException {
 		File baseDir = getFile(command.getId() + "" + pathToUnzip);
-		baseDir.mkdir();
-		PrintWriter unzipLog = new PrintWriter(new FileWriter(new File(baseDir, logFilename)), true);
-		unzipLog.append(output);
-		if (uploaded != null) {
-			new Unzipper(baseDir).logTo(unzipLog).unzip(uploaded.getFile());
+		if(baseDir.mkdirs()) {
+			PrintWriter unzipLog = new PrintWriter(new FileWriter(new File(baseDir, logFilename)), true);
+			unzipLog.append(output);
+			if (uploaded != null) {
+				new Unzipper(baseDir).logTo(unzipLog).unzip(uploaded.getFile());
+			}
+			unzipLog.close();
 		}
-		unzipLog.close();
 	}
 
 	private File getFile(String name) {
