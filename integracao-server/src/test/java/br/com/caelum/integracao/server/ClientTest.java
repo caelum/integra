@@ -75,7 +75,7 @@ public class ClientTest extends BaseTest {
 				one(job).executeAt(c, config);
 			}
 		});
-		assertThat(c.work(job, config), is(equalTo(true)));
+		assertThat(c.work(null,job, config), is(equalTo(true)));
 		assertThat(c.getCurrentJob(), is(equalTo(job)));
 		mockery.assertIsSatisfied();
 	}
@@ -89,7 +89,7 @@ public class ClientTest extends BaseTest {
 				will(throwException(new RuntimeException()));
 			}
 		});
-		assertThat(c.work(job, config), is(equalTo(false)));
+		assertThat(c.work(null,job, config), is(equalTo(false)));
 		assertThat(c.getCurrentJob(), is(equalTo(null)));
 		mockery.assertIsSatisfied();
 	}

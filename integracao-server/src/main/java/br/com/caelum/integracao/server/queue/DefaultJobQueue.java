@@ -65,7 +65,7 @@ public class DefaultJobQueue implements JobQueue {
 				try {
 					db.beginTransaction();
 					logger.debug("Will try to schedule " + job.getId() + " @ "+ client.getBaseUri());
-					if (client.canHandle(job.getCommand(), control) && client.work(job, config)) {
+					if (client.canHandle(job.getCommand(), control) && client.work(db, job, config)) {
 						iterator.remove();
 						completed++;
 						db.commit();

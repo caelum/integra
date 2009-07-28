@@ -73,23 +73,7 @@ public class QueueThread {
 		this.thread = new Thread(new Runnable() {
 			public void run() {
 				while (shouldRun) {
-					Database db = new Database(factory);
-					try {
-						stopOldJobs(db);
-					} catch (Exception ex) {
-						logger.error("Something really nasty ocurred while stopping jobs", ex);
-					} finally {
-						if (db.hasTransaction()) {
-							db.rollback();
-						}
-					}
-					try {
-						startJobs(db);
-					} catch (Exception ex) {
-						logger.error("Something really nasty ocurred while executing the job queue", ex);
-					} finally {
-						db.close();
-					}
+					parseJobs();
 					if (shouldRun) {
 						try {
 							synchronized (waiter) {
@@ -105,6 +89,26 @@ public class QueueThread {
 
 		});
 		thread.start();
+	}
+
+	private void parseJobs() {
+		Database db = new Database(factory);
+		try {
+			stopOldJobs(db);
+		} catch (Exception ex) {
+			logger.error("Something really nasty ocurred while stopping jobs", ex);
+		} finally {
+			if (db.hasTransaction()) {
+				db.rollback();
+			}
+		}
+		try {
+			startJobs(db);
+		} catch (Exception ex) {
+			logger.error("Something really nasty ocurred while executing the job queue", ex);
+		} finally {
+			db.close();
+		}
 	}
 
 	private void startJobs(Database db) {
@@ -126,46 +130,59 @@ public class QueueThread {
 			AgentStatus status = control.to(client.getBaseUri()).getStatus();
 			Job currentJob = client.getCurrentJob();
 			if (status.equals(AgentStatus.UNAVAILABLE) || status.equals(AgentStatus.FREE)) {
-				if (job.canReschedule()) {
-					new Projects(db).register(new Tab(job.getBuild(), "Retrying job " + job.getId(), ""));
-					job.reschedule();
-				} else {
-					try {
-						job.finish("Tried to reschedule this job too many times", false, db, "no output", null,
-								"no output", null);
-					} catch (IOException e) {
-						logger.error("Could not finish the job after trying it several times", e);
-					}
-				}
-				if (currentJob != null && currentJob.equals(job)) {
-					logger.error("Leaving the job because the server just told me there is nothing running there..."
-							+ "Did the client break or was it sending me the info right now?");
-					client.leaveJob();
-				}
+				tryToReschedule(db, job, client, currentJob);
 				continue;
 			}
-			if (timeSpent > minutes * 60 * 1000) {
-				if (currentJob != null && currentJob.equals(job)) {
-					if (client.stop(new DefaultAgent(client.getBaseUri(), new DefaultHttp()))) {
-						result++;
-					}
-				} else {
-					synchronized (ProjectStart.protectTwoBuildsOfProcessingAtTheSameTime) {
-						try {
-							job
-									.finish(
-											"killing job because there was no response and the client is not actually running it",
-											false, db, "", null, "", null);
-							result++;
-						} catch (IOException e) {
-							logger.error("Tried to kill job but couldnt.", e);
-						}
-					}
-				}
+			boolean timedOut = timeSpent > minutes * 60 * 1000;
+			if (timedOut) {
+				result = stopTheJob(db, result, job, client, currentJob);
 			}
 		}
 		db.commit();
 		logger.debug("Job queue killed " + result + " old jobs");
+	}
+
+	private int stopTheJob(Database db, int result, Job job, Client client,
+			Job currentJob) {
+		boolean clientIsRunningThisJob = currentJob != null && currentJob.equals(job);
+		if (clientIsRunningThisJob) {
+			if (client.stop(new DefaultAgent(client.getBaseUri(), new DefaultHttp()))) {
+				result++;
+			}
+		} else {
+			synchronized (ProjectStart.protectTwoBuildsOfProcessingAtTheSameTime) {
+				try {
+					job
+							.finish(
+									"killing job because there was no response and the client is not actually running it",
+									false, db, "", null, "", null);
+					result++;
+				} catch (IOException e) {
+					logger.error("Tried to kill job but couldnt.", e);
+				}
+			}
+		}
+		return result;
+	}
+
+	private void tryToReschedule(Database db, Job job, Client client,
+			Job currentJob) {
+		if (job.canReschedule()) {
+			new Projects(db).register(new Tab(job.getBuild(), "Retrying job " + job.getId(), ""));
+			job.reschedule();
+		} else {
+			try {
+				job.finish("Tried to reschedule this job too many times", false, db, "no output", null,
+						"no output", null);
+			} catch (IOException e) {
+				logger.error("Could not finish the job after trying it several times", e);
+			}
+		}
+		if (currentJob != null && currentJob.equals(job)) {
+			logger.error("Leaving the job because the server just told me there is nothing running there..."
+					+ "Did the client break or was it sending me the info right now?");
+			client.leaveJob();
+		}
 	}
 
 	@PreDestroy

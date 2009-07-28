@@ -92,7 +92,7 @@ public class DefaultJobQueueTest extends BaseTest{
 		mockery.checking(new Expectations() {{
 			one(jobs).todo(); will(returnValue(Arrays.asList(first)));
 			one(clients).freeClients(); will(returnValue(Arrays.asList(firstClient)));
-			one(firstClient).work(first, config); will(returnValue(true));
+			one(firstClient).work(db, first, config); will(returnValue(true));
 			one(firstClient).isAlive(control); will(returnValue(true));
 		}});
 		assertThat(queue.iterate(db), is(equalTo(1)));
@@ -103,7 +103,7 @@ public class DefaultJobQueueTest extends BaseTest{
 		mockery.checking(new Expectations() {{
 			one(jobs).todo(); will(returnValue(Arrays.asList(first)));
 			one(clients).freeClients(); will(returnValue(Arrays.asList(firstClient)));
-			one(firstClient).work(first, config); will(returnValue(false));
+			one(firstClient).work(db,first, config); will(returnValue(false));
 			one(firstClient).isAlive(control); will(returnValue(true));
 		}});
 		assertThat(queue.iterate(db), is(equalTo(0)));

@@ -157,7 +157,7 @@ public class Project {
 	}
 
 	public List<Build> getLastBuilds() {
-		return builds.subList(0, Math.min(builds.size(),100));
+		return builds.subList(0, Math.min(builds.size(),50));
 	}
 
 	public File getBuildsDirectory() {

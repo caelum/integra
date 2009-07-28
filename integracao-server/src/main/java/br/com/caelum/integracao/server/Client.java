@@ -27,6 +27,7 @@
  */
 package br.com.caelum.integracao.server;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ import br.com.caelum.integracao.server.agent.Agent;
 import br.com.caelum.integracao.server.agent.AgentControl;
 import br.com.caelum.integracao.server.agent.AgentStatus;
 import br.com.caelum.integracao.server.agent.DefaultAgent;
+import br.com.caelum.integracao.server.dao.Database;
 import br.com.caelum.integracao.server.label.Label;
 import br.com.caelum.integracao.server.queue.Job;
 
@@ -116,17 +118,25 @@ public class Client {
 		this.port = port;
 	}
 
-	public boolean work(Job job, Config config) {
+	public boolean work(Database database, Job job, Config config) {
+		boolean tooOldRevision = !job.getBuild().getRevisionContent().exists();
+		if(tooOldRevision) {
+			try {
+				job.finish("Unable to continue because this revision was already deleted from the file system.", false, database, "", null, "", null);
+			} catch (IOException e) {
+				logger.error("Unable to start the job at this client: " + getId(), e);
+			}
+			return false;
+		}
 		try {
 			if (job.executeAt(this, config)) {
 				this.currentJob = job;
 				return true;
 			}
-			return false;
 		} catch (Exception e) {
 			logger.error("Unable to start the job at this client: " + getId(), e);
-			return false;
 		}
+		return false;
 	}
 
 	public void deactivate() {
