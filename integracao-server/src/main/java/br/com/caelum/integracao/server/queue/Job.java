@@ -141,10 +141,11 @@ public class Job {
 
 		Phase phase = command.getPhase();
 		File file = getFile(command.getName() + ".txt");
-		file.getParentFile().mkdirs();
-		PrintWriter writer = new PrintWriter(new FileWriter(file), true);
-		writer.print(result);
-		writer.close();
+		if(file.getParentFile().mkdirs()){
+			PrintWriter writer = new PrintWriter(new FileWriter(file), true);
+			writer.print(result);
+			writer.close();
+		}
 
 		build.proceed(phase, database);
 
