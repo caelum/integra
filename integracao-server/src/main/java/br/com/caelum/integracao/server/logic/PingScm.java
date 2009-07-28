@@ -60,7 +60,7 @@ public class PingScm {
 	}
 
 	private void tryToBuild(Database db, Project project) {
-		if (project.wasntBuiltYet()) {
+		if (project.wasntBuiltYet() || !project.isActive()) {
 			return;
 		}
 		Builds builds = new Builds(db);

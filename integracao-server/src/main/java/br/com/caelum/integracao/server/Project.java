@@ -354,4 +354,8 @@ public class Project {
 		return false;
 	}
 
+	public boolean isActive() {
+		return active;
+	}
+
 }
