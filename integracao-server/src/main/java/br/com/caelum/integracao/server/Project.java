@@ -311,10 +311,10 @@ public class Project {
 	}
 
 	public void setLastRevisionBuilt(Revision newer) {
-		if(lastRevisionBuilt==null || lastRevisionBuilt.getDate().compareTo(newer.getDate())<=0) {
-			logger.debug("Updated " + newer.getName() + " as newest revision because it was after the last revision");
+		//if(lastRevisionBuilt==null || lastRevisionBuilt.getDate().compareTo(newer.getDate())<=0) {
+			//logger.debug("Updated " + newer.getName() + " as newest revision because it was after the last revision");
 			this.lastRevisionBuilt = newer;
-		}
+		//}
 	}
 
 	public Revision getLastRevisionBuilt() {
