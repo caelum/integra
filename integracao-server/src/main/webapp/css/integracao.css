@@ -1,0 +1,92 @@
+body * {
+    font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
+}
+h1, h2 {
+    margin-bottom: -2px;
+}
+.tabela th, .tabela td { 
+	border: 1px solid #c0c0c0; 
+	padding: 3px;
+}
+.box {
+	border: 2px solid gray;
+	margin: 5px;
+	padding: 5px;
+}
+.plugin {
+	width: 280px;
+}
+.phase {
+	width: 300px;
+	background-color: #99aa99;
+}
+.build_phase {
+	width: 100px;
+}
+.build_phase, .phase, .plugin {
+	border: 2px solid gray;
+	margin: 5px;
+	padding: 5px;
+}
+.command {
+	font-size: small;
+}
+.plugin {
+	font-size: small;
+}
+.large {
+	width: 100%;
+}
+#tabContent {
+	border: 2px solid gray;
+	margin: 5px;
+	padding: 5px;
+	width: 100%;
+	height: 600px;
+}
+
+.formulario {
+	font-size: 0.9em;
+}
+
+.formulario input[type=text], .formulario input[type=submit], .formulario select {
+	font-size: 0.8em;
+}
+
+.formulario input[type=text], .formulario select {
+	width: 120px;
+}
+
+.formulario input[type=text]:focus, .formulario input[type=password]:focus, .formulario textarea:focus {
+	background-color: #fffff1;
+}
+
+.phase_title, .plugin_title {
+	margin: 5px;
+	font-weight: bold;
+	text-align: center;
+}
+
+.title {
+	font-size: 1.8em;
+}
+
+.subtitle {
+	font-size: 1.4em;
+}
+
+.actions {
+	font-size: 0.8em;
+	font-style: italic;
+	background-color: silver;
+	color: white;
+	padding: 5px;
+}
+
+a:link,a:visited,a:active {
+	color: #3366cc;
+}
+
+a:hover {
+	color: #000091;
+}
