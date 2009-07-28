@@ -111,7 +111,7 @@
 	</tr>
 </table>
 <table>
-	<#list project.builds as build>
+	<#list project.lastBuilds as build>
 		<tr id="build_${build.id}">
 			<td><a
 				href="build/${build.buildCount}/info">results</a>

@@ -156,6 +156,10 @@ public class Project {
 		return builds;
 	}
 
+	public List<Build> getLastBuilds() {
+		return builds.subList(0, Math.min(builds.size(),100));
+	}
+
 	public File getBuildsDirectory() {
 		File buildsDirectory = new File(baseDir, "builds");
 		buildsDirectory.mkdirs();
