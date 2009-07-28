@@ -50,7 +50,7 @@ public class PingScm {
 			Database db = new Database(factory);
 			try {
 				Projects projects = new Projects(db);
-				for (Project project : projects.all()) {
+				for (Project project : projects.allActive()) {
 					tryToBuild(db, project);
 				}
 			} finally {

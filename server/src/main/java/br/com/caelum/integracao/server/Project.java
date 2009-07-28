@@ -68,6 +68,8 @@ public class Project {
 
 	@Min(10)
 	private long checkInterval = 60;
+	
+	private boolean active = true;
 
 	@Id
 	@GeneratedValue
@@ -332,6 +334,10 @@ public class Project {
 
 	public boolean isReadyToRestartBuild() {
 		return getLastBuild().isFinished() || isAllowAutomaticStartNextRevisionWhileBuildingPrevious();
+	}
+	
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 }

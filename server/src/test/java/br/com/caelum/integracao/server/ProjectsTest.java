@@ -25,19 +25,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package br.com.caelum.integracao;
+package br.com.caelum.integracao.server;
 
-import br.com.caelum.vraptor.interceptor.multipart.DefaultMultipartConfig;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
-/**
- * Configs the server to accept up to a lot of megas in file.
- * @author guilherme silveira
- */
-public class LongMultipartConfig extends DefaultMultipartConfig{
+import java.util.Collection;
+
+import br.com.caelum.integracao.server.project.DatabaseBasedTest;
+
+public class ProjectsTest  extends DatabaseBasedTest{
 	
-	@Override
-	public long getSizeLimit() {
-		return 500 * 1024 * 1024;
+	public void findsOnlyActiveProjects() {
+		Projects all = new Projects(database);
+		Project active = new Project();
+		all.register(active);
+		Project inactive = new Project();
+		inactive.setActive(false);
+		all.register(inactive);
+		Collection<Project> found = all.allActive();
+		assertThat(found.contains(active), is(equalTo(true)));
+		assertThat(found.contains(inactive), is(equalTo(false)));
 	}
 
 }

@@ -61,6 +61,10 @@ public class Projects {
 		return session.createQuery("from Project").list();
 	}
 
+	public Collection<Project> allActive() {
+		return session.createQuery("from Project as p where p.active = :active").setParameter("active",true).list();
+	}
+
 	public void register(Project p) {
 		session.save(p);
 	}
@@ -117,5 +121,6 @@ public class Projects {
 	public RegisteredPlugin get(RegisteredPlugin registered) {
 		return (RegisteredPlugin) session.load(RegisteredPlugin.class, registered.getId());
 	}
+
 
 }
