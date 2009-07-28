@@ -130,30 +130,6 @@ public class GitControl implements ScmControl {
 		return content;
 	}
 
-	public Revision getNextRevision(Revision fromRevision, PrintWriter log) throws ScmException {
-		int result = checkoutOrUpdate(null, log);
-		if (result != 0) {
-			throw new ScmException("Unable to load data and revision information.");
-		}
-		String revisionRange = "HEAD";
-		if(fromRevision!=null) {
-			revisionRange = fromRevision.getName() + "..HEAD";
-		}
-		String diff = extract(log, "git", "--no-pager", "log", revisionRange, "--shortstat");
-		logger.debug("diff was " + diff);
-		if (diff.indexOf("files changed") == -1) {
-			// there was no change in the content
-			return fromRevision;
-		}
-
-		log.println("\ndiff message was: " + diff + "\n");
-		int start = diff.lastIndexOf("commit ", diff.lastIndexOf("Author:")) + "commit ".length();
-		log.println("\nstart=\n" + start);
-		String baseName = diff.substring(start, start + "0f367b2fd83947fe916c3a54da2a341e28b88d78".length());
-		log.println("\ndiff basename is " +baseName + "\n");
-		return extractRevision(baseName, log, baseName);
-	}
-
 	private String extractInfoForRevision(PrintWriter log, String revisionRange) throws ScmException {
 		String logContent = extract(log, "git", "--no-pager", "log", revisionRange , "-v", "--date=iso");
 		return logContent;

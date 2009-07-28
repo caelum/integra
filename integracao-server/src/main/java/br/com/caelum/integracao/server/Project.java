@@ -93,8 +93,6 @@ public class Project {
 	@NotNull
 	private File baseDir;
 
-	private boolean buildEveryRevision = true;
-
 	private boolean allowAutomaticStartNextRevisionWhileBuildingPrevious = true;
 
 	private Long buildCount = 0L;
@@ -268,13 +266,6 @@ public class Project {
 		return getBuild(getBuildCount());
 	}
 
-	public boolean isBuildEveryRevision() {
-		return buildEveryRevision;
-	}
-
-	public void setBuildEveryRevision(boolean buildEveryRevision) {
-		this.buildEveryRevision = buildEveryRevision;
-	}
 
 	public Revision extractRevision(Builds builds, ScmControl control, LogFile file, String revisionName)
 			throws ScmException {
@@ -307,9 +298,6 @@ public class Project {
 
 	private Revision getNextRevisionToBuild(ScmControl control, LogFile log)
 			throws ScmException {
-		if (isBuildEveryRevision()) {
-			return control.getNextRevision(lastRevisionBuilt, log.getWriter());
-		}
 		return control.getCurrentRevision(lastRevisionBuilt, log.getWriter());
 	}
 

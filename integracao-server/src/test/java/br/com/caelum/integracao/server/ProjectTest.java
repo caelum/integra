@@ -151,7 +151,6 @@ public class ProjectTest extends BaseTest {
 		final Builds builds = mockery.mock(Builds.class);
 		final LogFile log = new LogFile(new File(baseDir, "tmp.log"));
 		final Project p = new Project();
-		p.setBuildEveryRevision(false);
 		p.setLastRevisionBuilt(old);
 		mockery.checking(new Expectations() {
 			{

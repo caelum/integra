@@ -45,14 +45,6 @@ public interface ScmControl {
 	 */
 	Revision getCurrentRevision(Revision fromRevision, PrintWriter log) throws ScmException;
 
-	/**
-	 * Returns the next revision after this one.
-	 *
-	 * @param fromRevision
-	 *            must be different than null
-	 */
-	Revision getNextRevision(Revision fromRevision, PrintWriter log) throws ScmException;
-
 	int checkoutOrUpdate(String revision, PrintWriter log) throws ScmException;
 
 	/**
