@@ -140,7 +140,7 @@ public class Job {
 		}
 
 		Phase phase = command.getPhase();
-		File file = getFile(command.getName() + ".txt");
+		File file = getFile(command.getId() + ".txt");
 		if(file.getParentFile().mkdirs()){
 			PrintWriter writer = new PrintWriter(new FileWriter(file), true);
 			writer.print(result);

@@ -23,7 +23,7 @@ Commands running or already run:<br/>
 				<td>${job.command.id}</td>
 				<td>
 				<a
-					href="${contextPath }/download/project/${project.name}/build/${build.buildCount}/view/${phase.name}/${job.command.name}.txt">view
+					href="${contextPath }/download/project/${project.name}/build/${build.buildCount}/view/${phase.name}/${job.command.id}.txt">view
 				</a>
 				</td>
 				<td>
