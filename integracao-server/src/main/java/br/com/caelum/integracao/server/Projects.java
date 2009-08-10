@@ -1,7 +1,7 @@
 /***
- * 
+ *
  * Copyright (c) 2009 Caelum - www.caelum.com.br/opensource All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -12,7 +12,7 @@
  * copyright holders nor the names of its contributors may be used to endorse or
  * promote products derived from this software without specific prior written
  * permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -41,7 +41,7 @@ import br.com.caelum.vraptor.ioc.RequestScoped;
 
 /**
  * Represents all projects.
- * 
+ *
  * @author guilherme silveira
  */
 @RequestScoped
@@ -99,7 +99,7 @@ public class Projects {
 
 	public PluginToRun get(PluginToRun plugin) {
 		return (PluginToRun) session.load(PluginToRun.class, plugin.getId());
-	} 
+	}
 
 	public void registerOrUpdate(List<PluginParameter> config) {
 		for(PluginParameter param : config) {
@@ -108,7 +108,7 @@ public class Projects {
 	}
 
 	public void remove(PluginToRun plugin) {
-		for(PluginParameter parameter : plugin.getConfig()) {
+		for (PluginParameter parameter : plugin.getConfig()) {
 			session.delete(parameter);
 		}
 		session.delete(plugin);
@@ -122,5 +122,12 @@ public class Projects {
 		return (RegisteredPlugin) session.load(RegisteredPlugin.class, registered.getId());
 	}
 
+	public void update(BuildCommand command) {
+		session.saveOrUpdate(command);
+	}
+
+	public void remove(BuildCommand command) {
+		session.delete(command);
+	}
 
 }

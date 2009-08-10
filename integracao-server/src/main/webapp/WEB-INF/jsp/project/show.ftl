@@ -15,9 +15,9 @@
 	<div class="plugin" id="info_plugins" >
 		<div class="plugin_title">Plugins</div>
 		<#list project.plugins as plugin>
-			<span class="plugin_title">${plugin.type.information.name }</span>
+			<span class="plugin_title">${plugin.type.information.name}</span>
 			<span class="commands">
-				(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
+				(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id}').load('plugin/${plugin.id}/snippet')">config</a>)
 				(<a href="plugin/${plugin.id}?_method=DELETE">remove</a>)
 			</span><br/>
 			<span id="plugin_${plugin.id }"></span>
@@ -53,7 +53,9 @@
 					<#if cmd.labels?size!=0>
 						labels: "<#list cmd.labels as label>${label.name},</#list>"<br/>
 					</#if>
+					(<a href="#command_${cmd.id}" onclick="$('#command_${cmd.id }').load('command/${cmd.id}/snippet')">edit</a>)
 					(<a href="command/${cmd.id}?_method=DELETE" style="color: red">remove</a>)
+					<div id="command_${cmd.id}"></div>
 				</div>
 				</#list>
 				<br/>
@@ -75,7 +77,7 @@
 						<div class="plugin">
 								<span class="plugin_title">${plugin.type.information.name }</span>
 								<span class="commands">
-									(<a href="#plugin_${plugin.id }" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}')">config</a>)
+									(<a href="#plugin_${plugin.id}" onclick="$('#plugin_${plugin.id }').load('plugin/${plugin.id}/snippet')">config</a>)
 									(<a href="phase/${phase.id}/plugin/${plugin.id}?_method=DELETE">remove</a>)
 								</span>
 								<div id="plugin_${plugin.id }"></div>

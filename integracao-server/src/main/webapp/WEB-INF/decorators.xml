@@ -2,7 +2,7 @@
 	<excludes>
 		<pattern>*.js</pattern>
 		<pattern>*.css</pattern>
-		<pattern>/project/*/plugin/*</pattern>
+		<pattern>/project/*/snippet</pattern>
 	</excludes>
 	<decorator name="integracao" page="main.jsp">
 		<pattern>/*</pattern>

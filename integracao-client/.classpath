@@ -13,7 +13,6 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/hibernate-3.2.0.ga.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/hibernate-commons-annotations-3.3.0.ga.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/hibernate-validator-3.0.0.ga.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/integracao-base-0.0.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/javassist-3.8.0.GA.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jsr250-api-1.0.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jstl-1.1.2.jar"/>
@@ -29,5 +28,6 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/vraptor-asm-3.1.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/vraptor3-3.0.0-SNAPSHOT.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/integracao-base"/>
 	<classpathentry kind="output" path="src/main/webapp/WEB-INF/classes"/>
 </classpath>
