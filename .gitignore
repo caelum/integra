@@ -2,4 +2,7 @@ bin
 target
 classes
 integracao-base-*
-
+.classpath
+.project
+.settings
+WebContent
